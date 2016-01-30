@@ -1,0 +1,13 @@
+<?php
+
+$this->headTitle($this->textline(1379));
+$this->headMeta($this->textline(1461), 'description');
+$this->headLink([
+    'rel' => 'canonical',
+    'href' => $this->url('faq', [], ['force_canonical' => true])]);
+
+?>
+<div class="col-sm-12">
+    <h3 class="text-primary"><?=$this->textline(1379)?></h3>
+	<?=$this->textline(1380)?>
+</div>

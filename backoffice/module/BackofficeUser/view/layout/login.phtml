@@ -1,0 +1,35 @@
+<?= $this->doctype() ?>
+<html lang="en">
+<head>
+
+<?php
+
+$this->headMeta()->appendHttpEquiv('Content-Type', 'text/html; charset=UTF-8');
+$this->headMeta()->appendName('viewport', 'width=device-width, initial-scale=1.0');
+$this->headMeta()->appendName('robots', 'noindex');
+echo $this->headMeta();
+
+echo $this->headTitle('Backoffice - Ginosi Apartments');
+
+$environment = getenv('APPLICATION_ENV') ?: 'production';
+
+if ($environment === 'production') {
+    $this->headScript()->appendFile('//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js');
+} else {
+    $this->headScript()->appendFile($this->basePath() . '/js/vendor/jquery/2.1.4/jquery.min.js');
+}
+
+echo $this->headLink()
+    ->appendStylesheet($this->basePath() . '/css/bootstrap-3.3.5.min.css')
+    ->appendStylesheet($this->basePath() . '/css/pages/login.css');
+
+echo $this->headScript()
+    ->appendFile($this->basePath() . '/js/plugins/jquery.backstretch.min.js')
+    ->appendFile($this->basePath() . '/js/pages/login.js');
+?>
+
+</head>
+<body>
+    <?= $this->content ?>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<?php
+use DDD\Service\Task;
+use DDD\Service\User;
+
+$task          = $this->task;
+$permissionSet = $this->permissionSet;
+?>
+<div class="row hk-container">
+    <div class="col-sm-7 task-body-left-block">
+        <div class="row">
+            <div class="col-sm-12 col-md-7 col-lg-8">
+                <h4>
+                    <a href="/task/edit/<?=  $task['id'] ?>" target="_blank">
+                        #<?= $task['id'] ?>.
+                        <?= $task['title'] ?>
+                    </a>
+                </h4>
+            </div>
+            <div class="col-sm-12 col-md-5 col-lg-4 task-body-tags">
+                <span class="label label-default">
+                    <span class="glyphicon glyphicon-time"></span>
+                    <?= date('H:i', strtotime($task['start_date'])) ?>
+                    -
+                    <?= date('H:i', strtotime($task['end_date'])) ?>
+                </span>
+                <?php if (!empty($task['res_number'])) { ?>
+                <a href="/frontier?id=1_<?=  $task['res_id'] ?>" target="_blank">
+                    <span class="label label-default">
+                        <span class="glyphicon glyphicon-flag"></span>
+                        <?= $task['res_number'] ?>
+                    </span>
+                </a>
+                <?php } ?>
+            </div>
+        </div>
+    <p><?= $task['description'] ?></p>
+
+    <?php if ($task['subtasks'] && $task['subtasks']->count()) { ?>
+    <ul class="subtasks">
+        <?php /** @var \DDD\Domain\Task\Subtask $subtask */ ?>
+        <?php foreach ($task['subtasks'] as $subtask) { ?>
+        <li <?= ($subtask->getStatus() ? ' class="text-muted"' : '') ?>>
+            <span
+                data-subtask-id="<?= $subtask->getId() ?>"
+                data-subtask-description="<?= $subtask->getDescription() ?>"
+                class="subtask-checkbox <?= (!isset($permissionSet[Task::ACTION_CHANGE_STATUS]) ? 'text-muted' : '') . ' glyphicon glyphicon-' . ($subtask->getStatus() ? 'check' : 'unchecked') ?>">
+            </span>
+
+            <span class="subtask-description">
+                <?= $subtask->getDescription() ?>
+            </span>
+        </li>
+        <?php } ?>
+    </ul>
+    <?php } ?>
+
+    <?php if ($task['incident_reports'] && $task['incident_reports']->count()) { ?>
+        <hr><h4> Incident Reports</h4>
+        <div class="incident-reports list-group">
+
+        <?php /** @var \DDD\Domain\Task\Minimal $incidentReport */ ?>
+        <?php foreach ($task['incident_reports'] as $incidentReport) { ?>
+            <a href="/task/edit/<?= $incidentReport->getId() ?>" target="_blank" class="list-group-item">
+                <span class="material-icons text-danger icon-incident ">warning</span>
+                <?= $incidentReport->getTitle() ?>
+            </a>
+        <?php } ?>
+        </div>
+    <?php } ?>
+        <?= $this->partial('backoffice/housekeeping-tasks/partial/task-buttons', [
+            'task' => $task,
+            'permissionSet' => $permissionSet,
+            'visibility' => 'hidden-xs',
+        ]); ?>
+    </div>
+    <div class="col-sm-5">
+        <h4> Comments </h4>
+        <div class="row">
+            <div class="col-sm-12 task-comments">
+                <?= $task['comments'] ?>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="pull-left comment-field-container">
+                    <input type="text" placeholder="Leave your comment here" class="form-control input-sm comment-input-field">
+                    <button class="btn btn-primary btn-sm comment-submit-btn">
+                        Comment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?= $this->partial('backoffice/housekeeping-tasks/partial/task-buttons', [
+        'task' => $task,
+        'permissionSet' => $permissionSet,
+        'visibility' => 'visible-xs-block',
+    ]); ?>
+
+    <div class="col-xs-12 visible-xs-block panel-toggle text-center">
+        <span class="glyphicon glyphicon-triangle-top accordion-toggle collapsed" data-toggle="collapse"></span>
+    </div>
+</div>

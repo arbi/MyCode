@@ -1,0 +1,135 @@
+<style>
+
+
+
+    .avatar {
+        height: 100%;
+        width: 100%;
+        border-radius: 50%;
+    }
+
+    .blankRow {
+        width: 100%;
+        height: 0px;
+        display: block;
+        clear: both;
+    }
+
+    .blankRowBottom {
+        width: 100%;
+        height: 10px;
+        display: block;
+        clear: both;
+    }
+
+    .managerRow {
+        width: 100%;
+        height: 90px;
+        display: block;
+        clear: both;
+    }
+
+    .managerContainer {
+        width: 90px;
+        height: 90px;
+        display: block;
+    }
+
+    .firstRow {
+        width: 100%;
+        height: 70px;
+        display: block;
+        clear: both;
+    }
+
+    .firstContainer {
+        width: 70px;
+        height: 70px;
+        display: block;
+        float: left;
+    }
+
+    .secondRow {
+        width: 100%;
+        height: 50px;
+        display: block;
+        clear: both;
+    }
+
+    .secondContainer {
+        width: 50px;
+        height: 50px;
+        display: block;
+        float: left;
+    }
+</style>
+
+
+<div class="managerRow">
+    <div class="managerContainer">
+        <img class="avatar" src="<?= '//' . \Library\Constants\DomainConstants::IMG_DOMAIN_NAME . '/profile/' . $user->getId() . '/' . $user->getAvatar(); ?>" />
+    </div>
+</div>
+<div class="blankRow"></div>
+
+<?php
+
+    foreach ($this->firstLevel as $firstLevelUser) {
+        if ($firstLevelUser->getId() == 64 || $firstLevelUser->getId() == 77) {
+            continue;
+        }
+?>
+        <div class="firstRow">
+            <div style="display: block; float: left; width: 130px; height: 70px">
+            </div>
+            <div class="firstContainer">
+                <img
+                    data-toggle="tooltip"
+                    data-placement="top"
+                    data-html="true"
+                    title="<p><?= $firstLevelUser->getFirstName() . ' ' . $firstLevelUser->getLastName() ?></p><p><?= $firstLevelUser->getPosition() ?></p>"
+                    class="avatar"
+                    src="<?= '//' . \Library\Constants\DomainConstants::IMG_DOMAIN_NAME . '/profile/' . $firstLevelUser->getId() . '/' . $firstLevelUser->getAvatar() ?>"
+                />
+            </div>
+        </div>
+
+        <?php
+            $secondLevelUsers = $this->secondLevel[$firstLevelUser->getId()];
+            if (count($secondLevelUsers)) {
+        ?>
+
+
+
+                <div class="blankRow"></div>
+                <div class="secondRow">
+                    <div style="display: block; float: left; width: 250px; height: 50px"></div>
+                    <?php
+                        foreach ($secondLevelUsers as $secondLevelUser) {
+                    ?>
+                            <div class="secondContainer">
+                                <img
+                                    data-toggle="tooltip"
+                                    data-placement="top"
+                                    data-html="true"
+                                    title="<p><?= $secondLevelUser->getFirstName() . ' ' . $secondLevelUser->getLastName() ?></p><p><?= $secondLevelUser->getPosition() ?></p>"
+                                    class="avatar"
+                                    src="<?= '//' . \Library\Constants\DomainConstants::IMG_DOMAIN_NAME . '/profile/' . $secondLevelUser->getId() . '/' . $secondLevelUser->getAvatar() ?>"
+                                />
+                            </div>
+                            <div style="display: block; float: left; width: 10px; height: 50px;"></div>
+                    <?php
+                        }
+                    ?>
+                </div>
+
+                <div class="blankRowBottom"></div>
+        <?php
+            }
+            else {
+                echo '<div class="blankRowBottom"></div>';
+            }
+        ?>
+<?php
+    }
+?>

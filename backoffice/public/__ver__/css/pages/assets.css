@@ -1,0 +1,15 @@
+#location{
+    min-width:100%!important;
+}
+
+#running-out{
+    position: relative;
+    top: 2px;
+}
+
+.checkbox-top{
+    position: relative;
+    top: 13px;
+}
+
+

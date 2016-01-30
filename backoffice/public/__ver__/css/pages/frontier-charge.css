@@ -1,0 +1,320 @@
+/**
+ * Credit Cards
+ */
+.credit-card {
+	background: url(../../img/cc-background.png) center center no-repeat;
+	width: 321px;
+	height: 199px;
+}
+.credit-card-list li {
+	position: relative;
+	border: 1px solid #b49830;
+	border-radius: 5px;
+	padding: 3px;
+	margin: 5px 0;
+	cursor: default;
+    background: #5ae2f4;
+    background: -moz-linear-gradient(left,  #5ae2f4 0%, #7db9e8 100%);
+    background: -webkit-gradient(linear, left top, right top, color-stop(0%,#5ae2f4), color-stop(100%,#7db9e8));
+    background: -webkit-linear-gradient(left,  #5ae2f4 0%,#7db9e8 100%);
+    background: -o-linear-gradient(left,  #5ae2f4 0%,#7db9e8 100%);
+    background: -ms-linear-gradient(left,  #5ae2f4 0%,#7db9e8 100%);
+    background: linear-gradient(to right,  #5ae2f4 0%,#7db9e8 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#5ae2f4', endColorstr='#7db9e8',GradientType=1 );
+	opacity: .5;
+}
+/*.credit-card-list li:not(.default):hover .ribbon,*/
+.credit-card-list li.default .ribbon {
+	visibility: visible;
+	opacity: 1;
+}
+.credit-card-list li.active {
+    color: #193742;
+    background: #5ae2f4;
+    background: -moz-linear-gradient(left,  #5ae2f4 0%, #7db9e8 100%);
+    background: -webkit-gradient(linear, left top, right top, color-stop(0%,#5ae2f4), color-stop(100%,#7db9e8));
+    background: -webkit-linear-gradient(left,  #5ae2f4 0%,#7db9e8 100%);
+    background: -o-linear-gradient(left,  #5ae2f4 0%,#7db9e8 100%);
+    background: -ms-linear-gradient(left,  #5ae2f4 0%,#7db9e8 100%);
+    background: linear-gradient(to right,  #5ae2f4 0%,#7db9e8 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#5ae2f4', endColorstr='#7db9e8',GradientType=1 );
+	opacity: 1;
+}
+.credit-card-list li:not(.active) img {
+    -webkit-filter: grayscale(100%);
+    -moz-filter: grayscale(100%);
+    filter: grayscale(100%);
+}
+
+.credit-card-list li:not(.active) .card-type {
+	opacity: .7;
+}
+.credit-card-list li:not(.active) .card-display-name,
+.credit-card-list li:not(.active) .received {
+	color: #555;
+}
+.credit-card-list li.default,
+.credit-card-list li:hover {
+	border-color: #3071a9;
+}
+.credit-card-list .tooltip,
+.credit-card .tooltip {
+	min-width: 5px;
+}
+.card-type {
+	width: 64px;
+}
+.card-type img {
+	width: 100%;
+}
+.card-type,
+.card-display-name,
+.received {
+	float: left;
+}
+.card-display-name {
+	font-size: 120%;
+	min-width: 130px;
+	max-width: 218px;
+	margin-left: 5px;
+	margin-top: -2px;
+    font-weight: bold;
+}
+.received {
+	font-size: 80%;
+	margin-left: 5px;
+	margin-top: -4px;
+}
+.is-partner {
+	position: absolute;
+	right: 57px;
+	top: 12px;
+	text-shadow: -1px 1px 1px #fff;
+	cursor: default;
+}
+.status {
+	width: 8px;
+	height: 8px;
+	position: absolute;
+	right: 37px;
+	top: 18px;
+	border-radius: 50%;
+	background-color: #957928;
+}
+.transaction-status {
+	position: absolute;
+	right: 12px;
+	top: 13px;
+	color: #957928;
+}
+.status:hover {
+	transform: scale(1.5);
+}
+.status-approved {
+	background-color: #088013;
+}
+.transaction-status-approved {
+	color: #088013;
+}
+.status-declined {
+	background-color: #80001c;
+}
+.transaction-status-declined {
+	color: #80001c;
+}
+.card-header {
+	width: 100%;
+	height: 50px;
+	position: relative;
+}
+.card-body {
+	width: 100%;
+	height: 100px;
+	position: relative;
+}
+.card-footer {
+	width: 100%;
+	height: 50px;
+	position: relative;
+}
+
+.card-header .status-control {
+	float: right;
+	margin: 10px 32px 0 0;
+	max-height: 28px;
+	padding: 3px 1px;
+	font-size: 90%;
+}
+.card-header .status-control .ellipsis {
+	padding-right: 5px;
+	max-width: 80px;
+	float: left;
+}
+.card-header .status {
+	right: 13px;
+	top: 20px
+}
+.card-body .card-number {
+	font-family: 'Share Tech Mono';
+	font-size: 191%;
+	padding: 16px 0 0 18px;
+}
+.card-body .card-cvc {
+	font-family: 'Share Tech Mono';
+	position: absolute;
+	right: 21px;
+	bottom: 10px;
+}
+.card-body .card-exp {
+	font-family: 'Share Tech Mono';
+	position: absolute;
+	left: 21px;
+	bottom: 10px;
+	display: none;
+}
+.card-footer .card-type {
+	float: right;
+	margin-right: 12px;
+}
+.card-footer .card-holder-name {
+	font-family: 'Share Tech Mono';
+	float: left;
+	margin: 12px 0 0 10px;
+	text-transform: uppercase;
+	font-size: 110%;
+	max-width: 230px;
+}
+.card-footer .card-holder-name:before {
+	content: "Holder Name";
+	position: absolute;
+	top: -4px;
+	text-transform: none;
+	font-size: 74%;
+	color: #999;
+}
+.request-details {
+	margin: 10px;
+}
+.ribbon-container {
+	overflow: hidden;
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 33px;
+	height: 33px;
+}
+.ribbon {
+	background-color: #3071a9;
+	overflow: hidden;
+	white-space: nowrap;
+	position: absolute;
+	left: -54px;
+	top: -15px;
+	-webkit-transform: rotate(-45deg);
+	-moz-transform: rotate(-45deg);
+	-ms-transform: rotate(-45deg);
+	-o-transform: rotate(-45deg);
+	transform: rotate(-45deg);
+	-webkit-box-shadow: 0 0 10px #888;
+	-moz-box-shadow: 0 0 10px #888;
+	box-shadow: 0 0 10px #888;
+	z-index: 1;
+	visibility: hidden;
+	opacity: 0;
+}
+.ribbon a {
+	color: #fff;
+	display: block;
+	font: bold 81.25% 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	margin: 1px 0;
+	padding: 20px 50px 0;
+	text-align: center;
+	text-decoration: none;
+}
+.credit-card-list li.default .ribbon a,
+.ribbon a:hover {
+	text-decoration: none;
+	text-shadow: 1px 0 0 rgba(0,0,0,.8);
+	color: #ffbd00;
+}
+.transition {
+	-webkit-transition: all .2s ease-out;
+	-moz-transition: all .2s ease-out;
+	-o-transition: all .2s ease-out;
+	transition: all .2s ease-out;
+}
+.ellipsis {
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+
+.credit-cards {
+    margin: 0;
+    padding: 0;
+}
+.cvc {
+    max-width: 52px;
+    width: 100%;
+    float: right;
+}
+
+
+.credit-cards li {
+    -webkit-transition: all .2s;
+    -moz-transition: all .2s;
+    -ms-transition: all .2s;
+    -o-transition: all .2s;
+    transition: all .2s;
+    background-image: url(../../img/credit_cards.png);
+    background-position: 0 0;
+    float: left;
+    height: 32px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    text-indent: -9999px;
+    width: 51px;
+    opacity: 1;
+    list-style: none;
+}
+.credit-cards li:last-child {
+    margin-right: 0;
+}
+.credit-cards .off {
+    opacity: .4;
+}
+
+.credit-cards .visa { background-position: 0 0; }
+.credit-cards .visa.off { background-position: 0 32px; }
+.credit-cards .mastercard { background-position: 255px 0; }
+.credit-cards .mastercard.off { background-position: 255px 32px; }
+.credit-cards .amex { background-position: 204px 0; }
+.credit-cards .amex.off { background-position: 204px 32px; }
+.credit-cards .discover { background-position: 153px 0; }
+.credit-cards .discover.off { background-position: 153px 32px; }
+.credit-cards .jcb { background-position: 102px 0; }
+.credit-cards .jcb.off { background-position: 102px 32px; }
+.credit-cards .diners-club { background-position: 51px 0; }
+.credit-cards .diners-club.off { background-position: 51px 32px; }
+
+#cc-new-form .row{ margin-bottom: 10px;}
+
+#cc-new-form input::-webkit-outer-spin-button,
+#cc-new-form input::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+.acc_amount {
+    width: 82px !important;
+}
+
+.addon-choose {
+    width: 126px !important;
+}
+
+#chargesTable td, #chargesTable tr {
+    font-size: 13px;
+}

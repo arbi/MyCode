@@ -1,0 +1,28 @@
+.btn-small {
+    padding: 2px 4px !important;
+}
+
+.top{
+    float: left;
+    width: 100%;
+}
+
+.status{
+    float: right !important;
+    padding-left: 20px;
+}
+
+.dataTables_info,
+.table-bordered{
+    float: left !important;
+}
+
+.product-tabs-link
+{
+    padding: 2px 14px !important;
+}
+
+.product-tabs-link a
+{
+    padding: 2px 7px !important;
+}

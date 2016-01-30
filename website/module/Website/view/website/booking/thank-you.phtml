@@ -1,0 +1,138 @@
+<?php
+    use Library\Utility\Helper;
+    $reservation = $this->reservation;
+    $thankYouPageData = $this->thankYouPageData;
+
+    $this->headTitle($this->textline(1326));
+
+    $this->headMeta()->appendName('robots', 'noindex');
+
+    $currencySymbol = $reservation['symbol'];
+
+    $apartmentDetailsData = [
+        'apartmentName' => $reservation['prod_name'],
+        'apartmentFullAddress' => $reservation['address'] . ', ' . $this->cityname($reservation['city_id']) . ', ' . $this->countryname($reservation['country_id']),
+        'apartmentCheckinDateAndTime' => $reservation['from'] . ' ' . date("h:i A", strtotime($reservation['check_in'])),
+        'apartmentCheckoutDateAndTime' => $reservation['to'] . ' ' . date("h:i A", strtotime($reservation['check_out'])),
+        'bedRoomCount' => $reservation['bedroom_count'],
+    ];
+
+    $reservationDetailsData = [
+        'reservationNumber' => $thankYouPageData['res_number'],
+        'totalNights' => $reservation['night_count'],
+        'numberOfGuests' => $reservation['guest'],
+        'rateName' => $reservation['rate_name'],
+    ];
+
+    $guestDetailsData = [
+        'fullName' => $thankYouPageData['first_name'] . ' '. $thankYouPageData['last_name'],
+        'email' => $thankYouPageData['email'],
+        'phone' => ($thankYouPageData['phone']) ? '+' . $thankYouPageData['phone'] : '',
+        'address' => $thankYouPageData['address'],
+    ];
+
+    $policyDetailsData = [
+        'cancellationPolicyText' => $reservation['cancelation_policy'],
+    ];
+
+    $apartmentDetails   = $this->partial('partial/thank-you/apartment-details', ['data' => $apartmentDetailsData]);
+    $paymentDetails     = $this->partial('partial/thank-you/payment-details', ['data' => $reservation]);
+    $reservationDetails = $this->partial('partial/thank-you/reservation-details', ['data' => $reservationDetailsData]);
+    $guestDetails       = $this->partial('partial/thank-you/guest-details', ['data' => $guestDetailsData]);
+    $policyDetails      = $this->partial('partial/thank-you/policy-details', ['data' => $policyDetailsData]);
+?>
+
+<div class="col-md-12 hidden-print">
+
+    <div class="row">
+        <div class="col-sm-9 col-md-10">
+            <h1 class="margin-top-0 text-success"><?= $this->textline(1302) ?></h1>
+            <p><?= $this->textline(1303) ?></p>
+        </div>
+        <div class="col-sm-3 col-md-2">
+            <a href="#print" class="btn btn-default btn-block hidden-xs print">
+                <?= $this->textline(1304) ?>
+                <i class="glyphicon glyphicon-print"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="row thank-you-title">
+        <div class="col-md-1 col-sm-2">
+            <i class="fa fa-lightbulb-o fa-3x text-primary light-bulb"></i>
+        </div>
+        <div class="col-md-11 col-sm-10">
+            <?= $this->textline(1308) ?>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 main-block-container padding-right-25">
+            <?= $apartmentDetails ?>
+        </div>
+
+        <div class="col-md-6 main-block-container padding-left-25 hidden-xs hidden-sm">
+            <?= $reservationDetails ?>
+        </div>
+
+        <div class="col-md-6 main-block-container hidden-lg hidden-md">
+            <?= $reservationDetails ?>
+        </div>
+    </div>
+
+    <div class="row hidden-xs hidden-sm"></div>
+
+    <div class="row">
+        <div class="col-md-6 main-block-container padding-right-25">
+            <?= $guestDetails ?>
+        </div>
+
+        <div class="col-md-6 main-block-container padding-left-25 hidden-xs hidden-sm">
+            <?= $paymentDetails ?>
+        </div>
+
+        <div class="col-md-6 main-block-container hidden-lg hidden-md">
+            <?= $paymentDetails ?>
+        </div>
+    </div>
+
+</div>
+
+<div class="container hidden-print">
+    <div class="row">
+        <div class="col-sm-12 p-margin-0">
+            <?= $policyDetails ?>
+        </div>
+    </div>
+</div>
+
+<script>
+    $('[data-toggle="popover"]').popover();
+    $('body').on('click', function (e) {
+            $('[data-toggle=popover]').each(function () {
+            // hide any open popovers when the anywhere else in the body is clicked
+            if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
+                $(this).popover('hide');
+            }
+        });
+    });
+</script>
+
+<table class="visible-print-block ki-tbl-print thank-you-tbl-print">
+    <tr>
+        <td width="50%"><?= $apartmentDetails ?></td>
+        <td width="50%"><?= $paymentDetails ?></td>
+    </tr>
+    <tr>
+        <td width="50%"><?= $reservationDetails ?></td>
+        <td width="50%"><?= $guestDetails ?></td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <div class="border-box"><?= $this->textline(1308) ?></div>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2"><?= $policyDetails ?></td>
+    </tr>
+</table>

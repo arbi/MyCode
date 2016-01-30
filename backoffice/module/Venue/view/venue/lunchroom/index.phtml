@@ -1,0 +1,84 @@
+<?php
+$current = 'Lunchroom';
+$this->layout()->viewTitle = $current;
+$this->layout()->breadcrumb = $this->breadcrumb([
+	['Administration'],
+	[$current]
+]);
+
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($this->layout()->viewTitle);
+
+
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/pages/lunchroom.js');
+
+$this->headLink()
+    ->appendStylesheet($this->basePath() . '/css/pages/lunchroom.css');
+?>
+<script>
+    var GLOBAL_VENUE_GET_ITEMS = '<?=$this->url('lunchroom', ['action' => 'ajax-get-items']) ?>';
+    var GLOBAL_VENUE_ORDER_ITEMS = '<?=$this->url('lunchroom', ['action' => 'ajax-order-items']) ?>';
+</script>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="row">
+            <div class="col-xs-6">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label for="venue_id" class="control-label col-xs-3">Lunchroom</label>
+                        <div class="col-xs-9">
+                            <select name="venue_id" id="venue_id" class="form-control col-xs-9">
+                                <?php foreach($lunchrooms as $lunchroom) { ?>
+                                    <option value="<?php echo $lunchroom->getId()?>"
+                                            data-threshold-price="<?php echo $lunchroom->getThresholdPrice()?>"
+                                            data-discount-price="<?php echo $lunchroom->getDiscountPrice()?>"
+                                        >
+                                        <?php echo $lunchroom->getName()?>
+                                    </option>
+                                <?php } ?>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+  <div class="col-sm-8">
+      <fieldset>
+          <legend>Items</legend>
+          <table id="venue-items" class="table table-striped table-bordered table-condensed table-hover">
+              <thead>
+              <tr>
+                  <th> NAME </th>
+                  <th> DESCRIPTION </th>
+                  <th> PRICE </th>
+                  <th> &nbsp; </th>
+              </tr>
+              </thead>
+              <tbody>
+
+              </tbody>
+          </table>
+          <div class="alert alert-danger no-items-message hidden">
+              No items are attached to this lunchroom
+          </div>
+
+      </fieldset>
+  </div>
+    <div class="col-sm-4">
+        <fieldset>
+            <legend>Lunch</legend>
+            <table id="cart" class="table table-striped table-bordered table-condensed table-hover">
+                <tbody>
+
+                </tbody>
+            </table>
+            <div class="row total-item-order">
+
+            </div>
+        </fieldset>
+    </div>
+</div>

@@ -1,0 +1,62 @@
+<?php
+/**
+ * @var \DDD\Domain\User\Schedule\Schedule | null $data
+ */
+$data = $this->data;
+?>
+            <div class="row">
+                <div class="col-xs-6">
+                    <div class="input-group input-group-sm">
+                        <input
+                            type="text" class="timepicker form-control" placeholder="from"
+                            value="<?= ($data && $data->getTimeFrom1()) ? $data->getTimeFrom1() : '' ?>"
+                        >
+                        <label class="input-group-addon">
+                            <span class="glyphicon glyphicon-time"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="col-xs-6">
+                    <div class="input-group input-group-sm">
+                        <input
+                            type="text" class="timepicker form-control" placeholder="to"
+                            value="<?= ($data && $data->getTimeTo1()) ? $data->getTimeTo1() : '' ?>"
+                        >
+                        <label class="input-group-addon">
+                            <span class="glyphicon glyphicon-time"></span>
+                        </label>
+                    </div>
+                </div>
+                <button class="remove-time-interval btn btn-danger btn-sm<?= (!$data || !$data->getTimeFrom2()) ? ' disabled' : '' ?>">
+                    <span class="glyphicon glyphicon-remove"></span>
+                </button>
+            </div>
+            <?php if ($data && $data->getTimeFrom2()) { ?>
+            <div class="row">
+                <div class="col-xs-6">
+                    <div class="input-group input-group-sm">
+                        <input
+                            type="text" class="timepicker form-control" placeholder="from"
+                            value="<?= ($data && $data->getTimeFrom2()) ? $data->getTimeFrom2() : '' ?>"
+                            >
+                        <label class="input-group-addon">
+                            <span class="glyphicon glyphicon-time"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="col-xs-6">
+                    <div class="input-group input-group-sm">
+                        <input
+                            type="text" class="timepicker form-control" placeholder="to"
+                            value="<?= ($data && $data->getTimeTo2()) ? $data->getTimeTo2() : '' ?>"
+                            >
+                        <label class="input-group-addon">
+                            <span class="glyphicon glyphicon-time"></span>
+                        </label>
+                    </div>
+                </div>
+                <button class="remove-time-interval btn btn-danger btn-sm">
+                    <span class="glyphicon glyphicon-remove"></span>
+                </button>
+            </div>
+            <?php } ?>

@@ -1,0 +1,138 @@
+<?php
+use Library\Constants\Constants;
+
+if ($this->days) {
+?>
+<thead>
+    <tr>
+        <th> Name </th>
+        <?php foreach ($this->days as $day) { ?>
+        <th onclick="showSchedule('<?=$day?>')" style="white-space: nowrap;">
+            <?= date(Constants::GLOBAL_DATE_FORMAT, strtotime($day)) ?>
+            &nbsp;
+            (<?= substr(date('l', strtotime($day)), 0, 3) ?>)
+            <?php if (!empty($this->dateSort) && $this->dateSort == $day) { ?>
+                <span class="glyphicon glyphicon-sort-by-attributes"></span>
+            <? } ?>
+        </th>
+        <?php } ?>
+    </tr>
+</thead>
+<tbody>
+    <?php foreach ($this->data as $row) { ?>
+    <?php $separator = false; ?>
+    <tr>
+        <th>
+            <div class="schedule-name">
+                <a href="<?=$this->url('backoffice/default', array('controller' => 'user', 'action' => 'edit', 'id' => $row['user_id']))?>#schedule" target="_new">
+                    <?= $row['name'] ?>
+                </a>
+            </div>
+        </th>
+        <?php
+        $isPreviewOnEdge = false;
+        foreach ($this->days as $day) {
+            if (isset($row['days'][$day])) {
+                $schedule = $row['days'][$day];
+
+            // special tag for css line-height
+            if ($schedule['time_from1'] && $schedule['time_to1'] && $schedule['time_from2'] && $schedule['time_to2']) {
+                $separator = true;
+            }
+        ?>
+            <td
+                data-id="<?= $schedule['id'] ?>"
+                data-next-id="<?= (isset($schedule['next_id'])) ? $schedule['next_id'] : 0 ?>"
+                data-availability="<?= $schedule['availability'] ?>"
+                data-from1="<?= $schedule['time_from1'] ?>"
+                data-to1="<?= $schedule['time_to1'] ?>"
+                data-from2="<?= $schedule['time_from2'] ?>"
+                data-to2="<?= $schedule['time_to2'] ?>"
+                data-user="<?= $row['name'] ?>"
+                data-office-id="<?= $schedule['office_id'] ?>"
+                data-day="<?= date(Constants::GLOBAL_DATE_FORMAT, strtotime($day)) ?>"
+                data-color-id="<?= $schedule['color'] ?>"
+                data-note="<?= !empty($schedule['note']) ? $schedule['note'] : '' ?>"
+                <?= ($schedule['may_edit'] && (!$schedule['vacation_type'] || $schedule['availability'] >= 0.5)) ? 'class="editable"' : '' ?>
+            >
+                <?php $timeboxStyle = (0 < $schedule['availability']) ? 'timebox-working' : 'timebox-not-working'; ?>
+                <?php if (!$schedule['vacation_type']) { ?>
+                    <?php if ($schedule['time_from1'] && $schedule['time_to1']) { ?>
+                        <?php $position        = $schedule['time_from1'] > $schedule['time_to1'] ? ' on-edge' : ''; ?>
+                    <div class="schedule-timebox <?= $timeboxStyle ?>
+                                <?= $position ?> timebox-color-<?=$schedule['color']?>
+                                <?= (!$schedule['time_from2'] || !$schedule['time_to2']) ? ' single' : '' ?>
+                                <?= $separator ? ' large' : '' ?>"
+                    >
+                        <div>
+                            <?= $schedule['time_from1'] ?> - <?= $schedule['time_to1']; ?>
+                        </div>
+                        <?php if (!empty($schedule['note'])) : ?>
+                            <?= $this->info('<span class="glyphicon glyphicon-comment"></span>', $schedule['note'], '', 'right') ?>
+                        <?php endif; ?>
+                    </div>
+                    <?php } ?>
+
+                    <?php if ($schedule['time_from2'] && $schedule['time_to2']) { ?>
+                        <?php $position = $schedule['time_from2'] > $schedule['time_to2'] ? ' on-edge' : ''; ?>
+                    <div class="schedule-timebox <?= $timeboxStyle ?>
+                                <?= $position ?> timebox-color-<?=$schedule['color']?>
+                                <?= (!$schedule['time_from1'] || !$schedule['time_to1']) ? ' single' : '' ?>
+                                <?= $separator ? ' large' : '' ?>
+                                <?= $isPreviewOnEdge ? ' preview-on-edge' : '' ?>"
+                    >
+                        <?php $isPreviewOnEdge = empty($position) ? false : true; ?>
+                        <div>
+                            <?= $schedule['time_from2'] ?> - <?= $schedule['time_to2']; ?>
+                        </div>
+                        <?php if (!empty($schedule['note']) && (!$schedule['time_from1'] || !$schedule['time_to1'])) : ?>
+                            <?= $this->info('<span class="glyphicon glyphicon-comment"></span>', $schedule['note'], '', 'right') ?>
+                        <?php endif; ?>
+                    </div>
+                    <?php } ?>
+                <?php } else { ?>
+                    <?php
+                    $classVacationType = 'timebox-vacation';
+                    $partday = false;
+
+                    if ($schedule['availability'] >= 0.5) {
+                        $classVacationType = 'timebox-partday';
+                        $partday = true;
+                    }
+                    ?>
+                    <div class="schedule-timebox <?=$classVacationType?>">
+                        <div>
+                            <?=$schedule['vacation_type']?>
+
+                            <?php if ($partday && $schedule['time_from1'] && $schedule['time_to1']) { ?>
+                                <hr>
+                                <?= $schedule['time_from1'] ?> - <?= $schedule['time_to1']; ?>
+                            <?php } ?>
+                            <?php if ($partday && $schedule['time_from2'] && $schedule['time_to2']) { ?>
+                                <hr>
+                                <?= $schedule['time_from2'] ?> - <?= $schedule['time_to2']; ?>
+                            <?php } ?>
+                        </div>
+                        <?php if (!empty($schedule['note'])) : ?>
+                            <?= $this->info('<span class="glyphicon glyphicon-comment"></span>', $schedule['note'], '', 'right') ?>
+                        <?php endif; ?>
+                    </div>
+                <?php } ?>
+            </td>
+        <?php
+            } else {
+        ?>
+            <td></td>
+        <?php } } ?>
+    </tr>
+    <?php } ?>
+</tbody>
+<tfoot>
+<tr>
+    <th> Name </th>
+    <?php foreach ($this->days as $day) { ?>
+        <th style="height:51px;" class="text-center"><?= date(Constants::GLOBAL_DATE_FORMAT, strtotime($day)) ?></th>
+    <?php } ?>
+</tr>
+</tfoot>
+<?php } ?>

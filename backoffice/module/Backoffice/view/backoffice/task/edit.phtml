@@ -1,0 +1,690 @@
+<?php
+use Library\Utility\Helper;
+use DDD\Service\Task as TaskService;
+use DDD\Service\Booking\BookingTicket as ReservationTicketService;
+use Library\Constants\Constants;
+
+/**
+ * @var DDD\Domain\Task\Task $taskMain
+ */
+
+$this->headTitle()->setSeparator(' - ');
+    if ($this->id) {
+        $taskMain = $this->data->get('taskMain');
+        $taskHelpers = $this->data->get('helperIds');
+        $taskFollowers = $this->data->get('followerIds');
+        $taskTitle = $taskMain->getTitle() .  ' (' . $this->id . ')';
+        /** @var \DDD\Domain\Task\Subtask[] $taskSubtasks */
+        $taskSubtasks = $this->data->get('taskSubtasks');
+        $taskAttachments = $this->data->get('taskAttachments');
+        $extraOptions = $this->data->get('extraOptions');
+        $selectedTags = $this->data->get('selectedTags');
+        $expenseOkSign = '';
+        if (isset($extraOptions['expenseStatus'])) {
+            $expenseOkSign = ($extraOptions['expenseStatus'] == \Library\Finance\Process\Expense\Ticket::STATUS_GRANTED)
+                ? '<i class="glyphicon glyphicon-ok text-success" data-toggle="tooltip" title="Expense is Approved"></i>'
+                : '<i class="glyphicon glyphicon-remove text-danger" data-toggle="tooltip" title="Expense not Approved"></i>';
+        }
+
+        $taskTitleView = $taskTitle;
+    } else {
+        $taskTitleView = $taskTitle = 'Add Task';
+    }
+
+	$this->layout()->viewTitle = $taskTitleView . '<a class="glyphicon glyphicon-tags"></a>';
+	$this->headTitle($taskTitle);
+	$this->layout()->breadcrumb = $this->breadcrumb([
+		['Administration'],
+		['Task Management', $this->url('backoffice/default', ['controller' => 'task'])],
+		[$taskTitle],
+	]);
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/plugins/jquery.datetimepicker.full.min.js')
+    ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+    ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+    ->appendFile($this->basePath() . '/js/pages/task.js')
+    ->appendFile($this->basePath() . '/js/validation/task.js');
+$this->headLink()
+    ->appendStylesheet($this->basePath() . '/css/plugins/jquery.datetimepicker.css')
+    ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css')
+    ->appendStylesheet($this->basePath() . '/css/pages/task.css')
+    ->appendStylesheet($this->basePath() . '/css/pages/task.print.css', 'print');
+
+$form = $this->taskForm;
+    $form->prepare();
+
+?>
+<script>
+	var GLOBAL_SAVE         = '<?= $this->url('backoffice/default', ['controller' => 'task', 'action' => 'ajaxsave'])?>';
+	var GLOBAL_AUTOCOMPLETE = '<?= $this->url('backoffice/default', ['controller' => 'task', 'action' => 'ajax-get-user'])?>';
+	var GLOBAL_PROPERTY     = '<?= $this->url('backoffice/default', ['controller' => 'task', 'action' => 'ajax-get-property'])?>';
+	var GLOBAL_BUILDING     = '<?= $this->url('backoffice/default', ['controller' => 'task', 'action' => 'ajax-get-building'])?>';
+	var GLOBAL_ASSIGN_TEAM  = '<?= $this->url('backoffice/default', ['controller' => 'task', 'action' => 'ajax-assign-team-based-on-type'])?>';
+	var GLOBAL_GET_SUBTASKS_BASED_ON_TYPE  = '<?= $this->url('backoffice/default', ['controller' => 'task', 'action' => 'ajax-get-subtasks-based-on-type'])?>';
+    var GLOBAL_RES_DATA     = '<?= $this->url('backoffice/default', ['controller' => 'task', 'action' => 'ajax-get-reservation-details'])?>';
+    var GLOBAL_CHECK_RES    = '<?= $this->url('backoffice/default', ['controller' => 'task', 'action' => 'ajax-check-reservation-number'])?>';
+    var GLOBAL_CHECK_VERIFIABLE = '<?= $this->url('backoffice/default', ['controller' => 'task', 'action' => 'ajax-check-verifiable-based-on-type'])?>';
+    var historyAaData       = <?= $this->historyData ?>;
+    var USER_OPTIONS        = <?= json_encode($users) ?>;
+    var allUsers            = <?= json_encode($allUsers) ?>;
+    var EDIT                = <?= $this->id ? 1 : 0 ?>;
+    var TASK_ID             = <?= $this->id ?: 0 ?>;
+    var STATUS_DONE         = <?= TaskService::STATUS_DONE ?>;
+    var STATUS_VERIFIED     = <?= TaskService::STATUS_VERIFIED ?>;
+    var STATUS_STARTED      = <?= TaskService::STATUS_STARTED ?>;
+    var GLOBAL_DELETE_ATTACHMENT  = '<?= $this->url('backoffice/default', ['controller' => 'task', 'action' => 'ajax-delete-attachment'])?>';
+    var GLOBAL_GET_DEFAULT_MEMBER  = '<?= $this->url('backoffice/default', ['controller' => 'task', 'action' => 'ajax-get-default-member'])?>';
+    var anyTeamMemberId     = <?= json_encode($anyTeamMemberId) ?>;
+    var autoVerifyUserId    = <?= json_encode($autoVerifyUserId) ?>;
+    var GLOBAL_ALL_TAGS     = <?= json_encode($allTags) ?>;
+    var GLOBAL_CAN_ADD_TAGS = <?= $canAddTag ?>;
+    <?php if ($this->id) { ?>
+    var GLOBAL_DOWNLOAD_ATTACHMENT = '<?= $this->url('backoffice/default', ['controller' => 'task', 'action' => 'download-attachment'])?>';
+    var GLOBAL_CHECKOUT      = '<?= $this->url('backoffice/default', ['controller' => 'task', 'action' => 'ajax-checkout'])?>';
+    var creatorId           = <?= $taskMain->getCreatorId() ?>;
+    var responsibleId       = <?= $taskMain->getResponsibleId() ? $data->get('taskMain')->getResponsibleId() : 0 ?>;
+    var verifierId          = <?= $taskMain->getVerifierId() ? $data->get('taskMain')->getVerifierId() : 0 ?>;
+    var helperIds           = <?= $taskHelpers ? json_encode($taskHelpers) : '[]' ?>;
+    var followerIds         = <?= $taskFollowers ? json_encode($taskFollowers) : '[]' ?>;
+    var reservationId       = <?= $taskMain->getResId() ? $data->get('taskMain')->getResId() : 0 ?>;
+    var GLOBAL_SELECTED_TAGS         = <?= $selectedTags ? json_encode($selectedTags) : '[]' ?>;
+<?php } ?>
+</script>
+
+<?=$this->form()->openTag($form)?>
+<div class="form-group">
+    <div class="col-sm-5">
+        <input type="hidden" name="tags"<?= (empty($actionsSet[TaskService::ACTION_TAG])) ? ' disabled' : '' ?>>
+        <?=$this->formInput($form->get('tags'))?>
+    </div>
+    <?php if (!empty($taskMain)) { ?>
+        <div class="col-sm-5 text-right pull-right">
+            <div>
+                <em>Created By <b><?= $taskMain->getCreatorName() ?></b> on <b><?= date(Constants::GLOBAL_DATE_TIME_FORMAT, strtotime($taskMain->getCreation_date())) ?></b></em>
+            </div>
+            <div>
+                <em>Last Update Time: <b><?= date(Constants::GLOBAL_DATE_TIME_FORMAT, strtotime($taskMain->getLastUpdateTime())) ?></b></em>
+            </div>
+        </div>
+    <?php } ?>
+</div>
+<div class="row">
+    <div class="col-sm-6 col-lg-7 print-50">
+        <fieldset name="general">
+
+            <legend>General</legend>
+            <?= $this->formHidden($form->get('creation_date')) ?>
+
+            <div class="form-group">
+                <label class="col-lg-2 col-md-3 col-sm-5 control-label" for="title">
+                    Title <?php echo $this->required(); ?>
+                </label>
+                <div class="col-lg-10 col-md-9 col-sm-7">
+                    <?=$this->formInput($form->get('title'))?>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12 col-lg-6">
+                    <div class="form-group">
+                        <label class="col-lg-4 col-md-3 col-sm-5 control-label" for="task_type">
+                            Type <?php echo $this->required(); ?>
+                        </label>
+                        <div class="col-lg-8 col-md-9 col-sm-7">
+                            <?= $this->formSelect($form->get('task_type')) ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-lg-6">
+                    <div class="form-group">
+                        <label class="col-lg-4 col-md-3 col-sm-5 control-label" for="task_priority">Priority</label>
+                        <div class="col-lg-8 col-md-9 col-sm-7">
+                            <?=$this->formSelect($form->get('task_priority'))?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group<?= (!$this->id ? ' hide': '') ?> hidden-print">
+                <label class="col-lg-2 col-md-3 col-sm-5 control-label" for="task_status">
+                    Status
+                </label>
+                <div class="col-lg-4 col-md-9 col-sm-7">
+                    <?=$this->formSelect($form->get('task_status'))?>
+                </div>
+
+                <?php if ($form->get('done_date')->getValue()) { ?>
+                <label class="col-lg-2 col-md-3 col-sm-5 control-label" for="done_date">Done</label>
+                <div class="col-lg-4 col-md-9 col-sm-7">
+                    <div class="input-group">
+                        <?=$this->formInput($form->get('done_date'))?>
+                        <div class="input-group-addon">
+                            <label class="glyphicon glyphicon-calendar" for="done_date"></label>
+                        </div>
+                    </div>
+                </div>
+                <?php } ?>
+            </div>
+            <div class="row">
+                <div class="col-sm-12 col-lg-6">
+                    <div class="form-group">
+                        <label class="col-lg-4 col-md-3 col-sm-5 control-label" for="start_date">
+                            Start <?php echo $this->required(); ?>
+                        </label>
+                        <div class="col-lg-8 col-md-9 col-sm-7">
+                            <div class="input-group">
+                                <?=$this->formInput($form->get('start_date'))?>
+                                <div class="input-group-addon">
+                                    <label class="glyphicon glyphicon-calendar" for="start_date"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-lg-6">
+                    <div class="form-group">
+                        <label class="col-lg-4 col-md-3 col-sm-5 control-label" for="end_date">
+                            Due <?php echo $this->required(); ?>
+                        </label>
+                        <div class="col-lg-8 col-md-9 col-sm-7">
+                            <div class="input-group">
+                                <?=$this->formInput($form->get('end_date'))?>
+                                <div class="input-group-addon">
+                                    <label class="glyphicon glyphicon-calendar" for="end_date"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-lg-2 col-md-3 col-sm-5 control-label" for="property_name">
+                    <?php if ($this->apartmentUrl) { ?>
+                    <a href="<?=$this->apartmentUrl?>" target="new">Apartment</a>
+                    <?php } else { ?>
+                    Apartment
+                    <?php } ?>
+                </label>
+                <div class="col-lg-10 col-md-9 col-sm-7">
+                    <?=$this->formInput($form->get('property_name'))?>
+                </div>
+
+
+            </div>
+            <div class="row">
+                <div class="col-sm-12 col-lg-6">
+                    <div class="form-group">
+                        <label class="col-lg-4 col-md-3 col-sm-5 control-label" for="building_name">
+                            <?php if ($this->buildingUrl) { ?>
+                            <a href="<?=$this->buildingUrl?>" target="new">Building</a>
+                            <?php } else { ?>
+                            Building
+                            <?php } ?>
+                        </label>
+                        <div class="col-lg-8 col-md-9 col-sm-7">
+                            <?=$this->formInput($form->get('building_name'))?>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-lg-6">
+                    <div class="form-group">
+                        <label class="col-lg-4 col-md-3 col-sm-5 control-label hidden-print" for="res_id">
+                            <?php if ($this->reservationUrl) { ?>
+                                <a href="<?=$this->reservationUrl?>" target="new">Reservation</a>
+                            <?php } else {?>
+                                Reservation
+                            <?php } ?>
+                        </label>
+                        <div class="col-lg-8 col-md-9 col-sm-7 hidden-print">
+                            <?=$this->formInput($form->get('res_number'))?>
+                            <?=$this->formHidden($form->get('res_id'))?>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-lg-6">
+                    <div class="form-group">
+                        <label class="col-lg-4 col-md-3 col-sm-5 control-label hidden-print" for="related_task">
+                            <?php if (!empty($taskMain) && $taskMain->getRelatedTask()) { ?>
+                                <a href="<?= $this->url('backoffice/default', array('controller' => 'task', 'action' => 'edit', 'id'=>$taskMain->getRelatedTask()))?>" target="_blank" class="link_task">Related</a>
+                            <?php } else {?>
+                                <?= $this->info('Related', 'This field is to fill in the Task ID of a Related Task to link them.') ?>
+                            <?php } ?>
+                        </label>
+                        <div class="col-lg-8 col-md-9 col-sm-7 hidden-print">
+                            <?=$this->formInput($form->get('related_task'))?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    <div class="col-sm-6 col-lg-5 print-50">
+        <fieldset name="user" id="fieldset-staff" class="<?= (empty($actionsSet[TaskService::ACTION_MANAGE_STAFF])) ? ' disabled' : '' ?>">
+            <legend>Staff</legend>
+            <div class="form-group">
+                <label class="col-lg-4 col-md-3 col-sm-4 control-label">
+                    <?= $this->info('Responsible', 'The one who is responsible for task progress.
+                    <br>Has permission to
+                    <ul>
+                        <li>
+                            View
+                        </li>
+                        <li>
+                            Change status up to <b>Done</b>
+                        </li>
+                        <li>
+                            Manage subtasks (add/edit/delete)
+                        </li>
+                        <li>
+                            Add comment
+                        </li>
+                    </ul>') ?>
+                </label>
+                <div class="col-lg-8 col-md-9 col-sm-8">
+                    <?=$this->formSelect($form->get('responsible_id'))?>
+                </div>
+            </div>
+            <div class="form-group verifier-row">
+                <label class="col-lg-4 col-md-3 col-sm-4 control-label">
+                    <?= $this->info('Verifier', 'The one who should verify the task when it\'s done. If set as Auto Verify, task will automatically change status to verified, when it\'s done.
+                    <br>Has permission to
+                    <ul>
+                        <li>
+                            View
+                        </li>
+                        <li>
+                            Change status
+                        </li>
+                        <li>
+                            Manage subtasks (add/edit/delete)
+                        </li>
+                        <li>
+                            Add comment
+                        </li>
+                    </ul>') ?>
+                </label>
+
+                <div class="col-lg-8 col-md-9 col-sm-8">
+                    <?=$this->formSelect($form->get('verifier_id'))?>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-lg-4 col-md-3 col-sm-4 control-label">
+                        <?= $this->info('Helpers', 'The ones who should help task responsible person.
+                    <br>Have same permissions as task responsible person
+                    <ul>
+                        <li>
+                            View
+                        </li>
+                        <li>
+                            Change status to: <b>Viewed, Blocked, Started</b> and <b>Done</b>
+                        </li>
+                        <li>
+                            Manage subtasks (add/edit/delete)
+                        </li>
+                        <li>
+                            Add comment
+                        </li>
+                    </ul>') ?>
+                </label>
+                <div class="col-lg-8 col-md-9 col-sm-8">
+                    <input type="hidden" name="helper_ids"<?= (empty($actionsSet[TaskService::ACTION_MANAGE_STAFF])) ? ' disabled' : '' ?>>
+                    <?=$this->formSelect($form->get('helper_ids'))?>
+                </div>
+            </div>
+            <div class="form-group hidden-print">
+                <label class="col-lg-4 col-md-3 col-sm-4 control-label">
+                    <?= $this->info('Followers', 'The ones that can see this task.
+                    <br>Have permissions to
+                    <ul>
+                        <li>
+                            View
+                        </li>
+                        <li>
+                            Add comment
+                        </li>
+                    </ul>') ?>
+                </label>
+                <div class="col-lg-8 col-md-9 col-sm-8">
+                    <input type="hidden" name="follower_ids"<?= (empty($actionsSet[TaskService::ACTION_MANAGE_STAFF])) ? ' disabled' : '' ?>>
+                    <?=$this->formSelect($form->get('follower_ids'))?>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-lg-4 col-md-3 col-sm-4 control-label" for="team_id">
+                    <?= $this->info('Assigned Team', 'This teams\' staff will have following permissions:
+                        <ul>
+                            <li>Access this page</li>
+                            <li>Add comments</li>
+                            <li>
+                                Change Task Staff
+                                <span class="text-info">(Team Officers and Managers only)</span>
+                            </li>
+                            <li>
+                                Overall changes
+                                <span class="text-info">(Team Managers only)</span>
+                            </li>
+                        </ul>', 'Link to Team') ?>
+                </label>
+                <div class="col-lg-8 col-md-9 col-sm-8">
+                    <?=$this->formElement($form->get('team_id'))?>
+                </div>
+            </div>
+            <div class="form-group hidden-print">
+                <label class="col-lg-4 col-md-3 col-sm-4 control-label" for="following_team_id">
+                    <?= $this->info('Following Team', 'This teams\' staff will have following permissions:
+                        <ul>
+                            <li>Access this page</li>
+                            <li>Add comments</li>
+                        </ul>', 'Link to Team as Followers') ?>
+                </label>
+                <div class="col-lg-8 col-md-9 col-sm-8">
+                    <?=$this->formElement($form->get('following_team_id'))?>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+</div>
+<div class="row<?= (empty($actionsSet[TaskService::ACTION_MANAGE_SUBTASKS]) && (empty($taskSubtasks) || !count($taskSubtasks))) ? ' hide' : '' ?>">
+    <div class="col-sm-12">
+        <fieldset id="subtasks">
+            <legend>Subtasks</legend>
+            <?php $i = 0; ?>
+            <?php if (!empty($taskSubtasks) && count($taskSubtasks)) { ?>
+                <?php foreach ($taskSubtasks as $subTask) { ?>
+            <div class="row<?= $subTask->getStatus() ? ' subtask-done' : '' ?>">
+                <div class="col-xs-1 checkbox text-right">
+                    <input type="hidden" name="subtask_status[<?= $subTask->getId() ?>]" value="0"<?= (empty($actionsSet[TaskService::ACTION_MANAGE_SUBTASKS])) ? ' disabled' : '' ?>>
+                    <input type="checkbox" name="subtask_status[<?= $subTask->getId() ?>]"<?= $subTask->getStatus() ? ' checked' : ''?> value="1"<?= (empty($actionsSet[TaskService::ACTION_MANAGE_SUBTASKS])) ? ' disabled' : '' ?>>
+                </div>
+                <div class="col-xs-10 col-sm-9">
+                    <div class="input-group">
+                        <input type="text" name="subtask_description[<?= $subTask->getId() ?>]" class="form-control subtask-description" value="<?= $subTask->getDescription() ?>"<?= (empty($actionsSet[TaskService::ACTION_MANAGE_SUBTASKS])) ? ' disabled' : '' ?>>
+                        <div class="input-group-addon remove-subtask<?= (empty($actionsSet[TaskService::ACTION_CHANGE_DETAILS])) ? ' soft-hide' : '' ?>">
+                            <span class="glyphicon glyphicon-remove text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                    <?php $i++ ?>
+                <?php } ?>
+            <?php } ?>
+            <?php // Add Subtask ?>
+            <div class="row hidden-print">
+                <div class="col-xs-1 checkbox text-right">
+                    <input type="hidden" name="subtask_status[<?= $i ?>]" value="0"<?= (empty($actionsSet[TaskService::ACTION_MANAGE_SUBTASKS])) ? ' disabled' : '' ?>>
+                    <input type="checkbox" name="subtask_status[<?= $i ?>]" value="1"<?= (empty($actionsSet[TaskService::ACTION_MANAGE_SUBTASKS])) ? ' disabled' : '' ?>>
+                </div>
+                <div class="col-xs-10 col-sm-9">
+                    <div class="input-group">
+                        <input placeholder="Type subtask title here" type="text" name="subtask_description[<?= $i ?>]" class="form-control subtask-description"<?= (empty($actionsSet[TaskService::ACTION_MANAGE_SUBTASKS])) ? ' disabled' : '' ?>>
+                        <div class="input-group-addon remove-subtask disabled<?= (empty($actionsSet[TaskService::ACTION_CHANGE_DETAILS])) ? ' soft-hide' : '' ?>">
+                            <span class="glyphicon glyphicon-remove text-muted"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+</div>
+<br>
+<div class="row<?= (empty($actionsSet[TaskService::ACTION_CHANGE_DETAILS]) && empty($form->get('description')->getValue())) ? ' hide' : '' ?>">
+    <div class="col-sm-12">
+        <fieldset>
+            <legend>Description</legend>
+            <div class="form-group">
+                <div class="col-sm-12">
+                    <?=$this->formElement($form->get('description'))?>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+</div>
+<?php
+    echo $this->formInput($form->get('property_id'));
+    echo $this->formInput($form->get('building_id'));
+    echo $this->formInput($form->get('edit_id'));
+?>
+
+<?php if (!empty($actionsSet[TaskService::ACTION_MANAGE_ATTACHMENTS]) || !empty($taskAttachments) && $taskAttachments->count()) { ?>
+<div class="row hidden-print">
+    <div class="col-sm-12">
+        <fieldset>
+            <legend style="<?=(isset($taskAttachments) && count($taskAttachments)) ? '' : 'display:none;'?>" id="legend-for-appartments">Attachment</legend>
+            <ul id="attachments-list">
+            <?php if (!empty($taskAttachments)) { ?>
+                <?php foreach ($taskAttachments as $attachment) { ?>
+                    <li class="attachment-item" data-attachment-id="<?= $attachment->getId() ?>" id="attachment-<?= $attachment->getId() ?>">
+                        <div class="btn-group">
+                            <a href="#" class="btn btn-sm btn-default dropdown-toggle attachment-btn" data-toggle="dropdown" aria-expanded="false">
+                                <span class="glyphicon glyphicon-paperclip"></span> <?= $attachment->getFile() ?> <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu" role="menu">
+                                <li>
+                                    <a href="#" class="download-attachment-btn">
+                                        <span class="glyphicon glyphicon-cloud-download text-info"></span> Download
+                                    </a>
+                                </li>
+                                <?php if(!empty($actionsSet[TaskService::ACTION_MANAGE_ATTACHMENTS])) { ?>
+                                <li>
+                                    <a href="#" class="delete-attachment-btn">
+                                        <span class="glyphicon glyphicon-remove-circle text-danger"></span> Delete
+                                    </a>
+                                </li>
+                                <?php } ?>
+                            </ul>
+                        </div>
+                    </li>
+                <?php } ?>
+            <?php } ?>
+            </ul>
+
+            <?php
+            //
+            // Progress id hidden field. Used to track upload progress.
+            // *NOTE* The hidden element MUST be before the file elements.
+            //
+            //echo $this->formFileSessionProgress();
+            ?>
+            <input type="hidden" value="aaaaaaa"
+                   name="<?php echo ini_get("session.upload_progress.name"); ?>">
+            <?php
+            $elem = $uploadForm->get('file');
+            ?>
+            <div id="file-controls" class="form-group">
+                <div class="col-sm-12">
+                    <?php echo $this->formFile($elem); ?>
+                    <?php echo $this->formHidden($form->get('attachment_names')); ?>
+
+                    <div id="file-errors" class="help-block"></div>
+                </div>
+            </div>
+
+            <div id="progress" class="help-block">
+                <div class="progress progress-info progress-striped active">
+                    <div class="progress-bar" role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em;"></div>
+                </div>
+            </div>
+
+
+
+            <div id="output"></div>
+
+        </fieldset>
+    </div>
+</div>
+<?php } ?>
+
+
+
+
+
+<?php if ($this->id) { ?>
+<div class="row" id="history-block">
+    <div class="col-sm-12">
+        <fieldset>
+            <legend id="history-legend">History</legend>
+            <div class="form-group">
+                <div class="col-sm-12">
+                    <div class="history-switch">
+                        <div class="btn-group fn-buttons pull-right margin-left-10">
+                            <a href="javascript:void(0)" class="btn btn-sm btn-default all">All</a>
+                            <a href="javascript:void(0)" class="btn btn-sm btn-default manual active">Manual</a>
+                        </div>
+                    </div>
+
+                    <table id="datatable_history" class="table table-bordered table-condensed table-hover">
+                        <thead>
+                        <tr>
+                            <th> Date </th>
+                            <th> Employee </th>
+                            <th> Message </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                    <?=$this->formElement($form->get('comments'))?>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+</div>
+<?php } ?>
+<div class="page-actions container">
+    <div class="row text-right">
+        <?php echo $this->formButton($form->get('save_button'))?>
+        <?php echo $this->formButton($form->get('download_button'))?>
+        <?php if ($this->id) { ?>
+            <?php
+            $relatedTaskParams = [
+                'res_number' => $taskMain->getResNumber(),
+                'res_id' => $taskMain->getResId(),
+                'apartment_id' => $taskMain->getProperty_id(),
+                'apartment_name' => $taskMain->getProperty_name(),
+                'related_task' => $taskMain->getId(),
+                'building_id' => $taskMain->getBuildingId(),
+                'building_name' => $taskMain->getBuildingName(),
+                'following_team' => $taskMain->getFollowingTeamId(),
+            ];
+            ?>
+
+            <?php if (!empty($actionsSet[TaskService::ACTION_CHANGE_STATUS])) { ?>
+                <?php // ACTION_CHANGE_STATUS is 1, means can change to verified/cancel ?>
+                <?php if ($taskMain->getTask_status() == TaskService::STATUS_DONE && $actionsSet[TaskService::ACTION_CHANGE_STATUS] == 1) { ?>
+        <button type="button" class="btn btn-primary margin-left-10 pull-right col-sm-2 col-xs-12 status-change-button" id="mark-verified-btn" data-value="<?= TaskService::STATUS_VERIFIED ?>">
+            Mark Verified
+        </button>
+                <?php } else if ($taskMain->getTask_status() < TaskService::STATUS_DONE) { ?>
+        <button type="button" class="btn btn-primary margin-left-10 pull-right col-sm-2 col-xs-12 status-change-button" id="mark-done-btn" data-value="<?= TaskService::STATUS_DONE ?>">
+            Mark Done
+        </button>
+                <?php } ?>
+                <?php if ($taskMain->getTask_status() < TaskService::STATUS_STARTED) { ?>
+        <button type="button" class="btn btn-primary margin-left-10 pull-right col-sm-1 col-xs-12 status-change-button" id="start-btn" data-value="<?= TaskService::STATUS_STARTED ?>">
+            Start
+        </button>
+                <?php } else if ($taskMain->getTask_status() == TaskService::STATUS_STARTED) { ?>
+        <button type="button" class="btn btn-warning margin-left-10 pull-right col-sm-1 col-xs-12 status-change-button" id="stop-btn" data-value="<?= TaskService::STATUS_VIEWED ?>">
+            Stop
+        </button>
+                <?php } ?>
+            <?php } ?>
+            <?php // Only for team officers and managers (GEMs and HKMs) ?>
+            <?php if (!empty($actionsSet[TaskService::ACTION_MANAGE_STAFF])
+                && $taskMain->getResId()
+                && ($taskMain->getArrivalStatus() == ReservationTicketService::BOOKING_ARRIVAL_STATUS_CHECKED_IN
+                    || $taskMain->getArrivalStatus() == ReservationTicketService::BOOKING_ARRIVAL_STATUS_EXPECTED
+                )
+                && $taskMain->getTaskTypeId() == TaskService::TYPE_CLEANING
+                && strtotime(Helper::getCurrenctDateByTimezone($taskMain->getTimezone())) >= strtotime($taskMain->getReservationDateFrom())
+            ) { ?>
+        <button type="button" class="btn btn-success margin-left-10 pull-right col-sm-1 col-xs-12 col-md-1" id="checkout-btn">
+            Checkout
+        </button>
+            <?php } ?>
+        <div class="btn-group pull-left dropup col-xs-12 col-sm-2">
+            <a class="btn btn-primary dropdown-toggle btn-block" data-toggle="dropdown" aria-expanded="true">
+                Actions
+                <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+                <li>
+                    <a href="#" data-loading-text="Printing..." class="print-btn">
+                        <span class="glyphicon glyphicon-print"></span> Print
+                    </a>
+                </li>
+                <li>
+                    <a href="#" data-loading-text="Printing..." class="print-btn" data-comments="1">
+                        <span class="glyphicon glyphicon-print"></span> Print With Comments
+                    </a>
+                </li>
+                <li>
+                    <a href="/task/edit?<?= http_build_query($relatedTaskParams) ?>" target="_blank">
+                        <span class="glyphicon glyphicon-share"></span> Create Related Task
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <?php } ?>
+        <?php if(!empty($actionsSet[TaskService::ACTION_MANAGE_ATTACHMENTS])) { ?>
+            <a class="btn btn-success margin-left-10 pull-right col-sm-3 col-md-2 col-xs-12" id="upload-button">
+                <span class="glyphicon glyphicon-cloud-upload"></span>
+                Add Attachments
+            </a>
+        <?php } ?>
+    </div>
+</div>
+<?=$this->form()->closeTag()?>
+<?php // Subtask Template ?>
+<div class="row soft-hide SUBTASK_CLASS hidden-print" id="subtask-template">
+    <div class="col-xs-1 checkbox text-right">
+        <input type="hidden" name="subtask_status[SUBTASK_NUMBER]" value="0"<?= (empty($actionsSet[TaskService::ACTION_MANAGE_SUBTASKS])) ? ' disabled' : '' ?>>
+        <input type="checkbox" name="subtask_status[SUBTASK_NUMBER]" value="1"<?= (empty($actionsSet[TaskService::ACTION_MANAGE_SUBTASKS])) ? ' disabled' : '' ?>>
+    </div>
+    <div class="col-xs-10 col-sm-9">
+        <div class="input-group">
+            <input placeholder="Type subtask title here" type="text" name="subtask_description[SUBTASK_NUMBER]" value="SUBTASK_TEXT" class="form-control subtask-description"<?= (empty($actionsSet[TaskService::ACTION_MANAGE_SUBTASKS])) ? ' disabled' : '' ?>>
+            <div class="input-group-addon remove-subtask disabled<?= (empty($actionsSet[TaskService::ACTION_CHANGE_DETAILS])) ? ' soft-hide' : '' ?>">
+                <span class="glyphicon glyphicon-remove text-muted"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Delete modal -->
+<div id="delete-modal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-danger">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel">Delete Attachment</h4>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <button class="btn btn-danger" id="delete-attachment-button">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- There are open subtasks modal -->
+<div id="open-subtasks-modal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-info">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" >Open Subtasks Left</h4>
+            </div>
+            <div class="modal-body">
+                <p>There are open Subtasks. They will be marked as done.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <button class="btn btn-primary" id="save-task-also-close-subtasks">OK</button>
+            </div>
+        </div>
+    </div>
+</div>

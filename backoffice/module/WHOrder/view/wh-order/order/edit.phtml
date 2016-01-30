@@ -1,0 +1,671 @@
+<?php
+use DDD\Service\WHOrder\Order;
+
+/** @var \DDD\Domain\WHOrder\Order $orderData */
+$orderData = $this->orderData;
+
+$current = $this->orderId ? 'Edit Order' : 'Add Order';
+$this->layout()->viewTitle = $current;
+$this->layout()->breadcrumb = $this->breadcrumb([
+    ['Administration'],
+    ['Order Management', $this->url('orders', ['controller' => 'order'])],
+    [$current]
+]);
+
+
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($current);
+
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+    ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+    ->appendFile($this->basePath() . '/js/plugins/jquery.datetimepicker.full.min.js')
+    ->appendFile($this->basePath() . '/js/module/wh-orders/order-item.js')
+    ->appendFile($this->basePath() . '/js/module/finance/purchase-order/item.js');
+
+$this->headLink()
+    ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css')
+    ->appendStylesheet($this->basePath() . '/css/plugins/jquery.datetimepicker.css')
+    ->appendStylesheet($this->basePath() . '/css/pages/wh-orders.css');
+
+$identity = $this->identity();
+$creator = $identity->firstname . ' ' . $identity->lastname;
+?>
+<script>
+    var EDITABLE = 1;
+</script>
+<div class="row">
+    <div class="col-sm-12 mobile-text-center">
+        <?php
+        $orderStatus = '';
+        if ($this->orderId && $this->orderStatusText) {
+            $orderStatus .= '<span class="label ' . $this->orderStatusText[1] . ' margin-right-5">' . $this->orderStatusText[0] . '</span>';
+            $orderStatus .= '<span class="label label-primary margin-right-5">Manager: ' . $orderData->getTeamName() . '</span>';
+        }
+        if ($this->poId) {
+            $poStatus = $this->poId;
+
+            if ($this->hasPORol) {
+                $poStatus = '<a href="/finance/purchase-order/ticket/' . $this->poId . '" target="_blank">' . $this->poId . '</a>';
+            }
+            $orderStatus .= '<span class="label label-purple margin-right-5">PO: ' . $poStatus . '</span>';
+            ?>
+            <input type="hidden" name="po_id" id="po_id" value="<?= $this->poId; ?>">
+            <?php
+        }
+        if ($orderStatus) {
+            echo $orderStatus;
+        }
+
+        ?>
+    </div>
+</div>
+<br>
+
+<!-- TABS: START -->
+<ul class="nav nav-tabs tabs-general">
+    <li class="active">
+        <a href="#general" data-toggle="tab" aria-expanded="false" id="general-tab">General</a>
+    </li>
+    <li class="history-tab pull-right">
+        <a href="#history" data-toggle="tab" aria-expanded="false" id="history-tab"><span class="glyphicon glyphicon-list-alt"></span> History</a>
+    </li>
+</ul>
+<!-- TABS: END -->
+
+<div class="tab-content">
+
+<!-- GENERAL TAB: START-->
+<div class="tab-pane fade active in" id="general">
+
+<?= $this->form()->openTag($form); ?>
+<input type="hidden" name="order_id" id="order_id" value="<?= $this->orderId; ?>">
+<input type="hidden" name="money_account_transaction" id="money_account_transaction" value="">
+<div class="row">
+    <div class="col-sm-12">
+        <div class="row">
+            <div class="col-sm-6">
+                <fieldset name="general">
+                    <div class="row">
+                        <label class="col-sm-4 control-label" for="title">
+                            <?php echo $form->get('title')->getLabel() . ' ' . $this->required(); ?>
+                        </label>
+                        <div class="col-sm-8 controls">
+                            <?php echo $this->formInput($form->get('title')); ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-4 control-label" for="price">
+                            <?php echo $form->get('price')->getLabel() . ' ' . $this->required(); ?>
+                        </label>
+                        <div class="col-sm-8 controls">
+                            <?php echo $this->formInput($form->get('price')); ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-4 control-label" for="currency">
+                            <?php echo $form->get('currency')->getLabel() . ' ' . $this->required(); ?>
+                        </label>
+                        <div class="col-sm-8 controls">
+                            <?php echo $this->formSelect($form->get('currency')); ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-4 control-label" for="quantity">
+                            <?php echo $form->get('quantity')->getLabel() . ' ' . $this->required(); ?>
+                        </label>
+                        <div class="col-sm-3 controls">
+                            <?php echo $this->formInput($form->get('quantity')); ?>
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="col-sm-5 controls">
+                            <?php echo $this->formSelect($form->get('quantity_type')); ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-4 control-label" for="asset_category_id">
+                            <?php echo $form->get('asset_category_id')->getLabel() . ' ' . $this->required(); ?>
+                        </label>
+                        <div class="col-sm-8 controls">
+                            <?php echo $this->formSelect($form->get('asset_category_id')); ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <label class="col-sm-4 control-label" for="location_target">
+                            <?php echo $form->get('location_target')->getLabel() . ' ' . $this->required(); ?>
+                        </label>
+                        <div class="col-sm-8 controls">
+                            <?php echo $this->formSelect($form->get('location_target')); ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+
+                    <div class="row status-shipping">
+                        <label class="col-sm-4 control-label" for="status_shipping">
+                            <?php echo $form->get('status_shipping')->getLabel() . ' ' . $this->required(); ?>
+                        </label>
+                        <div class="col-sm-8 controls">
+                            <?php echo $this->formSelect($form->get('status_shipping')); ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <?php if ($this->orderId) {?>
+                        <div class="row">
+                            <label class="col-sm-4 control-label" for="status_shipping">
+                                Created by
+                            </label>
+                            <div class="col-sm-8 controls checkbox">
+                                <?= $this->created?>
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                    <?php } ?>
+                    <div class="row received-info hide">
+                        <label class="col-sm-4 control-label" for="received-quantity">
+                            <?php echo $form->get('received_quantity')->getLabel(); ?>
+                        </label>
+                        <div class="col-sm-8 controls">
+                            <?php echo $this->formInput($form->get('received_quantity')); ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+
+                    <div class="row received-info hide">
+                        <label class="col-sm-4 control-label" for="received-date">
+                            <?php echo $form->get('received_date')->getLabel(); ?>
+                        </label>
+                        <div class="col-sm-8 controls">
+                            <?php echo $this->formInput($form->get('received_date')); ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+
+            <div class="col-sm-6">
+                <fieldset name="finance">
+                    <div class="row order-date soft-hide">
+                        <label class="col-sm-4 control-label" for="estimated_delivery_date_range">
+                        <span data-content="Estimated Delivery Date Range" data-container="body" data-toggle="popover" data-placement="top" class="commented-text" data-animation="true">
+                            <?php echo $form->get('estimated_delivery_date_range')->getLabel() . ' ' . $this->required(); ?>
+                        </span>
+                        </label>
+                        <div class="col-sm-8 controls">
+                            <div class="input-group margin-bottom-10">
+                                <label class="input-group-addon" for="estimated_delivery_date_range">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </label>
+                                <?php echo $this->formInput($form->get('estimated_delivery_date_range')); ?>
+                            </div>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <div class="row order-date soft-hide">
+                        <label class="col-sm-4 control-label" for="order_date">
+                            <?php echo $form->get('order_date')->getLabel() . ' ' . $this->required(); ?>
+                        </label>
+                        <div class="col-sm-8 controls">
+                            <div class="input-group margin-bottom-10">
+                                <label class="input-group-addon" for="order_date">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </label>
+                                <?php echo $this->formInput($form->get('order_date')); ?>
+                            </div>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-12">
+        <fieldset name="Supplier">
+            <legend>Supplier</legend>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="row">
+                        <label class="col-sm-4 control-label" for="supplier_id">
+                            <?php echo $form->get('supplier_id')->getLabel(); ?>
+                        </label>
+                        <div class="col-sm-8 controls">
+                            <?php echo $this->formSelect($form->get('supplier_id')); ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <label class="col-sm-4 control-label" for="tracking_url">
+                            <?php echo $form->get('tracking_url')->getLabel(); ?>
+                        </label>
+                        <div class="col-sm-8 controls">
+                            <?php echo $this->formInput($form->get('tracking_url')); ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="row">
+                        <label class="col-sm-4 control-label" for="supplier_transaction_id">
+                            <span data-content="Supplier Transaction ID" data-container="body" data-toggle="popover" data-placement="top" class="commented-text" data-animation="true">
+                                <?php echo $form->get('supplier_transaction_id')->getLabel(); ?>
+                            </span>
+                        </label>
+                        <div class="col-sm-8 controls">
+                            <?php echo $this->formInput($form->get('supplier_transaction_id')); ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-4 control-label" for="supplier_tracking_number">
+                            <span data-content="Supplier Tracking Number" data-container="body" data-toggle="popover" data-placement="top" class="commented-text" data-animation="true">
+                                <?php echo $form->get('supplier_tracking_number')->getLabel(); ?>
+                            </span>
+                        </label>
+                        <div class="col-sm-8 controls">
+                            <?php echo $this->formInput($form->get('supplier_tracking_number')); ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+
+    <div class="col-sm-12">
+        <fieldset name="additionally">
+            <legend>Additionally</legend>
+
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <label class="col-sm-2 control-label" for="url">
+                            <?php if ($this->orderId > 0) : ?>
+                                <a href="<?= $form->get('url')->getValue() ?>" target="_blank"><?= $form->get('url')->getLabel(); ?></a>
+                            <?php else : ?>
+                                <?= $form->get('url')->getLabel(); ?>
+                            <?php endif; ?>
+                        </label>
+                        <div class="col-sm-10 controls">
+                            <?php echo $this->formInput($form->get('url')); ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-12">
+                    <div class="row">
+                        <label class="col-sm-2 control-label" for="description">
+                            <?php echo $form->get('description')->getLabel(); ?>
+                        </label>
+                        <div class="col-sm-10 controls">
+                            <?php echo $this->formTextarea($form->get('description')); ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+</div>
+
+<div id="alertStatusModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="alertStatusModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-danger">
+                <h4 class="modal-title" id="alertStatusModal">The Irreversible Change of Order Status</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    If you change the order status to the <span class="text-bold" id="change-status-to"></span>, then no longer be able to change it less than <span class="text-bold" id="irreversible-status"></span>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true" id="order-new-status-canceled">Cancel</button>
+                <button class="btn btn-danger" id="order-new-status-approved">Continue</button>
+            </div>
+        </div>
+    </div>
+</div>
+<?php if (!$this->isRejected) { ?>
+    <div class="page-actions container">
+        <div class="row text-right">
+            <?php echo $this->formButton($form->get('save_button')); ?>
+            <?php if ($this->viewRejectedButton) { ?>
+                <a href="#modal_reject" data-toggle="modal" class="btn btn-danger col-sm-2 col-xs-12 margin-left-10 pull-right">Reject</a>
+            <?php } ?>
+
+            <?php if ($this->orderId && $this->procurementTeams->count() > 1) { ?>
+            <a href="#modal_change_manager_team" data-toggle="modal" class="btn btn-primary col-sm-2 col-xs-12 pull-left">Change Manager</a>
+            <?php } ?>
+
+            <?php if ($this->orderId && !$orderData->getPoItemId()) { ?>
+                <button class="btn btn-primary col-sm-2 col-xs-12 margin-left-10 pull-left get-approval" data-toggle="modal">Attach PO</button>
+            <?php } ?>
+
+            <?php if ($this->orderId && $this->orderStatus == Order::STATUS_ORDER_APPROVED && $this->poId > 0 && !$orderData->getPoRAItemId()) { ?>
+                <a href="#requestAdvanceModal" class="btn btn-primary col-sm-2 col-xs-12 margin-left-10 hide pull-left get-approval" data-toggle="modal">Request Advance</a>
+            <?php } ?>
+
+            <?php if ($this->orderId && !$orderData->getPoItemId()) {?>
+            <button class="btn btn-primary col-sm-2 col-xs-12 margin-left-10 pull-left create-item-without-po">Request PO</button>
+            <?php } ?>
+        </div>
+    </div>
+<?php } ?>
+<?php echo $this->form()->closeTag(); ?>
+</div>
+<!-- GENERAL TAB: END-->
+
+<!-- HISTORY TAB: START-->
+<div class="tab-pane fade" id="history">
+    <div class="row" id="history-block">
+        <div class="col-sm-12">
+            <table id="datatable_history" class="table table-bordered table-condensed table-hover">
+                <thead>
+                <tr>
+                    <th> Date </th>
+                    <th> Employee </th>
+                    <th> Message </th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <div class="alert alert-success" id="history_clean">
+                <span class="glyphicon glyphicon-ok-sign" aria-hidden="true"></span>
+                There are no items to display
+            </div>
+        </div>
+    </div>
+</div>
+<!-- HISTORY TAB: END-->
+
+<?php if ($this->orderId) {?>
+    <div class="modal fade" id="modal_reject" tabindex="-1" role="dialog" aria-labelledby="deactivateCategory" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-danger">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">
+                        Reject
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to reject this order?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default" data-dismiss="modal">Close</button>
+                    <a class="btn btn-danger" href="/orders/reject/<?=$this->orderId?>">Reject</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal_change_manager_team" tabindex="-1" role="dialog" aria-labelledby="changeManagerTeam" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-primary">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">
+                        Change Manager Team
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <p>Choose one of procurement teams as a ticket manager</p>
+                    <select name="manager_team_id" id="manager_team_id" class="form-control">
+                        <?php
+                            foreach ($this->procurementTeams as $procurementTeam) {
+                                $selected = '';
+                                if ($orderData->getTeamId() == $procurementTeam->getId()) {
+                                    $selected = 'selected';
+                                }
+                                echo('<option value="' . $procurementTeam->getId() . '" ' . $selected . '>' . $procurementTeam->getName() . '</option>');
+                            }
+                        ?>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default" data-dismiss="modal">Close</button>
+                    <a class="btn btn-primary" id="btnChangeManagerTeam">Change</a>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php } ?>
+
+</div>
+
+<div id="alertPOItemModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="alertPOItemModal" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-primary">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Attach Purchase Order</h4>
+            </div>
+            <div class="modal-body">
+                <form id="item-form" name="item-form" class="modal-form">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <?php echo $this->partial('finance/partial/item-add', [
+                                'form' => $this->itemForm,
+                                'data' => [],
+                                'costCenters' => [],
+                                'creator' => $creator,
+                                'order' => true,
+                                'userPOList' => $this->userPOList,
+                            ]); ?>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <button class="btn btn-primary create-item">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php if ($this->orderId > 0) : ?>
+<div id="alertPOItemTransactionModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="alertPOItemTransactionModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-primary">
+                <h4 class="modal-title">Make a Transaction</h4>
+            </div>
+            <div class="modal-body">
+                <form id="item-transaction-form" name="item-transaction-form" class="modal-form">
+                    <div class="row">
+                        <div class="col-sm-4 text-right">
+                            <label class="form-control-static">Money Account <?php echo $this->required(); ?></label>
+                        </div>
+                        <div class="col-sm-8">
+                            <select name="money_accounts" class="form-control margin-bottom-10 order-item-money-accounts"
+                                data-money-accounts=''
+                                data-placeholder="-- Please Select --"></select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 text-right">
+                            <label class="form-control-static">Transaction Date <?php echo $this->required(); ?></label>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="input-group margin-bottom-10">
+                                <input type="text" name="transaction_date" class="form-control datepicker order-item-transaction-date">
+                                <label class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 text-right">
+                            <label class="form-control-static"><?= $this->info('Amount', 'Caution: should not be bigger than the original price') ?> <?php echo $this->required(); ?></label>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="input-group">
+                                <input type="text" name="transaction_amount" class="form-control transaction-amount" value="<?php echo $orderData->getPrice(); ?>">
+                                <label class="input-group-addon money-account-currency">
+                                    <?php echo str_repeat('&nbsp;', 6); ?>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row margin-top-5">
+                        <div class="col-sm-4 col-sm-offset-4">
+                            <input type="file" name="items_attachments[]" class="form-control items-attachments hide">
+                                <a type="button" class="btn btn-success upload-item-attachment">
+                                    <i class="glyphicon glyphicon-cloud-upload"></i> <span>Attach</span>
+                                </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <button class="btn btn-primary create-item-transaction" data-url="<?php echo $this->url('orders/create-item-transaction'); ?>">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="requestAdvanceModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="requestAdvanceModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-primary">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Request Money</h4>
+            </div>
+            <div class="modal-body">
+                <form id="request-money-form" name="request-money-form">
+                    <div class="row">
+                        <div class="col-sm-4 text-right">
+                            <label class="form-control-static">Money Account <?php echo $this->required(); ?></label>
+                        </div>
+                        <div class="col-sm-8">
+                            <select name="money_accounts" class="form-control margin-bottom-10 user-money-accounts"
+                                    data-money-accounts=''
+                                    data-placeholder="-- Please Select --"></select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 text-right">
+                            <label class="form-control-static">Amount <?php echo $this->required(); ?></label>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="input-group">
+                                <input type="text" name="request_advance_amount" class="form-control request_advance_amount" value="<?php echo $orderData->getPrice(); ?>">
+                                <label class="input-group-addon money-account-currency">
+                                    <?php echo str_repeat('&nbsp;', 6); ?>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <button class="btn btn-primary request-money">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="refundModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="refundModal" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-primary">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Refund</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-12 refund-description"></div>
+                </div>
+                <form id="request-refund-form" name="request-refund-form">
+                    <div class="row">
+                        <div class="col-sm-4 text-right">
+                            <label class="form-control-static">Account From</label>
+                        </div>
+                        <div class="col-sm-4 account-from"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 text-right">
+                            <label class="form-control-static">Account To</label>
+                        </div>
+                        <div class="col-sm-4 account-to"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 text-right">
+                            <label class="form-control-static">Refund Amount <?php echo $this->required(); ?></label>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="input-group">
+                                <input type="text" name="refund-amount" class="form-control refund-amount" value="<?php echo $orderData->getPrice(); ?>">
+                                <label class="input-group-addon money-account-currency">
+                                    <?php echo str_repeat('&nbsp;', 6); ?>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default refund-cancel" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <button class="btn btn-primary refund-request">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<div id="data"
+     data-account-url="<?php echo $this->url('finance/purchase-order/get-accounts'); ?>"
+     data-currency-url="<?php echo $this->url('finance/purchase-order/get-currencies'); ?>"
+     data-sub-category-url="<?php echo $this->url('finance/purchase-order/get-sub-categories'); ?>"
+     data-money-account-url="<?php echo $this->url('finance/purchase-order/get-money-accounts'); ?>"
+     data-cost-center-url="<?php echo $this->url('finance/purchase-order/get-cost-centers'); ?>"
+     data-affiliate-url="<?php echo $this->url('finance/purchase-order/get-affiliates'); ?>"
+     data-office-url="<?php echo $this->url('finance/purchase-order/get-offices'); ?>"
+     data-people-url="<?php echo $this->url('finance/purchase-order/get-people'); ?>"
+
+     data-item-id="0"
+     data-creation-date="<?php echo date('Y-m-d'); ?>"
+     data-able-to-approve="0"
+     data-status="1"
+
+     data-money-accounts='<?php echo str_replace('\'', '’', json_encode($this->moneyAccountList)); ?>'>
+</div>
+
+<script>
+    var GLOBAL_GET_LOCATIONS_URL  = '<?= $this->url('orders/ajax-get-order-locations'); ?>';
+    var GLOBAL_GET_STATUSES_URL   = '<?= $this->url('orders/ajax-get-order-statuses'); ?>';
+    var GLOBAL_GET_CATEGORIES_URL = '<?= $this->url('orders/ajax-get-order-categories'); ?>';
+    var GLOBAL_GET_SUPPLIERS_URL  = '<?= $this->url('orders/ajax-get-order-suppliers'); ?>';
+    var GLOBAL_CREATE_PO_ITEM     = '<?= $this->url('orders/ajax-create-po-item'); ?>';
+    var GLOBAL_REQUEST_MONEY      = '<?= $this->url('orders/ajax-request-advance'); ?>';
+    var GLOBAL_CHANGE_MANAGER_URL = '<?= $this->url('orders/ajax-change-manager'); ?>';
+    var GLOBAL_ORDER_STATUSES     = <?= json_encode($this->orderShippingStatuses); ?>;
+    var HISTORY_DATA              = <?= $this->historyData; ?>;
+    var STATUS_TO_BE_ORDERED      = <?= Order::STATUS_TO_BE_ORDERED ?>;
+    var STATUS_CANCELED           = <?= Order::STATUS_CANCELED ?>;
+    var STATUS_RECEIVED           = <?= Order::STATUS_RECEIVED ?>;
+    var STATUS_ISSUE              = <?= Order::STATUS_ISSUE ?>;
+    var STATUS_RETURNED           = <?= Order::STATUS_RETURNED ?>;
+    var STATUS_REFUNDED           = <?= Order::STATUS_REFUNDED ?>;
+    var STATUS_PARTIALLY_RECEIVED = <?= Order::STATUS_PARTIALLY_RECEIVED ?>;
+    var IS_REJECTED               = <?= (int)$this->isRejected ?>;
+    var STATUS_TEXT_AWAITING      = <?= json_encode(Order::getStatusesByText()[Order::STATUS_ORDER_AWAITING_APPROVAL]) ?>;
+    var GLOBAL_STATUS_SHIPPING_ORDER = JSON.parse('<?= $this->statusShipping?>');
+    var GLOBAL_REQUEST_REFUND     = '<?= $this->url('orders/ajax-create-refund-po-item'); ?>';
+    var GLOBAL_GET_ITEM_ACCOUNT_DETAILS = '<?= $this->url('orders/ajax-get-item-account-details'); ?>';
+    var CURRENT_ORDER_STATUS = <?= $this->currentStatusShipping; ?>;
+</script>

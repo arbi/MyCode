@@ -1,0 +1,77 @@
+<?php
+
+use Mailer\Constants\Inline;
+
+?><tr>
+    <td style="padding: 20px 20px 0px 20px">
+        <!-- header: start -->
+        <table border="0" cellpadding="0" cellspacing="0" align="center" data-editable="text" style="<?php echo Inline::MAX_WIDTH . Inline::BACKGROUND_WHITE . Inline::BORDER_RADIUS; ?>margin-bottom:20px">
+            <tbody>
+                <tr>
+                    <td style="<?php echo Inline::PADDING_20 . Inline::ALIGN_LEFT; ?>font-size:100%">
+                        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                            <tr>
+                                <td>
+                                    <a href="https://www.ginosi.com?<?= $this->analyticsQuery ?>" style="text-decoration: none;">
+                                        <img src="https://www.ginosi.com/images/emails/logo-grey-new.png" alt="Ginosi Apartments" title="Ginosi Apartments" style="width:100px;"/>
+                                    </a>
+                                </td>
+                                <td align="right" valign="middle" style="font-size: 14px;">
+                                    <?php if ($this->phone1) { ?>
+                                        <a href="tel:<?= $this->phone1 ?>" style="text-decoration: none; color: #757575;">
+                                            <?= $this->phone1 ?>
+                                        </a>
+                                    <?php } ?>
+                                    <?php if($this->phone2 && $this->phone2 != $this->phone1) { ?>
+                                        <br>
+                                        <a href="tel:<?= $this->phone2 ?>" style="text-decoration: none; color: #757575;">
+                                            <?= $this->phone2 ?>
+                                        </a>
+                                    <?php } ?>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="<?php echo Inline::getBG('#fed701', 'https://www.ginosi.com/images/emails/review_background.jpg'); ?>">
+                        <table border="0" cellpadding="0" cellspacing="0" align="left">
+                            <tbody>
+                            <tr>
+                                <td style="<?php echo Inline::getCover(); ?>">
+                                    <p style="<?php echo Inline::SUBHEADING_P; ?>">
+                                        <b>
+                                            <?= $this->textline842 ?>
+                                            <?= $this->guestName ?>,
+                                        </b>
+                                    </p>
+                                    <?= $this->content ?>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 20px; padding-top: 24px;padding-bottom: 8px;" align="center">
+                        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                            <tr>
+                                <td style="text-align:center">
+                                    <a href="<?= $this->reviewLink ?>" style="<?php echo Inline::getPrimaryText('#FFCA00'); ?>">
+                                        <?= $this->viewButtonText ?>
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="<?php echo Inline::PADDING_0_20 . Inline::PADDING_BOTTOM_5; ?>">
+                        <?= $this->thankReview ?>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <!-- header: end -->
+    </td>
+</tr>

@@ -1,0 +1,146 @@
+<?php
+
+$this->layout()->viewTitle = $this->partnerName ;
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($this->partnerName);
+
+$this->layout()->breadcrumb = $this->breadcrumb([
+    ['Administration'],
+    ['Partner Management', $this->url('backoffice/default', ['controller' => 'partners'])],
+    [$this->layout()->viewTitle],
+]);
+
+$this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/pages/partners.css');
+$this->InlineScript()
+        ->appendFile($this->basePath() . '/js/plugins/jquery.form.min.js')
+        ->appendFile($this->basePath() . '/js/pages/partner.gcm.specific.js');
+?>
+
+<script type="text/javascript">
+    var GENERAL_SAVE_GCM_VALUES = "<?= $this->url('backoffice/default', ['controller' => 'partners', 'action' => 'ajax-save-gcm-specific-values', 'id' => $this->partnerId]) ?>";
+</script>
+
+<ul id="groupTabs" class="nav nav-tabs tabs-general" role="tablist">
+    <li>
+        <a href="<?= $this->url('backoffice/default', ['controller' => 'partners', 'action' => 'edit', 'id' => $this->partnerId]) ?>#administration">Administration</a>
+    </li>
+    <li>
+        <a href="<?= $this->url('backoffice/default', ['controller' => 'partners', 'action' => 'edit', 'id' => $this->partnerId]) ?>#commission-part">Commission</a>
+    </li>
+    <?php if ($hasGCMSpecificRole) : ?>
+    <li class="active">
+        <a href="<?= $this->url('backoffice/default', ['controller' => 'partners', 'action' => 'gcm-specific', 'id' => $this->partnerId]) ?>" id="gcm-specific-tab">GCM Specific</a>
+    </li>
+    <?php endif; ?>
+    <li class="pull-right">
+        <a href="<?= $this->url('backoffice/default', ['controller' => 'partners', 'action' => 'edit', 'id' => $this->partnerId]) ?>#history">
+            <span class="glyphicon glyphicon-list-alt"></span>
+            History
+        </a>
+    </li>
+</ul>
+
+<!-- Form opening tag -->
+<div id="groupTabsContent" class="tab-content">
+
+    <div class="tab-pane fade" id="administration">
+
+    </div>
+    <div class="tab-pane fade" id="commission-part">
+
+    </div>
+
+
+
+    <!-- Start: GCM Specific -->
+    <div class="tab-pane fade active in" id="gcm-specific">
+
+        <form method="post" name="partner-gcm-value-form" class="form-horizontal" id="partner-gcm-value-add-form">
+            <div class="col-sm-12 margin-bottom-15">
+                <?= $this->form()->openTag($this->form); ?>
+                <table class="table table-striped table-bordered table-condensed" id="value_table_for_add">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="input-prepend input-append form-group margin-0">
+                                    <div class="col-sm-12">
+                                        <?= $this->formInput($this->form->get('keys[]')) ?>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="input-prepend input-append form-group margin-0">
+                                    <div class="col-sm-12">
+                                        <?= $this->formInput($this->form->get('values[]')) ?>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <a href="javascript:void(0)" class="btn btn-sm btn-block btn-primary" id="add-value">&nbsp;&nbsp;Add&nbsp;&nbsp;</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <?= $this->form()->closeTag(); ?>
+            </div>
+        </form>
+
+        <div class="col-sm-12">
+            <fieldset name="gcm_values">
+
+                <?php $this->form->setAttribute('id' , 'partner-gcm-value-form') ?>
+                <?= $this->form()->openTag($this->form); ?>
+                    <table class="table table-striped table-bordered table-condensed" id="gcm-values-table">
+                        <thead>
+                            <tr>
+                                <th> Key </th>
+                                <th> Value </th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="values-list">
+                            <?php if (($this->partnerGcmValues) && $this->partnerGcmValues->count()) : ?>
+                                <?php foreach ($this->partnerGcmValues as $gcmValue) : ?>
+                                    <tr>
+                                        <td>
+                                            <div class="input-prepend input-append form-group margin-0">
+                                                <div class="col-sm-12">
+                                                    <input name="keys[]" type="text" class="form-control" value="<?= $gcmValue->getKey() ?>">
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <td>
+                                            <div class="input-prepend input-append form-group margin-0">
+                                                <div class="col-sm-12">
+                                                    <input name="values[]" type="text" class="form-control" value="<?=$gcmValue->getValue() ?>">
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <td>
+                                            <a href="javascript:void(0)" class="btn btn-sm btn-danger btn-block deletePartnerValue">
+                                                Delete
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                    <input type="hidden" name="partnerId" value="<?=$this->partnerId?>">
+                <?= $this->form()->closeTag(); ?>
+
+            </fieldset>
+        </div>
+
+    </div>
+    <!-- End: GCM Specific -->
+
+    <div class="container page-actions">
+        <div class="row text-right">
+            <button name="submit-values" id="submit-values" class="btn btn-primary col-sm-2 col-xs-12 margin-left-10 pull-right">Save</button>
+        </div>
+    </div>
+</div>

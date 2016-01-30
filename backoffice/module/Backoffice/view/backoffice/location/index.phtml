@@ -1,0 +1,72 @@
+<?php
+	use \DDD\Service\Location as LocationService;
+
+	$this->layout()->viewTitle = 'Locations';
+	$this->headTitle()->setSeparator(' - ');
+	$this->headTitle($this->layout()->viewTitle);
+	$this->layout()->breadcrumb = $this->breadcrumb([
+		['Content'],
+		[$this->layout()->viewTitle],
+	]);
+
+	$this->InlineScript()
+        ->appendFile($this->basePath() . '/js/module/backoffice/location/index.js');
+	$this->headLink()->appendStylesheet($this->basePath() . '/css/pages/location.css');
+?>
+<script>
+	var GLOBAL_SEARCH_LOCATION = '<?= $this->url('backoffice/default', array('controller' => 'location', 'action' => 'ajaxsearch'))?>';
+</script>
+ <hr>
+ <div class="col-sm-12">
+    <form class="form-horizontal">
+        <div class="row">
+            <div class="form-group">
+                <label class="control-label col-sm-2">Search</label>
+                <div class="col-sm-4">
+                    <select placeholder="Country, Province, City, POI" class="form-control selectized" id="search_txt"></select>
+                    <div class="help-block"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="control-group">
+                <fieldset>
+                    <legend>Countries</legend>
+
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <div class="active-country-list-container">
+                                <ul>
+                                    <?php
+                                        foreach ($this->activeCountries as $row) {
+                                            if ($row->getChildrenCount() != '') {
+                                                $url = $this->url(
+                                                    'backoffice/default', [
+                                                        'controller' => 'location',
+                                                        'action' => 'edit',
+                                                        'id' => $row->getDetailsID() . '-' . $row->getId() . '-' . LocationService::LOCATION_TYPE_COUNTRY
+                                                    ]
+                                                );
+                                    ?>
+                                                <li><a href="<?= $url ?>"><?= $row->getName() ?>&nbsp;(<?= $row->getChildrenCount() ?>)</a></li>
+                                    <?php
+                                            }
+                                        }
+                                    ?>
+                                    <br>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+
+        </div>
+    </form>
+</div>
+<div class="container page-actions">
+    <div class="row text-right">
+        <a class="btn btn-primary pull-right col-sm-2 col-xs-12" href="<?= $this->url('backoffice/default', ['controller' => 'location', 'action' => 'edit'])?>">Add Location</a>
+    </div>
+</div>

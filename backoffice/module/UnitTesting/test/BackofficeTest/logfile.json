@@ -1,0 +1,131 @@
+{
+    "event": "suiteStart",
+    "suite": "",
+    "tests": 6
+}{
+    "event": "suiteStart",
+    "suite": "BO_BackofficeUser_Authentication_Controller",
+    "tests": 1
+}{
+    "event": "suiteStart",
+    "suite": "BackofficeTest\\BackofficeUser\\Controller\\AuthenticationControllerTest",
+    "tests": 1
+}{
+    "event": "testStart",
+    "suite": "BackofficeTest\\BackofficeUser\\Controller\\AuthenticationControllerTest",
+    "test": "Warning"
+}{
+    "event": "test",
+    "suite": "BackofficeTest\\BackofficeUser\\Controller\\AuthenticationControllerTest",
+    "test": "Warning",
+    "status": "fail",
+    "time": 0.00088787078857422,
+    "trace": [],
+    "message": "No tests found in class \"BackofficeTest\\BackofficeUser\\Controller\\AuthenticationControllerTest\".",
+    "output": ""
+}{
+    "event": "suiteStart",
+    "suite": "BO_BackofficeUser_People_Directory_Controller",
+    "tests": 1
+}{
+    "event": "suiteStart",
+    "suite": "BackofficeTest\\BackofficeUser\\Controller\\PeopleDirectoryControllerTest",
+    "tests": 1
+}{
+    "event": "testStart",
+    "suite": "BackofficeTest\\BackofficeUser\\Controller\\PeopleDirectoryControllerTest",
+    "test": "Warning"
+}{
+    "event": "test",
+    "suite": "BackofficeTest\\BackofficeUser\\Controller\\PeopleDirectoryControllerTest",
+    "test": "Warning",
+    "status": "fail",
+    "time": 5.4121017456055e-5,
+    "trace": [],
+    "message": "No tests found in class \"BackofficeTest\\BackofficeUser\\Controller\\PeopleDirectoryControllerTest\".",
+    "output": ""
+}{
+    "event": "suiteStart",
+    "suite": "BO_BackofficeUser_User_Controller",
+    "tests": 1
+}{
+    "event": "suiteStart",
+    "suite": "BackofficeTest\\BackofficeUser\\Controller\\UserControllerTest",
+    "tests": 1
+}{
+    "event": "testStart",
+    "suite": "BackofficeTest\\BackofficeUser\\Controller\\UserControllerTest",
+    "test": "Warning"
+}{
+    "event": "test",
+    "suite": "BackofficeTest\\BackofficeUser\\Controller\\UserControllerTest",
+    "test": "Warning",
+    "status": "fail",
+    "time": 5.3882598876953e-5,
+    "trace": [],
+    "message": "No tests found in class \"BackofficeTest\\BackofficeUser\\Controller\\UserControllerTest\".",
+    "output": ""
+}{
+    "event": "suiteStart",
+    "suite": "BO_BackofficeUser_User_Document_Controller",
+    "tests": 1
+}{
+    "event": "suiteStart",
+    "suite": "BackofficeTest\\BackofficeUser\\Controller\\UserDocumentControllerTest",
+    "tests": 1
+}{
+    "event": "testStart",
+    "suite": "BackofficeTest\\BackofficeUser\\Controller\\UserDocumentControllerTest",
+    "test": "Warning"
+}{
+    "event": "test",
+    "suite": "BackofficeTest\\BackofficeUser\\Controller\\UserDocumentControllerTest",
+    "test": "Warning",
+    "status": "fail",
+    "time": 5.0067901611328e-5,
+    "trace": [],
+    "message": "No tests found in class \"BackofficeTest\\BackofficeUser\\Controller\\UserDocumentControllerTest\".",
+    "output": ""
+}{
+    "event": "suiteStart",
+    "suite": "BO_BackofficeUser_User_Evaluation_Controller",
+    "tests": 1
+}{
+    "event": "suiteStart",
+    "suite": "BackofficeTest\\BackofficeUser\\Controller\\UserEvaluationControllerTest",
+    "tests": 1
+}{
+    "event": "testStart",
+    "suite": "BackofficeTest\\BackofficeUser\\Controller\\UserEvaluationControllerTest",
+    "test": "Warning"
+}{
+    "event": "test",
+    "suite": "BackofficeTest\\BackofficeUser\\Controller\\UserEvaluationControllerTest",
+    "test": "Warning",
+    "status": "fail",
+    "time": 5.1021575927734e-5,
+    "trace": [],
+    "message": "No tests found in class \"BackofficeTest\\BackofficeUser\\Controller\\UserEvaluationControllerTest\".",
+    "output": ""
+}{
+    "event": "suiteStart",
+    "suite": "BO_BackofficeUser_User_Schedule_Controller",
+    "tests": 1
+}{
+    "event": "suiteStart",
+    "suite": "BackofficeTest\\BackofficeUser\\Controller\\UserScheduleControllerTest",
+    "tests": 1
+}{
+    "event": "testStart",
+    "suite": "BackofficeTest\\BackofficeUser\\Controller\\UserScheduleControllerTest",
+    "test": "Warning"
+}{
+    "event": "test",
+    "suite": "BackofficeTest\\BackofficeUser\\Controller\\UserScheduleControllerTest",
+    "test": "Warning",
+    "status": "fail",
+    "time": 5.4121017456055e-5,
+    "trace": [],
+    "message": "No tests found in class \"BackofficeTest\\BackofficeUser\\Controller\\UserScheduleControllerTest\".",
+    "output": ""
+}

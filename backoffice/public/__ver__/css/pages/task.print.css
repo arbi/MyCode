@@ -1,0 +1,59 @@
+@media print {
+    span.required, .ginosik-avatar-selectize, .remove-subtask,
+    .panel-heading.collapsed, #task-search-form,
+    #datatable_task_info td:last-child,
+    #datatable_task_info th:last-child,
+    .dataTables_paginate, .dataTables_info, .dataTables_length, .dataTables_filter {
+        display: none !important;
+    }
+    select, .form-control, .selectize-input, .selectize-input input {
+        border-width: 0 !important;
+        -webkit-box-shadow: none;
+        -moz-box-shadow: none;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+
+    .subtask-description, .input-group {
+        width: 100% !important;
+    }
+
+    .selectize-ginosik-name:after {
+        content: ', ';
+    }
+    div:nth-last-child(2)>.selectize-ginosik-name:after {
+        content: '';
+    }
+    .ginosik-selectize .remove {
+        display: none;
+    }
+    .ginosik-selectize {
+        height:auto!important;
+    }
+    .input-group-addon {
+        display: none !important;
+    }
+
+    select {
+        appearance:none;
+        -moz-appearance:none;
+        -webkit-appearance:none;
+    }
+
+    a[href]:after {
+        content:"" !important;
+    }
+
+    span.label {
+        border: none ;
+        padding: 0;
+    }
+    .print-50{
+        float:left;
+        width:50%;
+    }
+
+    #subtasks input[type="checkbox"]{
+        display:none;
+    }
+}

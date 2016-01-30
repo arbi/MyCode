@@ -1,0 +1,223 @@
+<?php
+    $layoutViewModel = $this->viewModel()->getRoot();
+    $apartelId = $layoutViewModel->apartelId;
+?>
+<?php echo $this->apartelHeader($apartelId); ?>
+<?php
+    $this->headTitle('Connections')->setSeparator(' - ');
+    $this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/apartel/common.css');
+    $this->InlineScript()
+        ->appendFile($this->basePath() . '/js/apartel/connection.js');
+    $form = $this->form;
+    $isConnected = $this->cubilisDetails['sync_cubilis'];
+?>
+
+<?php
+    echo $this->partial(
+        'partial/ota-distribution',
+        [
+            'apartelId'   => $apartelId,
+            'OTAList'     => $this->apartelOTAList,
+            'partnerList' => $this->partnerList,
+            'OTAStatus'   => $this->OTAStatus,
+            'formAction'  => $this->url('apartel/connection/ajax-save-ota', ['apartel_id' => $apartelId]),
+        ]
+);
+?>
+
+<div class="row">
+    <div class="col-sm-12">
+        <fieldset>
+            <legend class="text-left">Cubilis Connection</legend>
+        </fieldset>
+    </div>
+</div>
+
+<div class="row form-group">
+    <div class="col-xs-12">
+        <ul class="nav nav-pills nav-justified thumbnail setup-panel">
+            <li class="<?=($isConnected ? '' : 'active')?>">
+                <a href="#step-1">
+                    <h4 class="list-group-item-heading">Step 1</h4>
+                    <p class="list-group-item-text">Connection Data</p>
+                </a>
+            </li>
+            <li class="<?=($isConnected ? 'active' : 'disabled')?>">
+                <a href="#step-2">
+                    <h4 class="list-group-item-heading">Step 2</h4>
+                    <p class="list-group-item-text">Room Type/Rate Synchronization</p>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+<div class="row setup-content" id="step-1">
+    <div class="col-md-12 text-center" id="credentials-block"
+         data-cubilis-sync="<?=$isConnected?>"
+         data-url-save="<?php echo $this->url('apartel/connection/save', ['apartel_id' => $apartelId]); ?>"
+         data-url-connect="<?php echo $this->url('apartel/connection/connect', ['apartel_id' => $apartelId]); ?>"
+         data-url-test-pull="<?php echo $this->url('apartel/connection/test-pull-reservations', ['apartel_id' => $apartelId]); ?>"
+         data-url-test-availability="<?php echo $this->url('apartel/connection/test-update-availability', ['apartel_id' => $apartelId]); ?>"
+         data-url-test-list="<?php echo $this->url('apartel/connection/test-fetch-list', ['apartel_id' => $apartelId]); ?>">
+        <fieldset>
+            <legend class="text-left">Connection Data</legend>
+        </fieldset>
+        <?php echo $this->form()->openTag($form);?>
+        <div class="form-group text-left" id="connection-status">
+            <label class="control-label col-sm-5" id="connection-status-key">Connection Status</label>
+            <div class="help-block col-sm-5" id="connection-status-value">
+                <span class="label label-warning">Disconnected</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-5" for="<?php echo $form->get('cubilis_id')->getAttribute('id');?>">
+                <?php echo $form->get('cubilis_id')->getLabel();?>
+            </label>
+            <div class="col-sm-3">
+                <?php echo $this->formInput($form->get('cubilis_id'));?>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-sm-5" for="<?php echo $form->get('cubilis_username')->getAttribute('id');?>">
+                <?php echo $form->get('cubilis_username')->getLabel();?>
+            </label>
+            <div class="col-sm-3">
+                <?php echo $this->formInput($form->get('cubilis_username'));?>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-sm-5" for="<?php echo $form->get('cubilis_password')->getAttribute('id');?>">
+                <?php echo $form->get('cubilis_password')->getLabel() ?>
+            </label>
+            <div class="col-sm-3">
+                <?php echo $this->formInput($form->get('cubilis_password'));?>
+            </div>
+        </div>
+        <?php echo $this->form()->closeTag();?>
+    </div>
+</div>
+<div class="row setup-content" id="step-2">
+    <div class="col-md-12">
+        <form class="link-rates" id="link-rates" action="<?php echo $this->url('apartel/connection/link', ['apartel_id' => $apartelId]); ?>" method="post">
+            <fieldset>
+                <legend>Type / Rate Mapping</legend>
+            </fieldset>
+            <?php if ($this->cubilisTypeRateList) {?>
+                  <div class="row">
+                    <?php
+                    foreach ($this->cubilisTypeRateList as $cubilisTypeId => $cubilisType) {?>
+                    <div class="col-sm-6">
+                        <div class="panel panel-default type-part">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-sm-5 panel-type">
+                                        <?php echo $cubilisType['type_name']; ?>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <input type="hidden" name="cubilis_type_id[<?php echo $cubilisTypeId;?>]" value="<?php echo $cubilisTypeId;?>">
+                                        <select name="ginosi_type_id[<?php echo $cubilisTypeId;?>]" class="form-control" onchange="getRatesByTypeId(this, <?php echo $cubilisTypeId;?>)">
+                                            <option value="null" class="text-muted">-- Select Type --</option>
+                                            <?php
+                                            $ginosiTypeIdConnected = 0;
+                                            foreach ($this->ginosiTypeRateList as $ginosiType) {
+                                                $selected = '';
+                                                if (!is_null($ginosiType['type_cubilis_id']) && $cubilisTypeId == $ginosiType['type_cubilis_id']) {
+                                                    $selected = ' selected="selected"';
+                                                    $ginosiTypeIdConnected = $ginosiType['type_id'];
+                                                }
+                                                ?>
+                                                <option value="<?php echo $ginosiType['type_id']; ?>"<?php echo $selected; ?>><?php echo $ginosiType['type_name']; ?></option>
+                                            <?php } ?>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <?php echo $ginosiTypeIdConnected ? '<span class="label label-success">Connected</span>' : '<span class="label label-danger">Not Connected</span>'; ?>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="rate-part">
+                                <div class="panel-body">
+                                    <?php
+                                    $checkForHr = false;
+                                    foreach ($cubilisType['rate_list'] as $cubilisRateId => $cubilisRate) {
+                                        if ($checkForHr) {
+                                            echo '<hr>';
+                                        }
+                                        $checkForHr = true;
+                                        $isConnectedRate = false;
+                                        ?>
+                                        <div class="row">
+                                            <div class="col-sm-5">
+                                                <?php echo $cubilisRate['rate_name']; ?>
+                                                <input type="hidden" name="cubilis_rate_id[<?php echo $cubilisTypeId;?>][]" value="<?php echo $cubilisRateId;?>">
+                                            </div>
+                                            <div class="col-sm-4 rate-select-part">
+                                                <select name="ginosi_rate_id[<?php echo $cubilisTypeId;?>][]" class="form-control">
+                                                    <option value="0" class="text-muted">-- Select Rate --</option>
+                                                    <?php
+                                                    if ($ginosiTypeIdConnected && isset($this->ginosiTypeRateList[$ginosiTypeIdConnected]['rate_list'])) {
+
+                                                        foreach ($this->ginosiTypeRateList[$ginosiTypeIdConnected]['rate_list'] as $rate) {
+                                                            $selected = '';
+                                                            if (!is_null($rate['rate_cubilis_id']) && $cubilisRateId == $rate['rate_cubilis_id']) {
+                                                                $selected = ' selected="selected"';
+                                                                $isConnectedRate = true;
+                                                            }
+                                                            ?>
+                                                            <option value="<?php echo $rate['rate_id']; ?>"<?php echo $selected; ?>><?php echo $rate['rate_name']; ?></option>
+                                                        <?php }
+                                                    }
+                                                    ?>
+                                                </select>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <?php echo $isConnectedRate ? '<span class="label label-success">Connected</span>' : '<span class="label label-danger">Not Connected</span>'; ?>
+                                            </div>
+                                        </div>
+                                    <?php } ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php } ?>
+                  </div>
+            <?php } else { ?>
+                <div class="alert alert-danger">
+                    The apartel is not connected to Cubilis.
+                </div>
+            <?php } ?>
+
+        </form>
+    </div>
+</div>
+<div class="page-actions container">
+    <div class="row text-right">
+        <a name="connect_button" data-loading-text="Connecting..." id="connect_button" class="btn btn-success col-sm-2 col-xs-12 margin-left-10 pull-right">Save &amp; Connect</a>
+        <button type="button" class="btn btn-medium btn-primary pull-right soft-hide" id="sync-clone">Synchronize</button>
+        <?php echo $this->formElement($form->get('save_button')) ?>
+    </div>
+</div>
+
+<div id="OTADeleteModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-danger">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Delete OTA<span id="delete_group"></span></h4>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <a class="btn btn-danger" href="#" id="deleteOTAButton">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var GLOBAL_TYPE_RATE_LIST = $.parseJSON('<?php echo json_encode($this->ginosiTypeRateList);?>');
+</script>

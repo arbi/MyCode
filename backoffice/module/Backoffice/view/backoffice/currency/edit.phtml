@@ -1,0 +1,147 @@
+<?php
+    $form = $this->form;
+
+	$this->layout()->viewTitle = $form->get('name')->getValue();
+    $this->headTitle()->setSeparator(' - ');
+    $this->headTitle($this->pageTitle);
+	$this->layout()->breadcrumb = $this->breadcrumb([
+		['Finance'],
+		['Currency Management', $this->url('backoffice/default', ['controller' => 'currency'])],
+		[$this->layout()->viewTitle]
+	]);
+
+    $this->InlineScript()
+        ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+        ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+		->appendFile($this->basePath() . '/js/module/backoffice/currency/edit.js')
+		->appendFile($this->basePath() . '/js/validation/currency.js');
+
+    $this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css')
+        ->appendStylesheet($this->basePath() . '/css/pages/currency.edit.css');
+
+?>
+<script>
+    var gTable;
+    var dataJsonUrl = '<?= $this->url('backoffice/default', ['controller' => 'currency', 'action' => 'get-range-json', 'id' => $this->currencyId ])?>';
+</script>
+<ul class="nav nav-tabs tabs-general">
+    <li class="active">
+        <a href="#general" data-toggle="tab" aria-controls="general">General</a>
+    </li>
+    <?php if($this->currencyId) { ?>
+    <li>
+        <a href="#archive" data-toggle="tab" aria-controls="archive">Archive</a>
+    </li>
+    <?php } ?>
+</ul>
+<div class="tab-content">
+    <div class="tab-pane active" id="general">
+        <?php
+        echo $this->form()->openTag($form);
+        echo $this->formHidden($form->get('id'));
+        ?>
+        <div class="form-group">
+            <label for="<?php echo $form->get('name')->getAttribute('id'); ?>" class="col-sm-3 control-label">
+                <?php echo $form->get('name')->getLabel(); ?> <?php echo $this->required()?>
+            </label>
+            <div class="col-sm-3">
+                <?php echo $this->formInput($form->get('name')); ?>
+            </div>
+            <?php echo $this->formElementErrors($form->get('name'), array('class' => 'col-sm-3 text-danger list-unstyled')); ?>
+        </div>
+        <div class="form-group">
+            <label for="<?php echo $form->get('code')->getAttribute('id'); ?>" class="col-sm-3 control-label">
+                <?php echo $form->get('code')->getLabel(); ?> <?php echo $this->required()?>
+            </label>
+            <div class="col-sm-3">
+                <?php echo $this->formInput($form->get('code')); ?>
+            </div>
+            <?php echo $this->formElementErrors($form->get('code'), array('class' => 'col-sm-3 text-danger list-unstyled')); ?>
+        </div>
+        <div class="form-group">
+            <label for="<?php echo $form->get('symbol')->getAttribute('id'); ?>" class="col-sm-3 control-label">
+                <?php echo $form->get('symbol')->getLabel(); ?> <?php echo $this->required()?>
+            </label>
+            <div class="col-sm-3 col-md-2">
+                <?php echo $this->formInput($form->get('symbol')); ?>
+            </div>
+            <?php echo $this->formElementErrors($form->get('symbol'), array('class' => 'col-sm-3 text-danger list-unstyled')); ?>
+        </div>
+        <div class="form-group">
+            <label for="<?php echo $form->get('auto_update')->getAttribute('id'); ?>" class="col-sm-3 control-label">
+                <?php echo $form->get('auto_update')->getLabel(); ?>
+            </label>
+            <div class="col-sm-2">
+                <div class="checkbox">
+                    <?php echo $this->formCheckbox($form->get('auto_update')); ?>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="<?php echo $form->get('gate')->getAttribute('id'); ?>" class="col-sm-3 control-label">
+                <?php echo $form->get('gate')->getLabel(); ?>
+            </label>
+            <div class="col-sm-2">
+                <div class="checkbox">
+                    <?php echo $this->formCheckbox($form->get('gate')); ?>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="<?php echo $form->get('visible')->getAttribute('id'); ?>" class="col-sm-3 control-label">
+                <?php echo $this->info($form->get('visible')->getLabel(), 'Visible and selectable on website if checked'); ?>
+            </label>
+            <div class="col-sm-2">
+                <div class="checkbox">
+                    <?php echo $this->formCheckbox($form->get('visible')); ?>
+                </div>
+            </div>
+        </div>
+        <div class="container page-actions">
+            <div class="row text-right">
+                <?php echo $this->formSubmit($form->get('submit')); ?>
+            </div>
+        </div>
+        <?php
+            echo $this->form()->closeTag();
+        ?>
+    </div>
+    <?php if($this->currencyId) { ?>
+    <div class="tab-pane" id="archive">
+        <div class="row">
+            <div class="col-sm-5 col-md-4 col-lg-3 col-xs-6">
+                <div class="input-group">
+                    <label class="input-group-addon" for="date-range">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </label>
+                    <input type="text" name="date_range" id="date-range" class="form-control" placeholder="Date Range">
+                </div>
+            </div>
+            <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2">
+                <button class="btn btn-primary btn-block" id="get-currency-values">
+                    Show
+                </button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-sm-9 col-md-7 col-lg-5 currecy-values-table-container">
+                <table id="currency-values-table" class="table table-striped table-bordered table-condensed table-hover">
+                    <thead>
+                        <tr>
+                            <th> Date  </th>
+                            <th> Value </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <?php } ?>
+</div>

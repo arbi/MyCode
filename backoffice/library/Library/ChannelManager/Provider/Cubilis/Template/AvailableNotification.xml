@@ -1,0 +1,6 @@
+<OTA_HotelAvailNotifRQ Version="2.0" xmlns="http://www.opentravel.org/OTA/2003/05">
+	%pos%
+	<AvailStatusMessages %brand_code%>
+		%messages%
+	</AvailStatusMessages>
+</OTA_HotelAvailNotifRQ>

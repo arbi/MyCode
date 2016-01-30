@@ -1,0 +1,16 @@
+{
+    "name": "ginosi/backoffice",
+    "description": "Ginosi Backoffice",
+    "config": {
+        "vendor-dir": "/ginosi/incubator/backoffice"
+    },
+    "require": {
+        "php": ">=5.3.3",
+        "zendframework/zendframework": "2.5.2",
+	    "graylog2/gelf-php": "~1.0",
+        "bushbaby/flysystem": "1.2.*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^4.8"
+    }
+}

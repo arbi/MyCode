@@ -1,0 +1,6 @@
+<OTA_HotelRoomListRQ Version="2.0" xmlns="http://www.opentravel.org/OTA/2003/05">
+	%pos%
+	<HotelRoomLists>
+		<HotelRoomList />
+	</HotelRoomLists>
+</OTA_HotelRoomListRQ>

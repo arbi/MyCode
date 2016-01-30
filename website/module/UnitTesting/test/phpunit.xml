@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit  backupStaticAttributes="false"
+          colors="true"
+          convertErrorsToExceptions="true"
+          convertNoticesToExceptions="true"
+          convertWarningsToExceptions="true"
+          processIsolation="true"
+          stopOnFailure="false"
+          syntaxCheck="false"
+          bootstrap="Bootstrap.php">
+    <testsuites>
+        <!-- .......................................................................... -->
+        <!-- ......................... Start Library tests ............................ -->
+        <!-- .......................................................................... -->
+        <!-- Start Library tests -->
+        <testsuite name="LIB_DDD_Service_Website">
+            <directory>LibraryTest/DDD/Service/Website</directory>
+        </testsuite>
+        <!-- .......................................................................... -->
+        <!-- ........................... End Library tests ............................ -->
+        <!-- .......................................................................... -->
+
+        <!-- .......................................................................... -->
+        <!-- .......................... Start Website tests ........................... -->
+        <!-- .......................................................................... -->
+        <!-- Start Website tests -->
+        <testsuite name="WEB_Index_Controller">
+            <file>WebsiteTest/Website/Controller/IndexControllerTest.php</file>
+        </testsuite>
+        <testsuite name="WEB_Booking_Controller">
+            <file>WebsiteTest/Website/Controller/BookingControllerTest.php</file>
+        </testsuite>
+        <!-- .......................................................................... -->
+        <!-- .......................... End Website tests ............................. -->
+        <!-- .......................................................................... -->
+    </testsuites>
+    <logging>
+        <log type="json" target="logfile.json"/>
+    </logging>
+</phpunit>

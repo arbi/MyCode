@@ -1,0 +1,173 @@
+<?php
+use Library\Finance\Process\Expense\Helper as FinanceHelper;
+
+if (count($this->transactions)) {
+    foreach ($this->transactions as $transaction) {
+        $isVoided = false;
+        $isVirtual = false;
+        $isVerified = false;
+        $isRefund = false;
+        $helperClasses = '';
+        $itemClasses = '';
+
+        if ($transaction['status'] == \Library\Finance\Transaction\Transactor\Expense::STATUS_VOID) {
+            $isVoided = true;
+            $helperClasses .= ' voided';
+        }
+
+        if ($transaction['is_verified']) {
+            $isVerified = true;
+        }
+
+        if (
+        is_null($transaction['money_transaction_id'])
+        ||
+        // more than one expense transactions point to the same money account transaction
+        $transaction['expense_transactions_count_with_same_money_transaction_id']  > 1
+        ) {
+            $isVirtual = true;
+            $helperClasses .= ' is-virtual-transaction';
+        }
+
+        $accountFrom = '<span class="label label-primary" title="' . $transaction['account_from'] . ' (' .$transaction['bank'] . ')">'
+            . \Library\Finance\Base\TransactionBase::getAccountTypeById(\Library\Finance\Base\Account::TYPE_MONEY_ACCOUNT)
+            . "</span> &nbsp;{$transaction['account_from']}";
+
+        $accountTo = '<span class="label label-primary">'
+            . \Library\Finance\Base\TransactionBase::getAccountTypeById($transaction['account_to_type'])
+            . "</span> &nbsp;{$transaction['account_to']}";
+
+        if ((int)$transaction['is_refund']) {
+            $tmp = $accountFrom;
+            $accountFrom = $accountTo;
+            $accountTo = $tmp;
+            $isRefund = true;
+            $helperClasses .= ' refund';
+        }
+
+        if (!empty($transaction['items'])) {
+            $items = explode(',', $transaction['items']);
+
+            if (count($items)) {
+                foreach ($items as $itemId) {
+                    $itemClasses .= " item-{$itemId}";
+                }
+            }
+        }
+
+        ?>
+        <div class="template transaction transaction-<?php echo $transaction['id']; echo $itemClasses; echo $helperClasses; ?>"
+             data-date="<?php echo date('Y-m-d', strtotime($transaction['creation_date'])); ?>"
+             data-transaction-id="<?php echo $transaction['id']; ?>"
+             data-attach-item-url="<?php echo $this->url('finance/purchase-order/transaction/attach-item', ['id' => $transaction['id']]); ?>"
+             data-detach-item-url="<?php echo $this->url('finance/purchase-order/transaction/detach-item', ['id' => $transaction['id']]); ?>">
+            <?php if (!$isVoided) { ?>
+            <div class="header transition noselect collapsable">
+
+                <?php if (!$isVerified && $transaction['finance_status'] != FinanceHelper::FIN_STATUS_SETTLED && !$isVirtual) { ?>
+                <a class="btn btn-danger btn-xs btn-void-transaction"
+                   data-toggle="modal" data-target="#areYouSure"
+                   data-context="ticket-element"
+                   data-action="void"
+                   data-action-name="Void"
+                   data-action-state="danger"
+                   data-title="Void purchase order transaction"
+                   data-body="Are you sure?"
+                   data-url="<?php echo $this->url('finance/purchase-order/transaction/void', ['id' => $transaction['id']]); ?>">
+                    <i class="glyphicon glyphicon-ban-circle"></i> Void
+                </a>
+                <?php } ?>
+            </div>
+
+            <div class="row fix-margin collapsable">
+                <div class="col-sm-4">
+                    <div>
+                        <strong><?php echo number_format(abs($transaction['amount']), 2) . ' ' . $transaction['currency']; ?></strong>
+                    </div>
+                </div>
+
+                <div class="col-sm-4">
+                    <div title="Transaction Date">
+                        <small><i class="glyphicon glyphicon-calendar text-muted"></i></small>
+                        <?php echo date(\Library\Constants\Constants::GLOBAL_DATE_FORMAT, strtotime($transaction['transaction_date'])); ?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row collapsable">
+                <div class="col-sm-10">
+                    <?php echo $accountFrom; ?>
+
+                    <span class="text-muted">&nbsp;<i class="glyphicon glyphicon-arrow-right"></i>&nbsp;</span>
+
+                    <?php echo $accountTo; ?>
+                </div>
+            </div>
+
+            <div class="footer collapsable">
+                <div class="row">
+                    <div class="col-sm-2 col">
+                        <?php if (empty($transaction['items'])) { ?>ID:<?php } else { ?>
+                            <a href="#" class="linked-element linked-transactions text-primary" title="Find Connected Items"><i class="glyphicon glyphicon-random"></i></a>
+                        <?php } ?>
+                        <?php echo $transaction['id']; ?>
+                    </div>
+                    <div class="col-sm-5 col text-muted ellipsis">
+                        <?php if (!$isVoided && $isVerified) { ?>
+                            <div class="badge-verified" data-toggle="tooltip" title="Verified by <?php echo $transaction['verifier']; ?>">
+                                <i class="glyphicon glyphicon-ok"></i>
+                            </div>
+                        <?php } ?>
+                        <span class="user-icon"><img src="<?php echo $this->basePath(); ?>/img/ios-user.png"></span> <?php echo $transaction['creator_name']; ?>
+                    </div>
+                    <div class="col-sm-2 col">
+                        <span class="text-muted date" title="Transaction Creation Date">
+                            <?php echo date(\Library\Constants\Constants::GLOBAL_DATE_FORMAT, strtotime($transaction['creation_date'])); ?>
+                        </span>
+                    </div>
+                    <div class="col-sm-offset-1 col-sm-2 text-right">
+                        <?php if ($isRefund) { ?>
+                        <label>
+                            <small>
+                                <span class="label label-warning">REFUND</span>
+                            </small>
+                        </label>
+                        <?php } ?>
+                    </div>
+                </div>
+            </div>
+
+            <?php } else { ?>
+
+            <div class="voided-panel text-danger">
+                <div class="row">
+                    <div class="badge-voided" data-toggle="tooltip" title="Voided by <?php echo $transaction['verifier']; ?>">
+                        <span></span>
+                    </div>
+                    <span class="user-icon pull-left"><img src="<?php echo $this->basePath(); ?>/img/ios-user.png" data-toggle="tooltip" title="By <?php echo $transaction['verifier']; ?>"></span>
+                    <div class="col-sm-4 col">
+                        <div class="money-account text-bold"><?php echo $isRefund ? $accountTo : $accountFrom; ?></div>
+                    </div>
+                    <div class="col-sm-3 col">
+                        <div class="amount text-bold text-center"><?php echo number_format(abs($transaction['amount']), 2) . ' ' . $transaction['currency']; ?></div>
+                    </div>
+                    <div class="col-sm-2 col">
+                        <?php if ($isRefund) { ?>
+                        <div class="is-refund"><span class="label label-danger">REFUND</span></div>
+                        <?php } ?>
+                    </div>
+                    <div class="col-sm-2 col">
+                        <div class="date"><?php echo $transaction['transaction_date']; ?></div>
+                    </div>
+                </div>
+            </div>
+
+            <?php } ?>
+        </div>
+<?php
+    }
+} else {
+?>
+<div class="alert alert-danger" role="alert"><strong>Oh snap!</strong> Nothing found.</div>
+<?php
+}

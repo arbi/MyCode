@@ -1,0 +1,72 @@
+<?php
+    use \DDD\Service\Task;
+    use DDD\Service\User as UserService;
+
+    $taskGroupId = $this->apartmentGroupId;
+
+    $this->headTitle()->setSeparator(' - ');
+    $this->layout()->viewTitle = 'Housekeeping Schedule' . ($this->apartmentGroupName ? ' - ' . $this->apartmentGroupName : '');
+    $this->headTitle($this->layout()->viewTitle);
+    $this->headTitle()->setSeparator(' - ');
+    $this->layout()->breadcrumb = $this->breadcrumb([
+        ['Dashboards'],
+        ['Housekeeping Tasks', $this->url('backoffice/default', ['controller' => 'housekeeping-tasks'])],
+        [$this->apartmentGroupName],
+    ]);
+
+    $this->InlineScript()
+        ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+        ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+        ->appendFile($this->basePath() . '/js/pages/housekeeping-tasks.js');
+    $this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/pages/housekeeping-tasks.css');
+?>
+
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<script>
+    var GET_TASKS             = '<?= $this->url('backoffice/default', ['controller' => 'housekeeping-tasks', 'action' => 'ajax-get-hk-dashboard-data'])?>';
+    var GET_THE_TASK          = '<?= $this->url('backoffice/default', ['controller' => 'housekeeping-tasks', 'action' => 'get-task-body'])?>';
+    var CHANGE_STATUS         = '<?= $this->url('backoffice/default', array('controller' => 'task', 'action' => 'ajax-change-status'))?>';
+    var REPORT_INCIDENT       = '<?= $this->url('backoffice/default', array('controller' => 'housekeeping-tasks', 'action' => 'ajax-report-incident'))?>';
+    var CHANGE_SUBTASK_STATUS = '<?= $this->url('backoffice/default', array('controller' => 'housekeeping-tasks', 'action' => 'ajax-change-subtask-status'))?>';
+    var SAVE_STAFF            = '<?= $this->url('backoffice/default', ['controller' => 'task', 'action' => 'ajaxsave'])?>';
+    var SAVE_COMMENT          = '<?= $this->url('backoffice/default', ['controller' => 'housekeeping-tasks', 'action' => 'ajax-save-comment'])?>';
+    var STAFF_RESPONSIBLE     = <?= Task::STAFF_RESPONSIBLE ?>;
+    var STAFF_VERIFIER        = <?= Task::STAFF_VERIFIER ?>;
+    var officersList          = <?= json_encode($this->officers) ?>;
+    var officersWithoutAutoVerify = <?= json_encode($this->officersWithoutAutoVerify) ?>;
+    var membersList           = <?= json_encode($this->members) ?>;
+    var allUsers              = <?= json_encode($this->allUsers) ?>;
+    var userId                 = <?= json_encode($this->userId) ?>;
+    var TASK_TYPE_APT_SERVICE  = <?= Task::TYPE_APT_SERVICE ?>;
+    var TEAM_ID               = <?= $this->teamId ?>;
+    var AUTO_VERIFIER_ID      = <?= UserService::AUTO_VERIFY_USER_ID ?>;
+    var STATUS_DONE           = <?= Task::STATUS_DONE?>;
+    var STATUS_VERIFIED       = <?= Task::STATUS_VERIFIED?>;
+    var STATUS_CANCELED       = <?= Task::STATUS_CANCEL ?>;
+</script>
+
+<div class="row">
+    <div class="col-xs-12 col-sm-6">
+        <div class="btn-group tasks-view-toggles" role="group">
+            <button class="btn btn-default disabled" data-value="recent">Recent</button>
+            <button class="btn btn-default disabled" data-value="today">Today</button>
+            <button class="btn btn-default disabled" data-value="upcoming">Upcoming</button>
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-6 sort-hk pull-right text-right">
+        <div class="btn-group tasks-sort-toggles" role="group">
+
+            <button class="btn btn-default disabled" data-value="5">Verifier</button>
+
+            <button class="btn btn-default disabled" data-value="2">Responsible</button>
+            <button class="btn btn-default disabled" data-value="0">Date</button>
+
+        </div>
+    </div>
+</div>
+
+<div class="housekeeping-tasks-day recent" style="display: none;"></div>
+<div class="housekeeping-tasks-day today" style="display: none;"></div>
+<div class="housekeeping-tasks-day upcoming" style="display: none;"></div>

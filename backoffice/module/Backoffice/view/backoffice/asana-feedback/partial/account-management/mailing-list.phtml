@@ -1,0 +1,15 @@
+<?php use DDD\Service\Asana\Feedback; ?>
+<div class="form-group">
+    <select name="feedback-mailing-list-action" id="feedback-mailing-list-action" class="form-control">
+        <option value="<?= Feedback::FEEDBACK_SUBTYPE_ACCOUNT_MANAGEMENT_ADD_USER_TO_MAILING_LISTS_VALUE ?>" ><?= Feedback::FEEDBACK_SUBTYPE_ACCOUNT_MANAGEMENT_ADD_USER_TO_MAILING_LISTS_TEXT ?></option>
+        <option value="<?= Feedback::FEEDBACK_SUBTYPE_ACCOUNT_MANAGEMENT_REMOVE_USER_FROM_MAILING_LISTS_VALUE ?>" ><?= Feedback::FEEDBACK_SUBTYPE_ACCOUNT_MANAGEMENT_REMOVE_USER_FROM_MAILING_LISTS_TEXT ?></option>
+    </select>
+</div>
+
+<div class="form-group">
+    <input type="text" name="feedback-account-username" id="feedback-account-username" class="form-control" placeholder="Account username / email" value="">
+</div>
+
+<div class="form-group">
+    <input type="text" name="feedback-mailing-list" id="feedback-mailing-list" class="form-control" placeholder="Mailing List" value="">
+</div>

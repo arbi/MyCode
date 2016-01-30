@@ -1,0 +1,168 @@
+.panel-body {
+    padding: 0 !important;
+}
+
+.table {
+    margin-bottom: 0 !important;
+}
+
+.conciergeGroupName {
+    font-size: 1.8em;
+    color: #3A4245;
+}
+
+.table.arrivals-dashboard .text-muted {
+    font-size: 0.8em;
+}
+
+.table.arrivals-dashboard tr:not(.concierge-comment-row) td, .table.arrivals-dashboard th {
+    font-size: 1em;
+}
+
+.table.arrivals-dashboard .dropdown-menu {
+    left: auto;
+    right: 0;
+    text-align: left;
+}
+
+.table.arrivals-dashboard .guest-name {
+    width: 25%;
+}
+
+.table.arrivals-dashboard .reservation {
+    width: 20%;
+}
+
+.table.arrivals-dashboard .apartment {
+    width: 25%;
+}
+
+.table.arrivals-dashboard .unit {
+    width: 12%;
+}
+
+.cons-Today-bg {
+    background: #AED89C;
+}
+
+.cons-Tomorrow-bg {
+    background: #E1E5C0;
+}
+
+
+.cons-Yesterday-bg {
+    background: #DDDDDD;
+}
+
+.ad-cons4-bg {
+    background: #5392b1;
+}
+
+#currentStays .arrivals-dashboard .ad-cons4-bg {
+    background: #CA6565;
+}
+
+.concierge-row-active {
+    cursor: pointer;
+}
+
+.concierge-comment-row td
+{
+    font-size: 0.9em;
+    font-weight: normal;
+    cursor: auto;
+    border-top-style: dashed !important;
+}
+
+.arrivals-dashboard-green td>div {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.arrivals-dashboard-green td>h3 {
+    color: #1D470B;
+}
+
+.panel-heading {
+    cursor: pointer;
+}
+
+#switch-view {
+    margin-left: 10px;
+}
+
+#filter {
+    display: inline-block;
+    width: 180px;
+}
+.concierge-card {
+    border: 1px solid #a9a33c;
+    border-radius: 5px;
+    padding: 2px 5px;
+    width: 120px;
+    background: #f2efe8; /* Old browsers */
+    background: -moz-linear-gradient(top,  #f2efe8 0%, #f2efda 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f2efe8), color-stop(100%,#f2efda)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #f2efe8 0%,#f2efda 100%);
+    background: -o-linear-gradient(top,  #f2efe8 0%,#f2efda 100%);
+    background: -ms-linear-gradient(top,  #f2efe8 0%,#f2efda 100%);
+    background: linear-gradient(to bottom,  #f2efe8 0%,#f2efda 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f2efe8', endColorstr='#f2efda',GradientType=0 ); /* IE6-9 */
+}
+
+.concierge-card-xxx {
+    color: #a9a33c;
+    font-size: 12px;
+}
+
+.concierge-card img {
+    width: 35px;
+    margin-right: 5px;
+}
+
+.label.pull-right:not(:first-child) {
+    margin-right: 3px;
+}
+
+@media print {
+    .table.arrivals-dashboard td, .table.arrivals-dashboard th {
+        display: table-cell !important;
+        font-size: 0.7em !important;
+    }
+
+    .table.arrivals-dashboard td:nth-child(9), .table.arrivals-dashboard th:last-child:nth-child(9) {
+        display: none !important;
+    }
+
+    .departures-content, .departures-title, .row-arrow, .collapsed { display: none !important; }
+
+    a[href]:after { display:none !important; }
+
+    .panel {
+        border: none !important;
+    }
+    .concierge-card {
+        width: 140px;
+        border: none;
+    }
+}
+
+@media (max-width:768px) {
+    .table.arrivals-dashboard .guest-name {
+        width: 35%;
+    }
+    .table.arrivals-dashboard .apartment {
+        width: 40%;
+    }
+}
+
+@media (max-width:480px) {
+    .hidden-xxs{
+        display:none!important
+    }
+
+    .concierge-card {
+        width: 150px;
+    }
+}

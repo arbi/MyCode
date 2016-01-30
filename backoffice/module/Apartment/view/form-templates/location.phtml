@@ -1,0 +1,151 @@
+<?php
+
+// Form object
+$form = $this->form;
+
+$form->prepare ();
+
+?>
+
+<!-- Form opening tag -->
+<?= $this->form()->openTag($form)?>
+
+<!-- First Row and Coordinates -->
+
+<fieldset>
+	<legend>General</legend>
+</fieldset>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-xs-5 col-sm-4 control-label" for="<?= $form->get('country_id')->getAttribute('id') ?>">
+                <?= $form->get('country_id')->getLabel() ?>
+                <?= $this->required() ?>
+            </label>
+            <div class="col-xs-6">
+                <?= $this->formSelect($form->get('country_id')) ?>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-xs-5 col-sm-4 control-label" for="<?= $form->get('province_id')->getAttribute('id') ?>">
+                <?= $form->get('province_id')->getLabel() ?>
+                <?= $this->required() ?>
+            </label>
+            <div class="col-xs-6">
+                <?= $this->formSelect($form->get('province_id')) ?>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-xs-5 col-sm-4 control-label" for="<?= $form->get('city_id')->getAttribute('id') ?>">
+                <?= $form->get('city_id')->getLabel() ?>
+                <?= $this->required() ?>
+            </label>
+            <div class="col-xs-6">
+                <?= $this->formSelect($form->get('city_id')) ?>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-xs-5 col-sm-4 control-label" for="<?= $form->get('address')->getAttribute('id') ?>">
+                <?= $form->get('address')->getLabel() ?>
+                <?= $this->required() ?>
+            </label>
+            <div class="col-xs-6">
+                <?= $this->formInput($form->get('address')) ?>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-xs-5 col-sm-4 control-label" for="<?= $form->get('postal_code')->getAttribute('id') ?>">
+                <?= $form->get('postal_code')->getLabel() ?>
+                <?= $this->required() ?>
+            </label>
+            <div class="col-xs-6 col-sm-6 col-md-4">
+                <?= $this->formInput($form->get('postal_code')) ?>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-xs-5 col-sm-4 control-label" for="<?= $form->get('building')->getAttribute('id') ?>">
+                <?= $form->get('building')->getLabel() ?>
+                <?= $this->required() ?>
+            </label>
+            <div class="col-xs-6">
+                <?= $this->formSelect($form->get('building')) ?>
+            </div>
+        </div>
+        <div class="form-group <?= $this->buildingSectionsShow ? '' : 'soft-hide'?>">
+            <label class="col-xs-5 col-sm-4 control-label" for="<?= $form->get('building_section')->getAttribute('id') ?>">
+                <?= $form->get('building_section')->getLabel() ?>
+                <?= $this->required() ?>
+            </label>
+            <div class="col-xs-6">
+                <?= $this->formSelect($form->get('building_section')) ?>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-xs-5 col-sm-4 control-label" for="<?= $form->get('block')->getAttribute('id') ?>">
+                <?= $form->get('block')->getLabel() ?>
+            </label>
+            <div class="col-xs-6 col-sm-6 col-md-5">
+                <?= $this->formInput($form->get('block')) ?>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-xs-5 col-sm-4 control-label" for="<?= $form->get('floor')->getAttribute('id') ?>">
+                <?= $form->get('floor')->getLabel() ?>
+            </label>
+            <div class="col-xs-6 col-sm-4 col-md-3">
+                <?= $this->formSelect($form->get('floor')) ?>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-xs-5 col-sm-4 control-label" for="<?= $form->get('unit_number')->getAttribute('id') ?>">
+                <?= $form->get('unit_number')->getLabel() ?>
+            </label>
+            <div class="col-xs-6 col-sm-4 col-md-3">
+                <?= $this->formInput($form->get('unit_number')) ?>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- First Row and Coordinates -->
+
+<fieldset>
+	<legend>Geo Location</legend>
+</fieldset>
+
+<div class="row">
+
+	<div class="col-sm-4">
+        <div class="form-group">
+            <label class="col-xs-5 col-sm-5 control-label" for="<?= $form->get('longitude')->getAttribute('id') ?>">
+                <?= $form->get('longitude')->getLabel() ?>
+                <?= $this->required() ?>
+            </label>
+            <div class="col-xs-6 col-sm-7">
+                <?= $this->formInput($form->get('longitude')) ?>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-xs-5 col-sm-5 control-label" for="<?= $form->get('latitude')->getAttribute('id') ?>">
+                <?= $form->get('latitude')->getLabel() ?>
+                <?= $this->required() ?>
+            </label>
+            <div class="col-xs-6 col-sm-7">
+                <?= $this->formInput($form->get('latitude')) ?>
+            </div>
+        </div>
+	</div>
+
+	<div class="col-sm-8">
+		<?= $this->mapHTML?>
+	</div>
+
+</div>
+<div class="page-actions container">
+    <div class="row text-right">
+		<?= $this->formInput($form->get('save_button')) ?>
+	</div>
+</div>
+
+<!-- Form close tag -->
+<?= $this->form()->closeTag() ?>

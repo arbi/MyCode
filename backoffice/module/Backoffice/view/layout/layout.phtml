@@ -1,0 +1,141 @@
+<?=$this->doctype()?>
+<html lang="en">
+<head>
+<?php
+		$this->headMeta()->appendHttpEquiv('Content-Type', 'text/html; charset=UTF-8');
+		$this->headMeta()->appendHttpEquiv('X-UA-Compatible', 'IE=edge');
+        $this->headMeta()->appendName('robots', 'noindex');
+		echo $this->headTitle('Ginosi Backoffice');
+		echo $this->headMeta()->appendName('viewport', 'width=device-width, initial-scale=1');
+
+		$this->headLink()
+			->appendStylesheet($this->basePath() . '/css/bootstrap-3.3.5.min.css', 'all')
+			->appendStylesheet($this->basePath() . '/css/plugins/pnotify.custom.min.css')
+			->appendStylesheet($this->basePath() . '/css/layout.css')
+            ->appendStylesheet($this->basePath() . '/css/dropzone.css')
+            ->appendStylesheet($this->basePath() . '/css/plugins/selectize.bootstrap3.css')
+			->appendStylesheet($this->basePath() . '/css/plugins/bootstrap-daterangepicker/daterangepicker-bs3.css')
+			// @ToDo remove this line
+            ->appendStylesheet($this->basePath() . '/css/plugins/datepicker.css')
+            ->appendStylesheet($this->basePath() . '/css/print.css', 'print');
+
+		$this->headScript()
+			->prependFile($this->basePath() . '/js/functions.js')
+			->prependFile($this->basePath() . '/js/omnibox.js')
+			->prependFile($this->basePath() . '/js/plugins/jquery.validate.min.js')
+			->prependFile($this->basePath() . '/js/plugins/jquery-ui-1.11.4-custom/js/jquery-ui-1.11.4.custom.min.js')
+			->prependFile($this->basePath() . '/js/bootstrap/bootstrap-3.3.5.min.js')
+            ->prependFile($this->basePath()  . '/js/plugins/selectize/selectize.min.js');
+
+		$this->inlineScript()
+			->prependFile($this->basePath() . '/js/plugins/pnotify.custom.min.js')
+			->prependFile($this->basePath() . '/js/plugins/jquery.form.min.js')
+            ->prependFile($this->basePath() . '/js/html2canvas.js')
+			// @ToDo remove this line
+            ->prependFile($this->basePath() . '/js/plugins/datepicker.js')
+			->appendFile($this->basePath()  . '/js/plugins/bootstrap-daterangepicker/moment.min.js')
+			->appendFile($this->basePath()  . '/js/plugins/bootstrap-daterangepicker/daterangepicker.js')
+            ->prependFile($this->basePath() . '/js/dropzone.min.js')
+            ->appendFile($this->basePath()  . '/js/custom.js')
+            ->appendFile($this->basePath()  . '/js/general-notifications.js')
+            ->appendFile($this->basePath()  . '/js/asana-feedback.js');
+
+		$environment = getenv('APPLICATION_ENV') ?: 'production';
+
+        if ($environment === 'production') {
+            $this->headScript()
+                ->prependFile('https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js', 'text/javascript', array('conditional' => 'lt IE 9',))
+                ->prependFile('https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js', 'text/javascript', array('conditional' => 'lt IE 9',))
+                ->prependFile('//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js');
+        } else {
+            $this->headScript()
+                ->prependFile($this->basePath() . '/js/vendor/html5shiv/html5shiv.js', 'text/javascript', array('conditional' => 'lt IE 9',))
+                ->prependFile($this->basePath() . '/js/vendor/respond/1.4.2/respond.min.js', 'text/javascript', array('conditional' => 'lt IE 9',))
+                ->prependFile($this->basePath() . '/js/vendor/jquery/2.1.4/jquery.min.js');
+        }
+
+		echo $this->headLink();
+		echo $this->headScript();
+?>
+	<script type="text/javascript">
+		var GLOBAL_BASE_PATH = '<?=$this->basePathView?>' + '/';
+		var VERSION_PUBLIC_PATH = '<?=$this->globalVersion?>';
+		var IMG_DOMAIN_NAME = '<?=$this->globalImgDomainName?>';
+	</script>
+</head>
+
+<body>
+<?= $this->GoogleAnalytics(); ?>
+
+<?= $this->AsanaFeedback(); ?>
+
+<div class="navbar navbar-inverse navbar-fixed-top hidden-print" role="navigation">
+	<div class="container">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand brand" href="<?=$this->default_home_url?>">
+				<img src="/img/logo/bo-logo.ico" class="bo-logo" title="Backoffice"><span class="visible-xs-inline">Backoffice</span>
+			</a>
+		</div>
+		<div class="navbar-collapse collapse">
+			<?= $this->Topmenu() ?>
+        </div>
+	</div>
+</div>
+
+<div class="container">
+	<ol class="breadcrumb hidden-xs">
+		<?=$this->layout()->breadcrumb?>
+	</ol>
+
+	<div class="row">
+		<div class="col-sm-12 main-title">
+			<h1><?=$this->layout()->viewTitle?></h1>
+		</div>
+	</div>
+
+    <?= $this->apartmentBadges ?>
+
+	<div class="row">
+		<div class="col-sm-12">
+			<?=$this->content?>
+		</div>
+	</div>
+
+	<footer class="container" id="footer-copyright">
+		<div class="col-sm-12 text-muted">
+			© <?=date('Y')?> <a href="//www.ginosi.com" target="_blank">www.ginosi.com</a> version __BUILD_VERSION_HERE__
+		</div>
+	</footer>
+</div>
+
+<?=$this->dynamicLoginWidgetBt3()?>
+<?=$this->InlineScript();?>
+
+<?php
+	if (isset($this->flashMessenger) && is_array($this->flashMessenger)) {
+		$messages = $this->flashMessenger;
+
+		foreach ($messages as $key => $message) {
+?>
+<script>
+    $(function() {
+        notification({
+            status: "<?=$key?>",
+            msg: "<?=$message?>"
+        });
+    });
+</script>
+<?php
+		}
+
+		unset($_SESSION['use_zf2']['flash']);
+	}
+?>
+</body>
+</html>

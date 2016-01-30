@@ -1,0 +1,93 @@
+<?php
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle('Locks');
+
+$layoutViewModel = $this->viewModel()->getRoot();
+$basePath = $layoutViewModel->basePathView;
+$this->layout()->breadcrumb = $this->breadcrumb([
+    ['Apartments'],
+    ['Locks']
+]);
+$this->layout()->viewTitle  = 'Lock Search';
+
+$this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css')
+        ->appendStylesheet($this->basePath() . '/css/pages/lock-search.css');
+
+$this->InlineScript()
+        ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+        ->appendFile($this->basePath() . '/js/plugins/fnReloadAjax.js')
+        ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+        ->appendFile($this->basePath() . '/js/pages/lock.search.js');
+?>
+
+<script>
+    var SEARCH_URL      = '<?= $this->url('lock/get-lock-json')?>';
+</script>
+
+<?php
+    $form = $this->search_form;
+    $form->setAttribute('class', 'form-horizontal');
+    $form->setAttribute('id', 'search-lock');
+?>
+
+<?php
+    echo $this->form()->openTag($form);
+?>
+<div class="row form-group">
+    <div class="col-sm-6">
+        <?php
+        echo $this->formElement($form->get('type_id'));
+        ?>
+    </div>
+
+    <div class="col-sm-6">
+        <?php
+            echo $this->formElement($form->get('usage'));
+        ?>
+    </div>
+
+</div>
+
+
+<?php
+    echo $this->form()->closeTag($form);
+?>
+
+<div class="row">
+
+    <div class="col-sm-12">
+        <a href="javascript:void(0)" class="btn btn-medium btn-block btn-primary" id="btn_filter_locks">
+            <i class="glyphicon glyphicon-search"></i> Search
+        </a>
+    </div>
+</div>
+
+<hr>
+
+<div class="row">
+    <div class="col-sm-12">
+        <table id="datatable_locks" class="table table-striped table-bordered table-condensed table-hover hidden">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Type</th>
+                <th>Apartment</th>
+                <th>Building</th>
+                <th>Parking</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="container page-actions">
+    <div class="row text-right">
+        <a href="<?= $this->addNewLockUrl?>" class="btn btn-primary col-sm-2 col-xs-12
+        pull-right">Add New Lock</a>
+    </div>
+</div>

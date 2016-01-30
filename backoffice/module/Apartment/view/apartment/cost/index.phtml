@@ -1,0 +1,53 @@
+<?php
+	$this->headTitle()->setSeparator(' - ');
+	$this->headTitle($this->layout()->apartmentName . ' - Apartment Costs');
+
+	$this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/apartment/common.css')
+        ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css');
+
+	$this->InlineScript()
+        ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+        ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+        ->appendFile($this->basePath() . '/js/pages/cost.js');
+?>
+<script>
+    var GLOBAL_DOWNLOAD_CSV = '<?=$this->url("apartment/cost", ['controller'=>'cost', 'action'=>'download-csv', 'apartment_id' => $this->apartmentId])?>';
+    var GLOBAL_GET_COSTS_URL = '<?= $this->url('apartment/cost', ['controller' => 'cost', 'action' => 'ajax-get-costs', 'apartment_id' => $this->apartmentId])?>';
+</script>
+<div class="row">
+    <div class="col-sm-12">
+        <hr>
+        <?= $this->apartmentNavigation($this->apartmentId, $this->apartmentStatus, 'apartment/cost')?>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <table id="costs" class="table table-striped table-bordered table-condensed table-hover">
+            <thead>
+            <tr>
+                <th> TID </th>
+                <th> Category </th>
+                <th> Creation Date </th>
+                <th class="text-center"> Amount (<?= $currency ?>) </th>
+                <th> Purpose </th>
+                <th> &nbsp; </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td></td><td></td><td></td><td></td><td></td><td></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<br />
+
+<div class="container page-actions">
+    <div class="row text-right">
+        <a href="javascript:void(0)" class="btn btn-info col-sm-2 col-xs-12 pull-left" id="btn_download_filtered_csv">
+            <span class="glyphicon glyphicon-download"></span> Download
+        </a>
+    </div>
+</div>

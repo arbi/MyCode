@@ -1,0 +1,35 @@
+<?php
+	$form = $this->loginForm;
+	$form->prepare();
+	$form->setAttribute('class', 'form-horizontal');
+	$form->setAttribute('action', $this->url('backoffice_user_authenticate', array()));
+?>
+
+<!-- Dynamic Login Form -->
+<div id="dynamicLoginForm" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<h3>Please Sign In again</h3>
+	</div>
+	<div class="alert alert-error hide" id="dynamicLoginFormError"></div>
+	<?= $this->form()->openTag($form) ?>
+		<div class="control-group mt20">
+			<label class="control-label" for="dynamicLoginFormEmail">Email</label>
+			<div class="controls">
+				<?= $this->formInput($form->get('identity')) ?>
+			</div>
+		</div>
+		<div class="control-group">
+			<label class="control-label" for="dynamicLoginFormPassword">Password</label>
+			<div class="controls">
+				<?= $this->formInput($form->get('credential')) ?>
+			</div>
+		</div>
+	<div class="modal-footer">
+		<div class="controls left">
+			<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+			<input name="sign_in" type="submit" class="btn btn-primary span3 login-btn" value="Sign In">
+		</div>
+	</div>
+	<?= $this->form()->closeTag() ?>
+</div>

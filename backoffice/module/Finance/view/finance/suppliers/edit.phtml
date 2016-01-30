@@ -1,0 +1,168 @@
+<?php
+	$this->layout()->viewTitle = $this->pageTitle;
+    $this->headTitle()->setSeparator(' - ');
+    $this->headTitle($this->pageTitle);
+	$this->layout()->breadcrumb = $this->breadcrumb([
+		['Finance'],
+		['Suppliers Management', $this->url('finance/suppliers', ['controller' => 'suppliers'])],
+		[$this->pageTitle]
+	]);
+
+    $form = $this->form;
+
+    $this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css')
+        ->appendStylesheet($this->basePath() . '/css/datatable/datatables.responsive.css')
+        ->appendStylesheet($this->basePath() . '/css/pages/suppliers.edit.css');
+
+    $this->InlineScript()
+        ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+        ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+        ->appendFile($this->basePath() . '/js/plugins/fnReloadAjax.js')
+		->appendFile($this->basePath() . '/js/validation/supplier.js')
+		->appendFile($this->basePath() . '/js/pages/suppliers.edit.js');
+?>
+<script type="text/javascript">
+    var GENERAL_SAVE_PATH                       = '<?= $this->url('finance/suppliers', ['controller' => 'suppliers', 'action' => 'ajax-save']) ?>';
+    var GENERAL_RETURN_PATH                     = '<?= $this->url('finance/suppliers', ['controller' => 'suppliers']) ?>';
+    var GENERAL_EXTERNAL_ACCOUNT_EDIT           = '<?= $this->url('finance/suppliers', ['controller' => 'suppliers', 'action' => 'ajax-supplier-account-edit']) ?>';
+    var GENERAL_SUPPLIER_ID                     =  parseInt('<?=$this->supplierId?>');
+    var DATATABLE_SUPPLIER_ACCOUNTS_AJAX_SOURCE = '<?= $this->url('finance/suppliers', ['controller' => 'suppliers', 'action' => 'ajax-get-supplier-account-list', 'id' => $this->supplierId]) ?>';
+    var DATATABLE_SUPPLIER_ACCOUNTS_ARCHIVE     = '<?= $this->url('finance/suppliers', ['controller' => 'suppliers', 'action' => 'ajax-set-supplier-account-archive']) ?>';
+</script>
+
+<div class="row">
+    <div class="col-sm-12">
+        <!-- Tabs : START -->
+        <ul class="nav nav-tabs tabs-general">
+            <li class="active">
+                <a href="#general" data-toggle="tab" id="general-tab" data-tab-name="general">
+                    General
+                </a>
+            </li>
+            <li style="display: none" class="tab-highlights">
+                <a href="#edit-account" data-toggle="tab" id="edit-account-tab" data-tab-name="edit-account">
+                    Edit Account
+                </a>
+            </li>
+        </ul>
+        <!-- Tabs : END -->
+    </div>
+    <div class="tab-content">
+        <div class="tab-pane active" id="general">
+            <div class="col-sm-6">
+                <fieldset name="General">
+                    <legend>General</legend>
+                    <?php
+                        echo $this->form()->openTag($form);
+                        echo $this->formHidden($form->get('id'));
+                    ?>
+                    <div class="form-group">
+                        <label for="<?php echo $form->get('name')->getAttribute('id'); ?>" class="col-sm-4 control-label">
+                            <?php echo $form->get('name')->getLabel(); ?> <?php echo $this->required()?>
+                        </label>
+                        <div class="col-sm-8">
+                            <?php echo $this->formInput($form->get('name')); ?>
+                        </div>
+                        <?php echo $this->formElementErrors($form->get('name'), array('class' => 'col-sm-3 text-danger list-unstyled')); ?>
+                    </div>
+                    <div class="form-group">
+                        <label for="<?php echo $form->get('description')->getAttribute('id'); ?>" class="col-sm-4 control-label">
+                            <?php echo $form->get('description')->getLabel(); ?>
+                        </label>
+                        <div class="col-sm-8">
+                            <?php echo $this->formTextarea($form->get('description')); ?>
+                        </div>
+                        <?php echo $this->formElementErrors($form->get('description'), array('class' => 'col-sm-3 text-danger list-unstyled')); ?>
+                    </div>
+                    <div class="container page-actions">
+                        <div class="row text-right">
+                            <?php if ($this->supplierId) : ?>
+                                <a href="#add-account" data-toggle="tab" class="btn btn-success col-sm-2 col-xs-12 pull-left" id="add-account" data-supplier-id="<?= $this->supplierId ?>">
+                                    Add New Account
+                                </a>
+                            <?php endif; ?>
+
+                            <?php echo $this->formSubmit($form->get('submit')); ?>
+                            <?php
+                                if($this->supplierId) {
+                                    $activationUrl = '/finance/suppliers/activate/' . $this->supplierId . '/' . (int)!$this->isActive;
+                                    $buttonClass = 'btn-success';
+                                    $buttonName = 'Activate';
+                                    if($this->isActive) {
+                                        $buttonClass = 'btn-danger';
+                                        $buttonName = 'Deactivate';
+                                    }?>
+                                    <a href="<?=$activationUrl?>" class="btn col-sm-2 col-xs-12 margin-left-10 pull-right <?=$buttonClass?>"><?=$buttonName?></a>
+                                <?php } ?>
+                        </div>
+                    </div>
+                    <?php
+                        echo $this->form()->closeTag();
+                    ?>
+                </fieldset>
+            </div>
+
+            <div class="col-sm-12">
+                <fieldset name="General">
+                    <legend>Accounts</legend>
+                    <div id="status-switch-account">
+                        <div class="btn-group fn-buttons pull-right">
+                            <a href="#" class="btn btn-sm btn-default active" data-status="all">All</a>
+                            <a href="#" class="btn btn-sm btn-default" data-status="archived">Archived</a>
+                        </div>
+                        <input type="hidden" name="show_status_account" id="show_status_account" value="1" />
+                    </div>
+                    <div class="row hidden" id="datatable_supplier_account_container">
+                        <div class="col-sm-12">
+                            <table id="datatable_supplier_account_info" class="table table-striped table-bordered table-condensed table-hover">
+                                <thead>
+                                    <tr>
+                                        <th> Default </th>
+                                        <th> Name </th>
+                                        <th> Type </th>
+                                        <th> Full Legal Name </th>
+                                        <th> Addresses </th>
+                                        <th> Country </th>
+                                        <th> Account Number </th>
+                                        <th> Routing Number </th>
+                                        <th> Actions </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+        <div class="tab-pane" id="edit-account">
+            <div class="col-sm-6">
+                <fieldset name="Edit Account">
+                    <legend>Edit Account</legend>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="activate-or-create-modal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-danger">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel">Activate Or Create New <span id="activate-or-create"></span></h4>
+            </div>
+            <div class="modal-body">
+                <p>An inactive Supplier with this name already exists. Do you want to activate him or create a new one?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <span id="deactivate-old-container"></span>
+                <a class="btn btn-success" id="create-new-active" href="#">Create New</a>
+            </div>
+        </div>
+    </div>
+</div>

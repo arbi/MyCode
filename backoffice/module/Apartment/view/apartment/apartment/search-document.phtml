@@ -1,0 +1,186 @@
+<?php
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle('Document Search');
+
+$layoutViewModel = $this->viewModel()->getRoot();
+$basePath = $layoutViewModel->basePathView;
+$this->layout()->breadcrumb = $this->breadcrumb([
+    ['Apartment'],
+    ['Document Search'],
+]);
+$this->layout()->viewTitle  = 'Document Search';
+
+$this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css')
+        ->appendStylesheet($this->basePath() . '/css/pages/apartment-document-search.css');
+
+$this->InlineScript()
+        ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+        ->appendFile($this->basePath() . '/js/plugins/fnReloadAjax.js')
+        ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+        ->appendFile($this->basePath() . '/js/pages/apartment.document.search.js');
+?>
+
+<script>
+    var SEARCH_URL      = '<?= $this->url('apartments', ['controller' => 'apartment', 'action' => 'get-apartment-document-search-json'])?>';
+    var BUILDING_SEARCH = '<?= $this->url('apartments', ['controller' => 'apartment', 'action' => 'get-buildings'])?>';
+    var SUPPLIER_SEARCH = '<?= $this->url('apartments', ['controller' => 'apartment', 'action' => 'get-suppliers'])?>';
+    var AUTHOR_SEARCH   = '<?= $this->url('apartments', ['controller' => 'apartment', 'action' => 'get-authors'])?>';
+    var DOWNLOAD_CSV    = '<?= $this->url('apartments', ['controller' => 'apartment', 'action' => 'download-csv'])?>';
+</script>
+
+<?php
+    $form = $this->search_form;
+    $form->setAttribute('class', 'form-horizontal');
+    $form->setAttribute('id', 'search-document');
+?>
+
+<?php
+    echo $this->form()->openTag($form);
+?>
+<div class="row form-group">
+    <div class="col-sm-3">
+        <?php
+            echo $this->formElement($form->get('status'));
+        ?>
+    </div>
+    <div class="col-sm-3">
+        <?php
+            echo $this->formElement($form->get('building'));
+            echo $this->formElement($form->get('building_id'));
+        ?>
+    </div>
+    <div class="col-sm-4">
+        <?php
+            echo $this->formElement($form->get('address'));
+        ?>
+    </div>
+    <div class="col-sm-2">
+        <?php
+            echo $this->formElement($form->get('has_attachment'));
+        ?>
+    </div>
+</div>
+<div class="row form-group">
+    <div class="col-sm-3">
+        <?php
+            echo $this->formElement($form->get('document_type'));
+        ?>
+    </div>
+    <div class="col-sm-3">
+        <?php
+            echo $this->formElement($form->get('supplier'));
+            echo $this->formElement($form->get('supplier_id'));
+        ?>
+    </div>
+    <div class="col-sm-4">
+        <?php
+            echo $this->formElement($form->get('description'));
+        ?>
+    </div>
+    <div class="col-sm-2">
+        <?php
+            echo $this->formElement($form->get('has_url'));
+        ?>
+    </div>
+</div>
+<div class="row form-group">
+    <div class="col-sm-3">
+        <div class="input-group">
+            <label class="input-group-addon" for="createdDate">
+                <span class="glyphicon glyphicon-calendar"></span>
+            </label>
+            <?php
+                echo $this->formElement($form->get('createdDate'));
+            ?>
+        </div>
+    </div>
+    <div class="col-sm-3">
+        <?php
+            echo $this->formElement($form->get('author'));
+            echo $this->formElement($form->get('author_id'));
+        ?>
+    </div>
+    <div class="col-sm-3">
+        <?php
+            echo $this->formElement($form->get('account_holder'));
+        ?>
+    </div>
+
+    <div class="col-sm-3">
+        <?php
+            echo $this->formElement($form->get('account_number'));
+        ?>
+    </div>
+
+
+</div>
+<div class="row form-group">
+    <div class="col-sm-3">
+        <div class="input-group">
+            <label class="input-group-addon" for="validation-range">
+                <span class="glyphicon glyphicon-calendar"></span>
+            </label>
+            <?php
+            echo $this->formElement($form->get('validation-range'));
+            ?>
+        </div>
+    </div>
+    <div class="col-sm-3">
+        <?php
+        echo $this->formElement($form->get('legal_entity_id'));
+        ?>
+    </div>
+    <div class="col-sm-3">
+        <?php
+        echo $this->formElement($form->get('signatory_id'));
+        ?>
+    </div>
+
+    <div class="col-sm-3">
+        <?php
+        echo $this->formElement($form->get('property_type'));
+        ?>
+    </div>
+</div>
+
+<?php
+    echo $this->form()->closeTag($form);
+?>
+
+<div class="row">
+    <div class="col-sm-2" id="download-btn">
+        <div class="form-group">
+            <a href="javascript:void(0)" class="btn btn-block btn-info" id="btn_download_filtered_csv"><i class="glyphicon glyphicon-download"></i> Download</a>
+        </div>
+    </div>
+    <div class="col-sm-10">
+        <a href="javascript:void(0)" class="btn btn-medium btn-block btn-primary" id="btn_filter_documents">
+            <i class="glyphicon glyphicon-search"></i> Search
+        </a>
+    </div>
+</div>
+
+<hr>
+
+<div class="row">
+    <div class="col-sm-12">
+        <table id="datatable_documents" class="table table-striped table-bordered table-condensed table-hover hidden">
+            <thead>
+            <tr>
+                <th>Property</th>
+                <th>Security</th>
+                <th>Type</th>
+                <th>Supplier</th>
+                <th>Description</th>
+                <th>Created</th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>

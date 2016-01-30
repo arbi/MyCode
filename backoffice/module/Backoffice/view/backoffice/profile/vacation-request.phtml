@@ -1,0 +1,217 @@
+<?php
+$remainedSickDays = $this->totalSickDays - $this->takenSickDays;
+
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle('Request Time Off');
+
+$this->layout()->viewTitle = 'Request Time Off';
+$this->layout()->breadcrumb = $this->breadcrumb([
+	[$this->userName, $this->url('profile')],
+	[$this->layout()->viewTitle]
+]);
+
+$this->InlineScript()
+	->appendFile($this->basePath() . '/js/validation/vacationdays.js')
+	->appendFile($this->basePath() . '/js/pages/vacationdays.js');
+
+$this->headLink()
+    ->appendStylesheet($this->basePath() . '/css/pages/vacationdays.css');
+
+$form = $this->vacationForm;
+$form->prepare();
+$form->setAttribute('action', $this->url('backoffice/default', array('controller' => 'profile', 'action' => 'vacationdays')));
+?>
+<script>
+    var GLOBAL_VAC_SAVE  = '<?=$this->url('backoffice/default', array('controller' => 'profile', 'action' => 'ajaxsave'))?>';
+    var VACATION_LEFT    = <?= $this->vacationLeft; ?>;
+    var VACATION_OVERALL = <?= $this->vacationOverall; ?>;
+    var TOTAL_SICK_DAYS  = <?= $this->totalSickDays?>;
+    var TAKEN_SICK_DAYS  = <?= $this->takenSickDays?>;
+</script>
+
+<?=$this->form()->openTag($form)?>
+    <fieldset name="general">
+        <legend>General</legend>
+        <div class="col-sm-12 col-md-6 col-xs-12">
+            <div class="row vacation">
+                <label class="col-sm-6 col-md-6 col-xs-12 control-label">
+                    Vacation Remaining
+                </label>
+                <div class="col-sm-6 col-md-6 col-xs-12">
+                    <div>
+                        <div class="progress">
+                            <div class="progress-bar<?php if($this->vacationLeft < 5) { ?> progress-bar-warning<?php } else { ?> progress-bar-success<?php } ?>" role="progressbar" aria-valuenow="<?= $this->vacationLeft; ?>" aria-valuemin="0" aria-valuemax="<?= $this->vacationOverall; ?>" style="width: <?= ($this->vacationOverall ? ($this->vacationLeft / $this->vacationOverall * 100) : 0); ?>%">
+                                <?= $this->vacationLeft; ?> days
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row sickdays" style="display: none;">
+                <label class="col-sm-6 col-md-6 col-xs-12 control-label">
+                    Sick Days Remaining
+                </label>
+                <div class="col-sm-6 col-md-6 col-xs-12">
+                    <div>
+                        <div class="progress">
+                            <div class="progress-bar<?php if($remainedSickDays < 2) { ?> progress-bar-warning<?php } else { ?> progress-bar-success<?php } ?>" role="progressbar" aria-valuenow="<?= $this->vacationLeft; ?>" aria-valuemin="0" aria-valuemax="<?= $this->totalSickDays; ?>" style="width: <?= ($this->totalSickDays ? ($remainedSickDays / $this->totalSickDays * 100) : 0); ?>%">
+                                <?= $remainedSickDays ?> days
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-6 col-md-6 control-label" for="vacation_type">Primary Reason <?=$this->required()?></label>
+
+                <div class="col-sm-6 col-md-6">
+                    <?=$this->formElement($form->get('vacation_type'))?>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-6 col-md-6 control-label" for="interval">Vacation interval <?=$this->required()?></label>
+
+                <div class="col-sm-6 col-md-6">
+                    <div class="input-group">
+                        <label class="input-group-addon" for="interval">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </label>
+                        <?=$this->formHidden($form->get('from'))?>
+                        <?=$this->formHidden($form->get('to'))?>
+                        <?=$this->formInput($form->get('interval'))?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-6 col-md-6 control-label vacation" for="total_number">
+                    <?=$this->info('Total days deducted', 'Number entered here will be deducted from your vacation if it is Personal or Vacation leave. In case of Unpaid Leave and unlimited Sick days, days will not be deducted from your vacation.')?>
+                    <?=$this->required()?>
+                    <span class="hidden" id="employmentPercent" data-value="<?= $this->employmentPercent ?>"></span>
+                </label>
+                <label class="col-sm-6 col-md-6 control-label sickdays" for="total_number" style="display: none;">
+                    <?=$this->info('Total sick days deducted', 'The number entered here is the number of sick days deducted from your sick days.')?>
+                    <?=$this->required()?>
+                </label>
+
+                <div class="col-sm-2 col-md-3">
+                    <?=$this->formInput($form->get('total_number'))?>
+                </div>
+                <div class="col-sm-4 col-md-3 help-block" id="total-number-hint">
+                    <div class="text-muted"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 col-md-6 col-xs-12">
+            <div class="row vacation">
+                <label class="col-sm-6 col-md-6 col-xs-12 control-label">
+                    Vacation Days per Year
+                </label>
+                <div class="col-sm-6 col-md-6 col-xs-12">
+                    <div>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="<?= $this->vacationLeft; ?>" aria-valuemin="0" aria-valuemax="<?= $this->vacationOverall; ?>" style="width: 100%">
+                                <?= $this->vacationOverall; ?> days
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row sickdays" style="display: none;">
+                <label class="col-sm-6 col-md-6 col-xs-12 control-label" >
+                    Sick Days per Year
+                </label>
+                <div class="col-sm-6 col-md-6 col-xs-12">
+                    <div>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="<?= $this->takenSickDays; ?>" aria-valuemin="0" aria-valuemax="<?= $this->totalSickDays; ?>" style="width: 100%">
+                                <?= $this->totalSickDays; ?> days
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row vacation">
+                <label class="col-sm-6 col-md-6 col-xs-12 control-label">
+                    Amount Taken
+                </label>
+                <div class="col-sm-6 col-md-6 col-xs-12">
+                    <div>
+                        <div class="progress">
+                            <div class="progress-bar<?php if($this->vacationDaysUsedThisYesr > $this->vacationOverall) { ?> progress-bar-danger<?php } else { ?> progress-bar-success<?php } ?>" role="progressbar" aria-valuenow="<?= $this->vacationDaysUsedThisYesr; ?>" aria-valuemin="0" aria-valuemax="<?= $this->vacationOverall; ?>" style="width: <?php if($this->vacationDaysUsedThisYesr > $this->vacationOverall) { ?> 100<?php } else { ($this->vacationOverall ? ($this->vacationDaysUsedThisYesr / $this->vacationOverall * 100) : 0);} ?>%">
+                                <?= $this->vacationDaysUsedThisYesr; ?> days
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row sickdays" style="display: none;">
+                <label class="col-sm-6 col-md-6 col-xs-12 control-label">
+                    Sick Amount Taken
+                </label>
+                <div class="col-sm-6 col-md-6 col-xs-12">
+                    <div>
+                        <div class="progress">
+                            <div class="progress-bar<?php if($this->takenSickDays > $this->totalSickDays) { ?> progress-bar-danger<?php } else { ?> progress-bar-success<?php } ?>" role="progressbar" aria-valuenow="<?= $this->takenSickDays; ?>" aria-valuemin="0" aria-valuemax="<?= $this->totalSickDays; ?>" style="width: <?php if($this->takenSickDays > $this->totalSickDays) { ?> 100<?php } else { ($this->totalSickDays ? ($this->takenSickDays / $this->totalSickDays * 100) : 0);} ?>%">
+                                <?= $this->takenSickDays; ?> days
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php if ($this->cashingDays) { ?>
+            <div class="row vacation">
+                <div class="col-sm-12 col-md-12 col-xs-12 text-right text-primary">
+                    <p class="profile-vacation">
+                        <?= $this->cashingDays ?>
+                    </p>
+                </div>
+            </div>
+            <?php } ?>
+        </div>
+        <div class="col-sm-12 col-md-12 col-xs-12">
+            <div class="form-group row">
+                <label class="col-sm-4 col-md-3 control-label" for="comment">
+                    <?=$this->info('Comment', 'Leaving a comment usually helps get your vacations approved faster and can help you recognize your time offs at a later date')?>
+                </label>
+
+                <div class="col-sm-8 col-md-9">
+                    <?=$this->formElement($form->get('comment'))?>
+                </div>
+            </div>
+            <div class="row vacation">
+                <label class="col-sm-4 col-md-3 col-xs-6 control-label">
+                    Remaining Vacation Days
+                </label>
+                <div class="col-sm-4 col-md-3 col-xs-6">
+                    <div>
+                        <div class="progress">
+                            <div id="vacationWillRemain" class="progress-bar<?php if($this->vacationLeft < 5) { ?> progress-bar-warning<?php } else { ?> progress-bar-success<?php } ?>" role="progressbar" aria-valuenow="<?= $this->vacationLeft; ?>" aria-valuemin="0" aria-valuemax="<?= $this->vacationOverall; ?>" style="width: <?= ($this->vacationOverall ? ($this->vacationLeft / $this->vacationOverall * 100) : 0); ?>%">
+                                <?= $this->vacationLeft; ?> days
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row sickdays" style="display: none;">
+                <label class="col-sm-4 col-md-3 col-xs-6 control-label">
+                    Remaining Sick Days
+                </label>
+                <div class="col-sm-4 col-md-3 col-xs-6">
+                    <div>
+                        <div class="progress">
+                            <div id="vacationWillRemain" class="progress-bar<?php if($remainedSickDays < 2) { ?> progress-bar-warning<?php } else { ?> progress-bar-success<?php } ?>" role="progressbar" aria-valuenow="<?= $remainedSickDays; ?>" aria-valuemin="0" aria-valuemax="<?= $this->totalSickDays; ?>" style="width: <?= ($this->totalSickDays ? ($remainedSickDays / $this->totalSickDays * 100) : 0); ?>%">
+                                <?= $remainedSickDays; ?> days
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+    <div class="page-actions container">
+	    <div class="row text-right">
+            <?=$this->formButton($form->get('save_button'))?>
+	    </div>
+    </div>
+<?=$this->form()->closeTag()?>

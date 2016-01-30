@@ -1,0 +1,164 @@
+<?php
+use DDD\Service\Warehouse\Storage;
+
+$current = $this->id ? 'Edit Storage' : 'Add Storage';
+$this->layout()->viewTitle = $current;
+$this->layout()->breadcrumb = $this->breadcrumb([
+	['Administration'],
+	['Storage Management', $this->url('warehouse/storage', ['controller' => 'storage'])],
+	[$current]
+]);
+
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($this->layout()->viewTitle);
+
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+    ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+    ->appendFile($this->basePath() . '/js/warehouse/storage.edit.js');
+
+$this->headLink()
+    ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css');
+?>
+<script>
+    GLOBAL_ADD_THREASHOLD = '<?= $this->url('warehouse/storage', ['controller' => 'storage', 'action' => 'ajax-add-threshold'])?>';
+    aaData = <?= $this->thresholdList ?>;
+</script>
+<?php echo $this->form()->openTag($this->form); ?>
+<div class="row">
+    <div class="col-sm-6">
+        <fieldset name="General">
+            <legend>General</legend>
+            <div class="form-group">
+                <label for="name" class="col-sm-4 control-label">Name <?php echo $this->required(); ?></label>
+                <div class="col-sm-7">
+                    <?= $this->formInput($form->get('name')) ?>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="money_account_id" class="col-sm-4 control-label">City <?php echo $this->required(); ?></label>
+                <div class="col-sm-7">
+                    <?php echo $this->formSelect($form->get('city')); ?>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="name" class="col-sm-4 control-label">Address <?php echo $this->required(); ?></label>
+                <div class="col-sm-7">
+                    <?= $this->formInput($form->get('address')) ?>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    <?php if ($this->id) { ?>
+        <div class="col-sm-6">
+            <fieldset name="General">
+                <legend>Threshold</legend>
+                    <div class="datatables-container">
+                        <table id="threshold-table" class="table table-striped table-bordered table-condensed table-hover">
+                            <thead>
+                            <tr>
+                                <th> Category </th>
+                                <th> Threshold </th>
+                                <th> Actions </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td>
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <select class="form-control required" name="category_list" id="category_list" placeholder="Choose Category" style="width: 100%">
+                                                    <?php foreach ($this->categoryList as $category) { ?>
+                                                        <option value="<?= $category['id'] ?>"><?= $category['name'] ?></option>
+                                                    <?php } ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <input type="text" class="form-control" name="threshold" id="threshold"  style="width: 100%">
+                                        <input type="hidden" name="storageId" id="storageId" value="<?=$this->id?>">
+                                    </td>
+                                    <td><a href="javascript:void(0)" id="add_threshold" class="btn btn-primary btn-block btn-sm">Add</a></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+            </fieldset>
+        </div>
+    <?php } ?>
+</div>
+ <div class="page-actions container">
+    <div class="row text-right">
+        <?= $this->formInput($form->get('save')) ?>
+        <?php if ($this->id) { ?>
+            <?php if (!$this->status) {?>
+                <a href="#modal_deactivate_storage" data-toggle="modal" class="btn btn-danger col-sm-2 col-xs-12 margin-left-10 pull-right">Deactivate Storage</a>
+            <?php } else { ?>
+                <a href="#modal_activate_storage" data-toggle="modal" class="btn btn-success col-sm-2 col-xs-12 margin-left-10 pull-right">Activate Storage</a>
+            <?php } ?>
+        <?php } ?>
+    </div>
+</div>
+<?=$this->form()->closeTag(); ?>
+<?php if ($this->id) { ?>
+    <div class="modal fade" id="modal_deactivate_storage" tabindex="-1" role="dialog" aria-labelledby="deactivateStorage" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-danger">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">
+                        Deactivate Storage <span id="deactivate_group"></span>
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to deactivate this storage?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default" data-dismiss="modal">Close</button>
+                    <a class="btn btn-danger" href="/warehouse/storage/change-status/<?=$this->id?>/<?=Storage::STORAGE_STATUS_INACTIVE?>">Deactivate</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal_activate_storage" tabindex="-1" role="dialog" aria-labelledby="activateStorage" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-success">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">
+                        Activate Storage <span id="deactivate_group"></span>
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to activate this storage?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default" data-dismiss="modal">Close</button>
+                    <a class="btn btn-success" href="/warehouse/storage/change-status/<?=$this->id?>/<?=Storage::STORAGE_STATUS_ACTIVE?>">Activate</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="removeThresholdModal" class="modal fade" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-danger">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Delete threshold</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                    <a class="btn btn-danger" href="#" id="deleteThresholdProcess">Delete</a>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php } ?>

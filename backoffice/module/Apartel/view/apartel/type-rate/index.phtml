@@ -1,0 +1,74 @@
+<?php
+    $layoutViewModel = $this->viewModel()->getRoot();
+    $apartelId = $layoutViewModel->apartelId;
+?>
+<?php echo $this->apartelHeader($apartelId); ?>
+<?php
+    $this->headTitle('Room Type / Rate')->setSeparator(' - ');
+    $this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/apartel/common.css')
+        ->appendStylesheet($this->basePath() . '/css/plugins/selectize.bootstrap3.css');
+    $this->InlineScript()
+        ->appendFile($this->basePath() . '/js/plugins/selectize/selectize.min.js')
+        ->appendFile($this->basePath() . '/js/apartel/type.js');
+    $form = $this->form;
+?>
+<div class="row">
+    <?php echo $this->form()->openTag($form)?>
+    <div class="col-sm-3">
+        <?php echo $this->typeRateNavigation($this->typeRates, $apartelId);?>
+    </div>
+    <div class="col-sm-9">
+        <fieldset>
+            <legend ><?php echo $this->typeId ? 'Edit' : 'Add'; ?> Room Type</legend>
+        </fieldset>
+
+        <div class="form-group">
+            <label class="control-label col-sm-3" for="<?php echo $form->get('type_name')->getAttribute('id');?>">
+                <?php echo $form->get('type_name')->getLabel();?>
+            </label>
+            <div class="col-sm-4">
+                <?php echo $this->formInput($form->get('type_name'));?>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-3" for="<?php echo $form->get('apartment_list')->getAttribute('id');?>">
+                <?php echo $form->get('apartment_list')->getLabel();?>
+            </label>
+            <div class="col-sm-9">
+                <?php echo $this->formElement($form->get('apartment_list'));?>
+            </div>
+        </div>
+    </div>
+    <?php echo $this->formInput($form->get('form_type_id'));?>
+    <?php echo $this->form()->closeTag(); ?>
+</div>
+<div class="page-actions container">
+    <div class="row text-right">
+        <?php echo $this->formElement($form->get('save_button'));?>
+        <?php if ($this->typeId) {?>
+            <a href="javascript:void(0)" data-toggle="modal" data-target="#delete-modal" class="btn col-sm-2 col-xs-12 margin-left-10 pull-right btn-danger">Delete</a>
+        <?php } ?>
+    </div>
+</div>
+
+<!-- Delete type modal -->
+<div id="delete-modal" class="modal fade" aria-labelledby="myModalLabel">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-danger">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true"><span class="sr-only">Close</span>&times;</span>
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Delete Type <span id="delete_group"></span></h4>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <a class="btn btn-danger" id="rates_delete_button" href="<?php echo $this->url('apartel/type-rate/type/type-delete', ['type_id' => $this->typeId, 'apartel_id' => $apartelId])?>">Delete Room Type</a>
+            </div>
+        </div>
+    </div>
+</div>

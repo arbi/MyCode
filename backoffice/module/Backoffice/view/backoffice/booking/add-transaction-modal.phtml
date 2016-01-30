@@ -1,0 +1,331 @@
+<?php
+
+use Library\Utility\Helper;
+use Library\Finance\CreditCard\CreditCard;
+use Library\Constants\TextConstants;
+use DDD\Service\Booking\BankTransaction;
+
+$data = $this->data;
+$creditCards = $this->creditCards;
+
+?>
+<link href='//fonts.googleapis.com/css?family=Share+Tech+Mono' rel='stylesheet' type='text/css'>
+<div class="row">
+    <div class="col-sm-12">
+        <form id="transaction-form" name="transaction-form" class="transaction-form form-horizontal">
+        <div class="row">
+            <div class="col-sm-12">
+                <fieldset><legend>Transaction Details</legend></fieldset>
+                <div class="row">
+
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label class="col-sm-5 control-label">Type</label>
+                            <div class="col-sm-7">
+                                <select name="transaction_type" id="transaction_type" class="form-control notZero">
+                                    <option value="0">-- Choose --</option>
+                                    <?php foreach ($this->dataOther['listTransactionType'] as $typeId => $typeName) { ?>
+                                        <option value="<?=$typeId?>"><?=$typeName?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label class="col-sm-5 control-label">ACC (<?=$data->getApartmentCurrencyCode()?>)</label>
+                            <div class="col-sm-7">
+                                <span id="transaction_acc_amount_span" class="checkbox" style="display: none"></span>
+                                <input type="text" name="transaction_acc_amount" id="transaction_acc_amount" value="" class="charge_valid charge_required notZero form-control" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-4 bank-part soft-hide">
+                        <div class="form-group">
+                            <label class="col-sm-5 control-label">Bank (<span id="transaction_charge_currency"></span>)</label>
+                            <div class="col-sm-7">
+                                <div class="controls bank-transaction-part">
+                                    <label id="transaction_charge_amount_span" class="margin-top-7"></label>
+                                    <input type="hidden" name="transaction_charge_amount" id="transaction_charge_amount" value="" class="charge_valid charge_required notZero form-control" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <input type="hidden" id="cc_id" name="cc_id" value="0">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="row">
+                    <div class="col-sm-4" id="transactionStatus">
+                        <div class="form-group">
+                            <label class="col-sm-5 control-label">Status</label>
+                            <div class="col-sm-7">
+                                <select name="transaction_status" id="transaction_status" class="form-control notZero">
+                                    <option value="0">-- Choose --</option>
+                                    <?php
+                                        foreach (BankTransaction::$transactionStatus as $key => $type) {
+                                            if ($key != BankTransaction::BANK_TRANSACTION_STATUS_VOIDED) {
+                                    ?>
+                                        <option value="<?=$key?>"><?=$type?></option>
+                                    <?php
+                                            }
+                                        }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="col-sm-4 soft-hide" id="transactionPSP">
+                        <div class="form-group">
+                            <label class="col-sm-5 control-label">PSP</label>
+                            <div class="col-sm-7">
+                                <select name="transaction_psp" id="transaction_psp" class="form-control notZero">
+                                    <option value="0">-- Choose --</option>
+                                    <?php foreach ($this->dataOther['psp'] as $psp) { ?>
+                                        <option value="<?=$psp['id']?>"  data-is-batch="<?php echo $psp['batch']; ?>" data-rrn="<?=$psp['rrn']?>" data-auth="<?=$psp['authorization']?>" data-error="<?=$psp['error_code']?>" data-bank="<?=$psp['money_account_id']?>" data-bank-name="<?=$psp['money_account_name']?>" data-bank-currency="<?=$psp['code']?>" ><?=$psp['short_name']?></option>
+                                    <?php } ?>
+                                </select>
+                                <input type="hidden" value="0" name="transaction_money_account_id"  id="transaction_money_account_id" />
+
+                                <input type="hidden" value="" name="transaction_money_account_currency"  id="transaction_money_account_currency" />
+                                <input type="hidden" value="0" name="transaction_money_account_currency_rate"  id="transaction_money_account_currency_rate" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4 soft-hide" id="transactionBank">
+                        <div class="form-group">
+                            <label class="col-sm-5 control-label">Bank</label>
+                            <div class="col-sm-7">
+                                 <select name="transaction_chargeback_bank" id="transaction_chargeback_bank" class="form-control notZero">
+                                    <option value="0">-- Choose --</option>
+                                    <?php foreach ($this->bank_transaction_list as $key => $bank) { ?>
+                                        <option value="<?=$key?>" data-bank-currency="<?=$bank['money_account_currency']?>" ><?= $bank['money_account_name'] ?></option>
+                                    <?php  } ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4 soft-hide" id="bankDepositList">
+                        <div class="form-group">
+                            <label class="col-sm-5 control-label">Bank</label>
+                            <div class="col-sm-7">
+                                <select name="money_account_deposit_id" id="money_account_deposit_id" class="form-control notZero">
+                                    <option value="0">-- Choose --</option>
+                                    <?php foreach ($this->dataOther['money_account_list'] as $moneyAccount) { ?>
+                                        <option value="<?=$moneyAccount['id']?>" data-bank-currency="<?=$moneyAccount['money_code']?>" ><?=$moneyAccount['name']?> - <?=$moneyAccount['money_code']?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4 soft-hide" id="transactionCache">
+                        <div class="form-group">
+                            <label class="col-sm-5 control-label">Deducted From</label>
+                            <div class="col-sm-7">
+                                <input name="userCache" type="text" class="ui-autocomplete-input notBeckoffiseUser form-control" id="userCache" maxlength="150" autocomplete="off"/>
+                                <input name="userCache_id" type="hidden" id="userCache_id" value="0" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4 soft-hide" id="personalAccount">
+                        <div class="form-group">
+                            <label class="col-sm-5 control-label">Account</label>
+                            <div class="col-sm-7">
+                                <select name="personal_account_id" id="personal_account_id" class="form-control notZero">
+                                    <option value="0">-- Please Select --</option>
+                                    <?php foreach ($this->dataOther['person_account_list'] as $moneyAccount) { ?>
+                                    <option value="<?=$moneyAccount['id']?>" data-bank-currency="<?=$moneyAccount['money_code']?>" ><?=$moneyAccount['name']?> - <?=$moneyAccount['money_code']?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4 soft-hide" id="transaction_bank_name_div">
+                        <div class="form-group">
+                            <label class="col-sm-5 text-right"><span id="transaction_bank"></span></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="row">
+                    <div class="col-sm-4 soft-hide" id="money_direction_received_div">
+                        <div class="form-group">
+                            <label class="col-sm-5 control-label"><?= $this->info('Received by',TextConstants::RECEIVED_BY_MONEY_DIRECTION) ?></label>
+                            <div class="col-sm-7">
+                                <select name="money_direction_received" id="money_direction_received" class="form-control notZero">
+                                    <option value="0">-- Choose --</option>
+                                    <?php foreach (BankTransaction::$transactionMoneyDirection as $key => $moneyDirection) { ?>
+                                        <option value="<?=$key?>"><?=$moneyDirection?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-4 soft-hide" id="transaction_error_code_div">
+                        <div class="form-group">
+                            <label class="col-sm-5 control-label">Error Code</label>
+                            <div class="col-sm-7">
+                                <input type="text" name="transaction_error_code" id="transaction_error_code" class="form-control charge_required"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-4 soft-hide" id="transaction_rrn_div">
+                        <div class="form-group">
+                            <label class="col-sm-5 control-label">RRN / ID</label>
+                            <div class="col-sm-7">
+                                <input type="text" name="transaction_rrn" id="transaction_rrn" class="form-control charge_required"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-4 soft-hide" id="transaction_auth_div">
+                        <div class="form-group">
+                            <label class="col-sm-5 control-label">Auth Code</label>
+                            <div class="col-sm-7">
+                                <input type="text" name="transaction_auth_code" id="transaction_auth_code" class="form-control charge_required"/>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="cards-part soft-hide">
+        <fieldset><legend>Credit Cards</legend></fieldset>
+        <div class="row">
+            <?php if ($creditCards && !empty($creditCards)) { ?>
+                <div class="col-sm-offset-1 col-sm-4">
+                    <div class="row">
+                    <ul class="list-unstyled credit-card-list">
+                        <?php
+                        foreach ($creditCards as $creditCard) {
+                            $default = $cardType = '';
+
+                            if ($creditCard['is_default']) {
+                                $default = 'default';
+                            }
+
+                            if ($creditCard['card_status'] == \CreditCard\Service\Card::CC_STATUS_FRAUD) {
+                                $cardType = 'fraud-cc';
+                            } else {
+                                $cardType = 'valid-card';
+                            }
+
+                            $cardStatus = CreditCard::getCardStatusNameById($creditCard['card_status']);
+
+                            $cardSourceName = \CreditCard\Service\Card::getCreditCardSourceName($creditCard['source']);
+                            ?>
+                            <li class="clearfix <?php echo $default; ?> <?php echo $cardType;?> transition"
+                                data-number="<?=$creditCard['cc_number']?>"
+                                data-holder="<?=$creditCard['cc_holder_name']?>"
+                                data-cvc="<?=$creditCard['cc_cvc']?>"
+                                data-exp="<?=$creditCard['cc_exp_year']?>/<?=$creditCard['cc_exp_month']?>"
+                                data-card-id="<?=$creditCard['cc_id']; ?>"
+                                data-partner-id="<?=$creditCard['partner_id']; ?>">
+                                <div class="ribbon-container">
+                                    <div class="ribbon">
+                                        <a href="#"><i class="glyphicon glyphicon-star"></i></a>
+                                    </div>
+                                </div>
+                                <div class="card-type">
+                                    <img src="<?php echo $this->basePath(); ?>/img/cc-icons/<?php echo CreditCard::getNameById($creditCard['card_type'], $creditCard['cc_number']); ?>.png">
+                                </div>
+                                <div class="card-display-name ellipsis">Card ID <?php echo $creditCard['cc_id']; ?></div>
+                                <div class="received">
+                                    <span class="glyphicon glyphicon-calendar" data-toggle="tooltip" title="Received: <?php echo $creditCard['date_provided']; ?>"></span>
+
+                                    Source: <b><?= $cardSourceName ?></b>
+                                </div>
+                                <div class="status <?php echo $cardStatus[0]; ?>" data-toggle="tooltip" title="<?php echo $cardStatus[1]; ?>" data-status="<?php echo $creditCard['card_status']; ?>"></div>
+
+                                <?php if ($creditCard['transaction_status'] == CreditCard::TRANSACTION_VALID) { ?>
+                                    <div class="transaction-status transaction-status-approved">
+                                        <span class="glyphicon glyphicon-ok" data-toggle="tooltip" title="Valid"></span>
+                                    </div>
+                                <?php } elseif ($creditCard['transaction_status'] == CreditCard::TRANSACTION_INVALID) { ?>
+                                    <div class="transaction-status transaction-status-declined">
+                                        <span class="glyphicon glyphicon-remove" data-toggle="tooltip" title="Invalid"></span>
+                                    </div>
+                                <?php } ?>
+                            </li>
+                        <?php } ?>
+                    </ul>
+                </div>
+                </div>
+                <div class="col-sm-offset-2 col-sm-4">
+                    <div class="row">
+                    <div class="credit-card soft-hide" data-card-id="0" data-card-mode="hidden"
+                         data-url-status="<?php echo $this->url('backoffice/default', array('controller' => 'booking', 'action' => 'change-cc-status')); ?>"
+                         data-url-request="<?php echo $this->url('backoffice/default', array('controller' => 'booking', 'action' => 'request-cc-details')); ?>">
+                        <div class="card-header">
+                            <div class="card-display-name"></div>
+                            <div class="btn-group status-control">
+                                <button class="btn btn-default btn-xs dropdown-toggle" type="button" data-toggle="dropdown" data-loading-text="Loading...">
+                                    <span class="ellipsis">Contact Partner</span> <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" role="menu">
+                                    <?php foreach (CreditCard::getCardStatuses() as $cardStatus => $cardStatusName) { ?>
+                                        <li data-value="<?php echo $cardStatus; ?>" data-status="status <?php echo $cardStatusName[0]; ?>"><a href="#"><?php echo $cardStatusName[1]; ?></a></li>
+                                    <?php } ?>
+                                </ul>
+                            </div>
+                            <div class="status"></div>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-number" data-last-digits="XX XXXX XXXX XXXX"></div>
+                            <a class="btn btn-primary btn-xs request-details">Request Details</a>
+                            <div class="card-cvc" data-default-cvc="XXX">CVC:<span></span></div>
+                            <div class="card-exp" data-default-exp="XX/XX">EXP:<span></span></div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="card-holder-name ellipsis" data-default-holder="----- -----"></div>
+                            <div class="card-type">
+                                <img src="">
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                    <div class="row">&nbsp;</div>
+                    <div class="row soft-hide cc-partner-changer">
+                        <div class="form-group">
+                            <label class="col-sm-4 control-label">Cardholder</label>
+                            <div class="col-sm-6">
+                                <select id="ginosi-or-partner" class="form-control" name="ginosi-or-partner">
+                                    <option value="1" <?php if($creditCard['partner_id'] == 1) echo 'selected="selected"';?>>Customer</option>
+                                    <option value="<?= $this->dataOther['partner_id'] ?>" <?php if($creditCard['partner_id'] > 1) echo 'selected="selected"';?>><?= $this->dataOther['partner_name'] ?></option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            <?php } else { ?>
+                <div class="text-center"><span class="label label-danger">No Credit Card Provided</span></div>
+            <?php } ?>
+        </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <fieldset>
+                    <legend>Comment</legend>
+                </fieldset>
+                <textarea rows="3" name="transaction_charge_comment" id="transaction_charge_comment" class="form-control"></textarea>
+            </div>
+        </div>
+        <input type="hidden" name="chargeType" id="chargeType" value="normal" />
+        <input type="hidden" name="transactionClick" id="transactionClick" value="" />
+    </form>
+    </div>
+</div>

@@ -1,0 +1,311 @@
+<?php
+
+use DDD\Service\Apartment\Rate as RateService;
+use Library\Utility\Helper;
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($this->layout()->apartmentName . ' - Apartment Calendar');
+
+$this->headLink()
+	->appendStylesheet($this->basePath() . '/css/apartment/common.css')
+    ->appendStylesheet($this->basePath() . '/css/apartment/calendar.css');
+
+$this->InlineScript()
+	->appendFile($this->basePath() . '/js/pages/apartment.calendar.js');
+?>
+<script xmlns="http://www.w3.org/1999/html">
+	var GLOBAL_TOGGLE_AVAILABILITY = '<?php echo $this->urlToggleAvailability; ?>';
+	var GLOBAL_UPDATE_PRICES = '<?php echo $this->urlUpdatePrices; ?>';
+	var GLOBAL_MANAGER = '<?=$this->roleManager?>';
+</script>
+
+<div class="row">
+    <div class="col-sm-12">
+        <hr>
+        <?= $this->apartmentNavigation($this->apartmentId, $this->apartmentStatus, 'apartment/calendar')?>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Month navigation -->
+    <div class="col-sm-2">
+        <?= $this->inventoryCalendarMonthNavigation($this->apartmentId, $this->year, $this->month)?>
+
+        <ul class="rate-list">
+        <?php
+            $rates = [];
+            $colorCounter = 1;
+
+            foreach ( $this->rates as $key => $rate ) {
+                $rate->setColor($colorCounter++);
+                $rates [] = $rate;
+
+                $parentSymbol = '';
+                if ($rate->getType() == RateService::TYPE1) {
+                    $parentSymbol = '<span class="glyphicon glyphicon-heart-empty"></span>';
+                }
+                ?>
+                <li class="rate-list-item <?= ($rate->isActive()) ?: 'disabled' ?>" data-color-number="<?= $rate->getColor() ?>">
+                    <span class="rate-list-icon color<?= $rate->getColor() ?>" <?= ($rate->isActive()) ?: 'style="opacity: 0; visibility: hidden;"'?>></span>
+                    <?= $rate->getName() . ' ' . $parentSymbol ?>
+                </li>
+        <?php } ?>
+        </ul>
+
+    </div>
+
+    <!-- Week Days -->
+    <div class="col-sm-10">
+        <div class="row_week">
+            <div class="col_week_day">
+                <div class="calendar-header-item bg-primary">Sunday</div>
+            </div>
+            <div class="col_week_day">
+                <div class="calendar-header-item bg-primary">Monday</div>
+            </div>
+            <div class="col_week_day">
+                <div class="calendar-header-item bg-primary">Tuesday</div>
+            </div>
+            <div class="col_week_day">
+                <div class="calendar-header-item bg-primary">Wednesday</div>
+            </div>
+            <div class="col_week_day">
+                <div class="calendar-header-item bg-primary">Thursday</div>
+            </div>
+            <div class="col_week_day">
+                <div class="calendar-header-item bg-primary">Friday</div>
+            </div>
+            <div class="col_week_day">
+                <div class="calendar-header-item bg-primary row-last-item">Saturday</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar -->
+    <div class="col-sm-10 calendar-container" style="position: relative">
+        <div id="locker"></div>
+        <div class="row_week">
+        <?php
+
+        $calendarFirstDayShift = 1;
+        $warning = 0;
+
+        if ($this->dayOfWeek) {
+            $calendarFirstDayShift = 1;
+        }
+
+        for ($i = 0; $i < $this->dayOfWeek; $i ++) {
+            echo '<div class="col_week_day"><div class="calendar-day-item-empty"></div></div>';
+        }
+
+        for ($i = 1; $i <= $this->givenMonthDaysCount; $i ++) {
+            $availabilityCounter = 0;
+            $lastItem = $isLockPrice = '';
+
+            if (($this->dayOfWeek + $i - $calendarFirstDayShift + 1) % 7 == 0) {
+                $lastItem = 'row-last-item';
+            }
+
+            $tpl = '<span class="rate-information rate-color rate-color-important color%1$s" data-rate-id="%2$s" data-status="%3$s" data-type="%8$s" data-price-percent="%7$s" date-lock-price="%9$s" style="%10$s">
+                        <span class="rate-icon %4$s"></span>
+                        <span class="rate-price" data-price-decimal="%5$s">%6$s</span>
+                    </span>';
+            $ratesHTML = '';
+
+            foreach ( $rates as $rate ) {
+                $goodLookingDate = $this->year . '-' . str_pad ( $this->month, 2, '0', STR_PAD_LEFT ) . '-' . str_pad ( $i, 2, '0', STR_PAD_LEFT );
+
+                if (isset($this->inventory[$rate->getID()]) && isset($this->inventory[$rate->getID()][$goodLookingDate])) {
+                    $availability = $this->inventory[$rate->getID()][$goodLookingDate]['availability'];
+                    $price = $this->inventory[$rate->getID()][$goodLookingDate]['price'];
+
+                    if (!$isLockPrice && $rate->getType() == RateService::TYPE1 && $this->inventory[$rate->getID()][$goodLookingDate]['isLockPrice']) {
+                        $isLockPrice = '<div class="lock-price-position"><span class="glyphicon glyphicon-lock"></span></div>';
+                    }
+                } else {
+                    $availability = 0;
+                    $warning++;
+                    $price = 'N/A';
+                    $isLockPrice = '';
+                }
+
+                if ($rate->getType() == RateService::TYPE1) {
+                    $availabilityCounter += $availability;
+                    $isParent = 1;
+                } else {
+                    $isParent = 0;
+                }
+
+                $availabilityColor = 'red';
+                $rateStatus = 'close';
+
+                if ($availability) {
+                    $rateStatus = 'open';
+                    $availabilityColor = 'green';
+                }
+
+                $ratePriceStyle = ($rate->isActive()) ? '' : 'opacity: 0; visibility: hidden;';
+
+                $ratesHTML .= sprintf (
+                    $tpl,
+                    $rate->getColor (),
+                    $rate->getID(),
+                    $rateStatus,
+                    $availabilityColor,
+                    $price,
+                    floor($price),
+                    Helper::getDateWeekType($goodLookingDate) == 'weekend_percent' ? $rate->getWeekendPercent() : $rate->getWeekPercent(),
+                    $isParent,
+                    $isLockPrice != '' ? 1 : 0,
+                    $ratePriceStyle
+                );
+            }
+
+            $status = $availabilityCounter ? 'open' : 'close';
+            $calendarItemClass = $availabilityCounter ? 'bg-success' : 'bg-danger';
+            $date = $this->year . '-' . str_pad($this->month, 2, '0', STR_PAD_LEFT) . '-' . str_pad($i, 2, '0', STR_PAD_LEFT);
+            $openStyle = ($status == 'open') ? 'style="display:none"' : '';
+            $closeStyle = ($status == 'close') ? 'style="display:none"' : '';
+            // init locker protocol
+            $availabilityToggleActions = '
+                            <div class="action-bar">
+                                <ul class="day-inventory-actions">
+                                    <li ' . $openStyle .'>
+                                        <a class="action-item action-av-toggle" href="javascript:void(0)" data-action="open" data-title="Open&nbsp;Availability" data-content="Open Availability to babla...."><small>open</small></a>
+                                    </li>
+                                    <li ' . $closeStyle .'>
+                                        <a class="action-item action-av-toggle" href="javascript:void(0)" data-action="close" data-title="Close&nbsp;Availability" data-content="ttt"><small>close</small></a>
+                                    </li>
+                                </ul>
+                            </div>';
+
+            if ($date < date('Y-m-d', strtotime('-1 days'))) {
+                $locker = '<div class="locker"></div>';
+                $availabilityMarkup = '';
+            } else {
+                $locker = '';
+                $availabilityMarkup = ($this->roleManager == 'yes') ? $availabilityToggleActions : '';
+            }
+            $date = date('Y-m-d l', strtotime($date));
+            echo '
+                <div class="col_week_day">
+                    <div class="calendar-day-item ' . $lastItem . ' ' . $calendarItemClass . '" data-date="' . $date . '" data-status="' . $status . '">
+                        ' . $locker . '
+                        <div class="calendar-item-header">
+                            <div class="day-of-month">' . $i . '</div>
+                            <div class="availability-badge availability-badge-' . $status . '">' . $availabilityMarkup . '</div>
+                        </div>
+                        <div class="rates-container">
+                            ' . $ratesHTML . '
+                            <div class="clearfix"></div>
+                        </div>
+                        ' . $isLockPrice . '
+                    </div>
+                </div>';
+        }
+        ?>
+        </div>
+    </div>
+
+</div>
+
+<div class="container page-actions">
+    <div class="row text-right">
+        <?php if (!$this->isConnected) { $disabled = 'disabled="diabled"';} else { $disabled = '';} ?>
+        <a href="javascript:void(0)" id="synchronizeMonth" class="btn btn-primary pull-right col-sm-2 col-xs-12 margin-left-10"
+           data-from="<?=$this->monthStart?>"
+           data-to="<?=$this->monthEnd?>"
+           data-url="<?=$this->url('apartment/calendar/synchronize-month', ['apartment_id' => $this->apartmentId, 'year' => date('Y'), 'month' => date('m')]); ?>"
+            <?= $disabled ?>>Synchronize this month</a>
+    </div>
+</div>
+<div class="row"></div>
+
+<div id="update-prices" class="modal fade" tabindex="-1" aria-labelledby="update-prices">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-primary">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                </button>
+                <h4 id="myModalLabel">Update Prices <small class="modal-selected-date"></small></h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" id="rate-price-form">
+                    <input type="hidden" name="date" value="">
+                    <?php foreach ($rates as $rate) { ?>
+                    <div class="form-group">
+                        <label class="control-label col-sm-4"><?php echo $rate->getName(); ?></label>
+                        <div class="col-sm-4">
+                            <?php if ($rate->getType() == RateService::TYPE1) {?>
+                            <input type="text" name="parent_price" id="parent_price" placeholder="Price" class="form-control">
+                            <?php } else { ?>
+                            <div class="checkbox child-part">
+                                <span id="rate_<?php echo $rate->getID(); ?>" class="child-price"></span>
+                                <small class="text-muted margin-left-10">
+                                    <span id="percent_<?php echo $rate->getID(); ?>" class="child-percent"></span>%
+                                </small>
+                            </div>
+                            <?php } ?>
+                        </div>
+                        <?php if (!$rate->isActive()) { ?>
+                            <small class="label label-default label-inactive-rate">inactive</small>
+                        <?php } ?>
+                    </div>
+                    <?php } ?>
+                    <div class="form-group">
+                        <label class="control-label col-sm-4" for="lock_price">Lock Price</label>
+                        <div class="col-sm-4 checkbox">
+                            <input type="checkbox" name="lock_price" id="lock_price">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <button class="btn btn-primary" id="rate-price-form-update">Update</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="closeAvailability" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-danger">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 id="closeAvailabilityModalLabel" class="modal-title">Are you sure want to close this availability?</h4>
+            </div>
+            <div class="modal-body">
+                <div class="col-sm-12">
+                    <input id="closeAvailabilityDate" type="hidden" value="">
+                    <textarea id="closeAvailabilityComment" class="form-control" rows="5" placeholder="Write comments here"></textarea>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true" id="closeAvailabilityCancel">Cancel</button>
+                <button class="btn btn-danger" id="closeAvailabilitySubmit" disabled="disabled" data-loading-text="Closing...">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php
+	if ($warning) {
+?>
+<script>
+	$(function(){
+		new PNotify({
+			title: 'Availability table is broken.',
+			text: 'Please inform development team to repair and fix this problem.',
+			type: 'error',
+			history: false,
+			icon: true,
+			hide: false,
+			sticker: false
+		});
+	});
+</script>
+<?php
+	}
+?>

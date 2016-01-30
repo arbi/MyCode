@@ -1,0 +1,58 @@
+<?php
+	$this->layout()->viewTitle  = 'Apartment Groups';
+	$this->headTitle()->setSeparator(' - ');
+	$this->headTitle($this->layout()->viewTitle);
+	$this->layout()->breadcrumb = $this->breadcrumb([
+		['Apartment'],
+		['Groups']
+	]);
+
+    $this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css');
+
+    $this->InlineScript()
+        ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+        ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+        ->appendFile($this->basePath() . '/js/pages/apartment.group.index.js');
+?>
+<script>
+    var DATATABLE_AJAX_SOURCE = "<?= $this->url('backoffice/default', ['controller' => 'apartment-group', 'action' => 'ajax-group-list'])?>";
+</script>
+<div id="status-switch">
+    <div class="btn-group fn-buttons pull-right">
+        <a href="#all" class="btn btn-sm btn-default" data-status="all">All</a>
+        <a href="#active" class="btn btn-sm btn-default active" data-status="active">Active</a>
+        <a href="#inactive" class="btn btn-sm btn-default" data-status="inactive">Inactive</a>
+    </div>
+    <input type="hidden" name="show_status" id="show-status" value="1">
+</div>
+<table id="table_apartment_groups" data-is-manager="<?php echo ($this->isGlobalApartmentGroupManager || $this->isAtLeaseManagerOfOneGroup) ? 1 : 0 ?>" class="table table-striped table-bordered table-condensed table-hover">
+    <thead>
+        <tr>
+            <th>Status</th>
+            <th>Name</th>
+            <th>Count</th>
+	        <th>Country</th>
+	        <th class="hidden-xs">Cost</th>
+	        <th class="hidden-xs">Concierge</th>
+	        <th class="hidden-xs">Building</th>
+	        <th class="hidden-xs">Performance</th>
+	        <th class="hidden-xs">Apartel</th>
+            <?php if ($this->isGlobalApartmentGroupManager || $this->isAtLeaseManagerOfOneGroup) { ?>
+            <th></th>
+            <?php } ?>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<?php if ($this->isGlobalApartmentGroupManager) { ?>
+    <div class="container page-actions">
+        <div class="row text-right">
+            <a href="<?= $this->url('backoffice/default', ['controller' => 'concierge', 'action' => 'edit'])?>" class="btn btn-primary col-sm-2 col-xs-12 pull-right">Add New Group</a>
+        </div>
+    </div>
+<?php } ?>

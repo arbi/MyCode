@@ -1,0 +1,18 @@
+ul.nav-apartment-group {
+    margin-bottom: 20px;
+}
+
+.labale-mid-size {
+    padding: 6px 10px !important;
+    margin-right: -2px !important;
+    line-height: 30px !important;;
+}
+
+a:link.apartment-lablel {
+    text-decoration: none !important;
+}
+
+.preview {
+    display: inline-block;
+    float: right;
+}

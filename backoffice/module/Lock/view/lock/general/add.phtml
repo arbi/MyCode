@@ -1,0 +1,86 @@
+<?php
+use Library\Constants\DomainConstants;
+$basePath = DomainConstants::BO_DOMAIN_NAME;
+	$this->layout()->viewTitle = $this->pageTitle;
+    $this->headTitle()->setSeparator(' - ');
+    $this->headTitle($this->pageTitle);
+	$this->layout()->breadcrumb = $this->breadcrumb([
+		['Apartments'],
+		['Lock Management', $this->url('lock', ['controller' => 'general'])],
+		[$this->pageTitle]
+	]);
+
+	$form = $this->form;
+
+$this->headLink()
+    ->appendStylesheet($this->basePath() . '/css/pages/lock-search.css');
+
+    $this->InlineScript()
+		->appendFile($this->basePath() . '/js/validation/lock.edit.js')
+		->appendFile($this->basePath() . '/js/pages/lock.add.js');
+?>
+<script>
+    var GENERAL_GET_SETTINGS_FOR_TYPE = '<?=$this->url('lock/ajax-get-settings-by-type')?>';
+    var GENERAL_SAVE_NEW_LOCK         = '<?=$this->url('lock/ajax-save-new-lock')?>';
+    var GENERAL_RETURN_PATH           = '<?=$this->url('lock')?>';
+</script>
+<div class="row">
+    <?= $this->form()->openTag($form)?>
+    <div class="col-sm-12">
+        <fieldset name="General">
+            <legend>General</legend>
+            <div class="form-group">
+                <label for="<?php echo $form->get('name')->getAttribute('id'); ?>" class="col-sm-2 control-label">
+                    <?php echo $form->get('name')->getLabel(); ?> <?php echo $this->required()?>
+                </label>
+                <div class="col-sm-9">
+                    <?php echo $this->formInput($form->get('name')); ?>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="<?php echo $form->get('description')->getAttribute('id'); ?>" class="col-sm-2 control-label">
+                    <?php echo $form->get('description')->getLabel(); ?>
+                </label>
+                <div class="col-sm-9">
+                    <?php echo $this->formTextarea($form->get('description')); ?>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="<?php echo $form->get('type_id')->getAttribute('id'); ?>" class="col-sm-2 control-label">
+                    <?php echo $form->get('type_id')->getLabel(); ?> <?php echo $this->required()?>
+                </label>
+                <div class="col-sm-9">
+                    <?php echo $this->formSelect($form->get('type_id')); ?>
+                    <?php foreach($this->allLockExplanations as $key=>$value) :?>
+                        <p class="help-block" data-id="<?=$key?>" style="display:none;"><?= $value ?></p>
+                    <?php endforeach;?>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="is_physical">
+                    <?= $this->info('Physical', 'Physical locks can only be assigned to one Entity.'); ?>
+                </label>
+                <div class="col-sm-10 checkbox">
+                    <?php echo $this->formElement($form->get('is_physical')); ?>
+                </div>
+            </div>
+        </fieldset>
+            </div>
+
+
+    <div class="col-sm-12">
+        <fieldset name="Settings">
+            <legend>Settings</legend>
+             <div id="additional-settings">
+                 <div class="alert alert-warning" role="alert"><span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span> There is no type chosen</div>
+             </div>
+        </fieldset>
+    </div>
+    <div class="container page-actions">
+        <div class="row text-right">
+            <?php echo $this->formSubmit($form->get('submit')); ?>
+        </div>
+    </div>
+    <?= $this->form()->closeTag()?>
+</div>

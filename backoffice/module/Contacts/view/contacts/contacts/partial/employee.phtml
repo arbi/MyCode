@@ -1,0 +1,196 @@
+<?php
+/**
+ * @var \DDD\Domain\User\User $card
+ */
+
+use Library\Constants\Constants;
+
+
+if (!isset($card) || empty($card)) {
+    return null;
+}
+?>
+
+<div class="bs-callout bs-callout-primary">
+    <h4>
+        <span>
+            <?php echo $card->getFullName(); ?>
+        </span>
+    </h4>
+    <table class="table table-condensed">
+
+
+        <?php if (!empty($card->getPosition())) { ?>
+        <tr>
+            <td>Position</td>
+            <td>
+                <span id="contact-position">
+                    <?php echo $card->getPosition(); ?>
+                </span>
+            </td>
+        </tr>
+        <?php } ?>
+
+        <?php if (!empty($card->getCity())) { ?>
+        <tr>
+            <td>City</td>
+            <td>
+                <span>
+                    <?php echo $card->getCity(); ?>
+                </span>
+            </td>
+        </tr>
+        <?php } ?>
+
+        <?php if (!empty($card->getLivingCity())) { ?>
+            <tr>
+                <td>Living City</td>
+                <td>
+                <span>
+                    <?php echo $card->getLivingCity(); ?>
+                </span>
+                </td>
+            </tr>
+        <?php } ?>
+
+        <?php if ($card->getInternalNumber() > 0 && $this->hasProfileFullViewer) { ?>
+            <tr>
+                <td>Extension</td>
+                <td>
+                <span>
+                    <?php echo $card->getInternalNumber(); ?>
+                </span>
+                </td>
+            </tr>
+        <?php } ?>
+
+        <?php if (!empty($card->getAddressPermanent())) { ?>
+            <tr>
+                <td>Permanent Address</td>
+                <td>
+                    <span>
+                        <?php echo $card->getAddressPermanent(); ?>
+                    </span>
+                </td>
+            </tr>
+        <?php } ?>
+
+        <?php if (!empty($card->getAddressResidence())) { ?>
+            <tr>
+                <td>Residence Address</td>
+                <td>
+                    <span>
+                        <?php echo $card->getAddressResidence(); ?>
+                    </span>
+                </td>
+            </tr>
+        <?php } ?>
+
+
+        <?php if (!empty($card->getPersonal_phone()) && $this->hasProfileFullViewer) { ?>
+            <tr>
+                <td>Personal Phone</td>
+                <td>
+                    <span>
+                        <?php $mobilePhoneNumber = '+' .  $card->getPersonal_phone()?>
+                        <?php if (($userInternalNumber && $card->getBusiness_phone())) { ?>
+                        <a href="<?php echo sprintf(Constants::GINOSI_CALL_CENTER_URL, $userInternalNumber, filter_var($card->getPersonal_phone(), FILTER_SANITIZE_NUMBER_INT)); ?>" target="_blank">
+                            <?php echo $mobilePhoneNumber; ?>
+                        </a>
+                        <?php } else { ?>
+                            <span><?php echo $mobilePhoneNumber; ?></span>
+                        <?php } ?>
+                    </span>
+                </td>
+            </tr>
+        <?php } ?>
+
+        <?php if (!empty($card->getBusiness_phone())) { ?>
+            <tr>
+                <td>Business Phone</td>
+                <td>
+                    <span>
+                        <?php $mobilePhoneNumber = '+' .  $card->getBusiness_phone()?>
+                        <?php if (($userInternalNumber && $card->getBusiness_phone())) { ?>
+                        <a href="<?php echo sprintf(Constants::GINOSI_CALL_CENTER_URL, $userInternalNumber, filter_var($card->getBusiness_phone(), FILTER_SANITIZE_NUMBER_INT)) ; ?>" target="_blank">
+                            <?php echo $mobilePhoneNumber; ?>
+                        </a>
+                        <?php } else { ?>
+                        <span><?php echo $mobilePhoneNumber; ?></span>
+                        <?php } ?>
+                    </span>
+                </td>
+            </tr>
+        <?php } ?>
+
+        <?php if (!empty($card->getEmergency_phone()) && $this->hasProfileFullViewer) { ?>
+            <tr>
+                <td>Emergency Phone</td>
+                <td>
+                    <span>
+                        <?php $mobilePhoneNumber = '+' .  $card->getEmergency_phone()?>
+                        <?php if (($userInternalNumber && $card->getEmergency_phone())) { ?>
+                        <a href="<?php echo sprintf(Constants::GINOSI_CALL_CENTER_URL, $userInternalNumber, filter_var($card->getEmergency_phone(), FILTER_SANITIZE_NUMBER_INT)); ?>" target="_blank">
+                            <?php echo $mobilePhoneNumber; ?>
+                        </a>
+                        <?php } else { ?>
+                            <span><?php echo $mobilePhoneNumber; ?></span>
+                        <?php } ?>
+                    </span>
+                </td>
+            </tr>
+        <?php } ?>
+
+        <?php if (!empty($card->getHouse_phone()) && $this->hasProfileFullViewer) { ?>
+            <tr>
+                <td>House Phone</td>
+                <td>
+                    <span>
+                        <?php $mobilePhoneNumber = '+' .  $card->getHouse_phone()?>
+                        <?php if (($userInternalNumber && $card->getHouse_phone())) { ?>
+                        <a href="<?php echo  sprintf(Constants::GINOSI_CALL_CENTER_URL, $userInternalNumber, filter_var($card->getHouse_phone(), FILTER_SANITIZE_NUMBER_INT)); ?>" target="_blank">
+                            <?php echo $mobilePhoneNumber; ?>
+                        </a>
+                        <?php } else { ?>
+                            <span><?php echo $mobilePhoneNumber; ?></span>
+                        <?php } ?>
+                    </span>
+                </td>
+            </tr>
+        <?php } ?>
+
+
+        <?php if (!empty($card->getEmail())) { ?>
+            <tr>
+                <td>Email</td>
+                <td>
+                    <a  href="mailto:<?php echo $card->getEmail(); ?>" target="_blank">
+                        <?php echo $card->getEmail(); ?>
+                    </a>
+                </td>
+            </tr>
+        <?php } ?>
+
+        <?php if (!empty($card->getAlt_email()) && $this->hasProfileFullViewer) { ?>
+            <tr>
+                <td>Alternative Email</td>
+                <td>
+                    <a  href="mailto:<?php echo $card->getAlt_email(); ?>" target="_blank">
+                        <?php echo $card->getAlt_email(); ?>
+                    </a>
+                </td>
+            </tr>
+        <?php } ?>
+
+    </table>
+    <?php if ($this->hasGlobal && $this->hasProfileFullViewer) { ?>
+    <div class="text-right">
+        <a
+            class="btn btn-primary btn-sm hand-task-button"
+            href="/user/edit/<?php echo $card->getId() ?>"
+            target="_blank">
+            Edit
+        </a>
+    </div>
+    <?php } ?>
+</div>

@@ -1,0 +1,66 @@
+<?php
+use Library\Constants\DomainConstants;
+
+$imgDomain = DomainConstants::IMG_DOMAIN_NAME;
+
+$this->headTitle($this->textline(1368))->setSeparator(' - ');
+$this->headMeta($this->textline(1462), 'description');
+$this->headMeta($this->serverUrl() . '/s/logo/500x500_white.png', 'og:image');
+$this->headMeta($this->serverUrl() . '/s/logo/500x500_white.png', 'image');
+$this->headLink()->appendStylesheet($this->basePath() . '/css/jobs.css');
+$this->inlineScript()->appendFile($this->basePath() . '/js/jobs.js')
+
+?>
+    </div>
+</div>
+<div class="container-fluid carousel slide carousel-fade hidden-xs" id="jobs-cover" class="grid-sep" data-ride="carousel">
+    <!-- Carousel items -->
+    <div class="carousel-inner">
+        <div class="active item"></div>
+        <div class="item"></div>
+        <div class="item"></div>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12 fix-textline">
+            <h1>
+                <?=$this->textline(1480)?>
+            </h1>
+                <?=$this->textline(1481)?>
+        </div>
+    </div>
+
+    <div class="row">
+    <?php $i = 0; ?>
+    <?php foreach($jobs as $cityId => $cityJobs) { ?>
+        <?php if(++$i % 2) { ?>
+    </div>
+    <div class="row job-city-row">
+        <?php } ?>
+        <div class="col-sm-6">
+            <div class="media">
+                <div class="pull-left">
+                    <?php $imgStyle = $cityJobs['img'] ? 'background-image: url(//' . $imgDomain . $cityJobs['img'] . ')' : 'none'; ?>
+                    <div class="media-object city-img" style="<?= $imgStyle ?>" alt="<?= $this->cityname($cityId) ?>" title="<?= $this->cityname($cityId) ?>"></div>
+                </div>
+                <div class="media-body">
+                    <h3 class="media-heading">
+                        <b><?= $this->cityname($cityId) ?>,</b>
+                        <small><?=$this->countryname($cityJobs['country_id'])?></small>
+                    </h3>
+                    <ul class="jobs-list">
+                    <?php foreach ($cityJobs['jobs'] as $job) { ?>
+                        <li>
+                            <a href="/jobs/<?=$job['slug'] ?>" title="<?= $job['title'] ?>">
+                                <?= $job['title'] ?>
+                            </a>
+                        </li>
+                    <?php } ?>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    <?php } ?>
+    </div>
+</div>

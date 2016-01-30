@@ -1,0 +1,277 @@
+<?php
+    //Form object
+    $form = $this->form;
+    $form->prepare();
+?>
+<!-- Controlled form display -->
+
+<!-- Form opening tag -->
+<?php echo $this->form()->openTag($form); ?>
+
+<!-- First Row -->
+<div class="row">
+    <!-- Reservation number -->
+    <div class="col-sm-3">
+            <div class="form-group">
+        <?php echo $this->formInput($form->get('res_number')); ?>
+            </div>
+    </div>
+
+    <!-- Status -->
+    <div class="col-sm-3">
+        <div class="form-group">
+            <?php echo $this->formSelect($form->get('status')); ?>
+        </div>
+    </div>
+
+    <!-- Arrival Status -->
+    <div class="col-sm-3">
+        <div class="form-group">
+            <?php echo $this->formSelect($form->get('arrival_status')); ?>
+        </div>
+    </div>
+
+    <!-- State -->
+    <div class="col-sm-3">
+        <div class="form-group">
+            <?php echo $this->formSelect($form->get('overbooking_status')); ?>
+        </div>
+    </div>
+</div>
+
+<!-- Second Row -->
+<div class="row">
+    <!-- Payment Model -->
+    <div class="col-sm-3">
+        <div class="form-group">
+            <?php echo $this->formSelect($form->get('payment_model')); ?>
+        </div>
+    </div>
+
+    <!-- Partners -->
+    <div class="col-sm-3">
+        <div class="form-group">
+            <?php echo $this->formSelect($form->get('partner_id')); ?>
+        </div>
+    </div>
+
+    <!-- Affiliate Reference -->
+    <div class="col-sm-3">
+        <div class="form-group">
+            <?php echo $this->formInput($form->get('partner_reference')); ?>
+        </div>
+    </div>
+
+    <!-- Show Standings -->
+    <div class="col-sm-3 booking_checkbox">
+        <div class="form-group">
+            <?php echo $this->formSelect($form->get('no_collection')); ?>
+        </div>
+    </div>
+</div>
+
+<!-- Third Row -->
+<div class="row">
+    <!-- Booking date -->
+    <div class="col-sm-4">
+        <div class="form-group">
+            <div class="input-group">
+                <label class="input-group-addon" for="booking_date">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                </label>
+                <?php echo $this->formInput($form->get('booking_date')); ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- Arrival date -->
+    <div class="col-sm-4">
+        <div class="form-group">
+            <div class="input-group">
+                <label class="input-group-addon" for="arrival_date">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                </label>
+                <?php echo $this->formInput($form->get('arrival_date')); ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- Departure date -->
+    <div class="col-sm-4">
+        <div class="form-group">
+            <div class="input-group">
+                <label class="input-group-addon" for="departure_date">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                </label>
+                <?php echo $this->formInput($form->get('departure_date')); ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fourth Row -->
+<div class="row">
+    <!-- Apartment Location -->
+    <div class="col-sm-4">
+        <div class="form-group">
+            <?php echo $this->formInput($form->get('apt_location')); ?>
+            <?php echo $this->formHidden($form->get('apt_location_id')); ?>
+        </div>
+    </div>
+
+   <!-- Apartment Groups -->
+    <div class="col-sm-4">
+            <div class="form-group">
+                <?php echo $this->formElement($form->get('group')); ?>
+                <?php echo $this->formElement($form->get('group_id')); ?>
+            </div>
+    </div>
+
+    <!-- Reservation types -->
+    <div class="col-sm-4">
+            <div class="form-group">
+                <?php echo $this->formSelect($form->get('apartel_id')); ?>
+            </div>
+    </div>
+</div>
+
+<!-- Fifth Row -->
+<div class="row">
+    <!-- Product -->
+    <div class="col-sm-6">
+        <div class="form-group">
+            <div class="input-group">
+                <?php echo $this->formInput($form->get('product')); ?>
+                <label class="input-group-btn" for="product">
+                    <a href="javascript:void(0)" class="btn btn-default apt-filter-btn">
+                        <span class="glyphicon glyphicon-filter" data-toggle="popover" data-container="body" title="Filter is ON" data-content="Autocomplete will search among <b>active</b> apartments only."></span>
+                        <span class="glyphicon glyphicon-asterisk hide" data-toggle="popover" data-container="body" title="Filter is OFF" data-content="Autocomplete will search among all apartments."></span>
+                    </a>
+                </label>
+            </div>
+            <?php echo $this->formHidden($form->get('product_id')); ?>
+            <?php echo $this->formHidden($form->get('product_type')); ?>
+        </div>
+    </div>
+
+    <div class="col-sm-6">
+        <div class="form-group">
+            <div class="input-group">
+                <?php echo $this->formInput($form->get('assigned_product')); ?>
+                <label class="input-group-btn" for="assigned_product">
+                    <a href="javascript:void(0)" class="btn btn-default apt-filter-btn">
+                        <span class="glyphicon glyphicon-filter" data-toggle="popover" data-container="body" title="Filter is ON" data-content="Autocomplete will search among <b>active</b> apartments only."></span>
+                        <span class="glyphicon glyphicon-asterisk hide" data-toggle="popover" data-container="body" title="Filter is OFF" data-content="Autocomplete will search among all apartments."></span>
+                    </a>
+                </label>
+            </div>
+            <?php echo $this->formHidden($form->get('assigned_product_id')); ?>
+            <?php echo $this->formHidden($form->get('assigned_product_type')); ?>
+        </div>
+    </div>
+</div>
+
+<!-- Sixth Row -->
+<div class="row">
+    <!-- Guest name -->
+    <div class="col-sm-2">
+        <div class="form-group">
+            <?php echo $this->formInput($form->get('guest_first_name')); ?>
+        </div>
+    </div>
+
+    <!-- Guest name -->
+    <div class="col-sm-2">
+        <div class="form-group">
+            <?php echo $this->formInput($form->get('guest_last_name')); ?>
+        </div>
+    </div>
+
+    <!-- Guest country -->
+    <div class="col-sm-2">
+        <div class="form-group">
+            <?php echo $this->formInput($form->get('guest_country')); ?>
+            <?php echo $this->formHidden($form->get('guest_country_id')); ?>
+        </div>
+    </div>
+
+	<!-- Guest phone -->
+    <div class="col-sm-2">
+        <div class="form-group">
+            <div class="input-group">
+                <label class="input-group-addon" for="guest_phone">
+                    <span class="glyphicon glyphicon-earphone"></span>
+                </label>
+                <?php echo $this->formInput($form->get('guest_phone')); ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ginosi Comment -->
+    <div class="col-sm-2">
+        <div class="form-group">
+            <?php echo $this->formInput($form->get('comment')); ?>
+        </div>
+    </div>
+
+    <!-- Room Count -->
+    <div class="col-sm-2">
+        <div class="form-group">
+            <?php echo $this->formSelect($form->get('rooms_count')); ?>
+        </div>
+    </div>
+</div>
+
+<!-- Seventh Row -->
+<div class="row">
+
+    <!-- Guest email -->
+    <div class="col-sm-3">
+        <div class="form-group">
+            <div class="input-group">
+                <label class="input-group-addon" for="guest_email">
+                    @
+                </label>
+                <?php echo $this->formEmail($form->get('guest_email')); ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guest secondary email -->
+    <div class="col-sm-3">
+        <div class="form-group">
+            <div class="input-group">
+                <label class="input-group-addon" for="guest_secondary_email">
+                    @
+                </label>
+                <?php echo $this->formEmail($form->get('guest_secondary_email')); ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charge Authorization -->
+    <div class="col-sm-2">
+        <div class="form-group">
+            <?php echo $this->formInput($form->get('charge_auth_number')); ?>
+        </div>
+    </div>
+
+    <!-- Transaction Amount -->
+    <div class="col-sm-2">
+        <div class="form-group">
+            <?php echo $this->formInput($form->get('transaction_amount')); ?>
+        </div>
+    </div>
+
+    <?php if ($this->isDevTest) {?>
+        <!-- For DEV -->
+        <div class="col-sm-2">
+            <div class="form-group">
+                <?php echo $this->formInput($form->get('channel_res_id')); ?>
+            </div>
+        </div>
+    <?php } ?>
+</div>
+
+<!-- Form close tag -->
+<?php echo $this->form()->closeTag(); ?>

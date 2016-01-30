@@ -1,0 +1,31 @@
+<?php if (count($this->reviewList)) { ?>
+	<div class="col-xs-12">
+		<div class="row" id="anchor_reviews">
+		    <div class="col-sm-12">
+		        <h2><?=$this->textline(1199)?></h2>
+
+		        <?php foreach ($this->reviewList as $review) {?>
+                <div class="media" <?=(isset($this->schemaTag) ? 'itemscope itemtype="http://data-vocabulary.org/Review"' : '')?>>
+                    <?php if(isset($this->schemaTag)) {?>
+                    <div class="hidden">
+                        <span itemprop="itemreviewed"><?=$this->apartmentName?></span>
+                        <time itemprop="dtreviewed" datetime="<?=date("Y-m-d", strtotime($review['date']))?>"><?=date("j M", strtotime($review['date']))?></time>.
+                        <span itemprop="rating"><?=$review['score']?></span>
+                    </div>
+                    <?php } ?>
+		            <span class="pull-left guest-avatar">
+		                <span  itemprop="reviewer"><?=$review['user_name']?></span> <small class="clearfix text-muted"><?=($review['country_id']) ? $this->countryname($review['country_id']) : ''?></small>
+		            </span>
+		            <div class="media-body">
+		                <span class="text-muted"><?=$this->textline(1200)?>:</span>
+		                <strong><?=date("d M Y", strtotime($review['date']))?></strong>
+                        <p itemprop="description"><?=$review['liked']?></p>
+		            </div>
+		        </div>
+		        <?php } ?>
+		    </div>
+		</div>
+
+		<div id="review_pagination" class="row text-right"></div>
+	</div>
+<?php } ?>

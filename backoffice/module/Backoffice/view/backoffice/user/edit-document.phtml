@@ -1,0 +1,121 @@
+<?php
+
+$form = $this->form;
+$userData = $this->userData;
+$category = $userData['type'];
+$userName = $userData['firstname'] . ' ' . $userData['lastname'];
+$userId = $userData['id'];
+$documentId = $userData['document_id'];
+
+$subject = "{$userName}'s {$category}";
+$this->layout()->viewTitle = $subject;
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($subject);
+
+$this->layout()->breadcrumb = $this->breadcrumb([
+    ['Administration'],
+    ['People Directory', $this->url('backoffice/default', ['controller' => 'company-directory'])],
+    [$userName, $this->url('backoffice/default', ['controller' => 'user', 'action' => 'edit', 'id' => $userId])],
+    [$category]
+]);
+$this->InlineScript()->appendFile($this->basePath() . '/js/pages/user-document-edit.js');
+
+$userEditUrl = $this->url('backoffice/default', ['controller' => 'user', 'action' => 'edit', 'id' => $userId]);
+$saveUrl = $this->url('backoffice/default', ['controller' => 'user', 'action' => 'ajax-edit-document', 'id' => $documentId]);
+
+$form->prepare();
+$form->setAttribute('action', $this->url('backoffice/default', ['controller' => 'user', 'action' => 'edit-document']));
+$form->setAttribute('method', 'post');
+$form->setAttribute('class', 'form-horizontal');
+$form->setAttribute('id', 'edit-document-from');
+
+?>
+
+<?php echo $this->form()->openTag($form); ?>
+<br>
+<div class="col-sm-12">
+    <div class="col-sm-12 form-group">
+        <label class="col-sm-2 control-label" for="document_type">Document</label>
+        <div class="col-sm-4">
+            <?php echo $this->formElement($form->get('document_type_id')); ?>
+        </div>
+        <div class="col-sm-4 pull-right">
+
+        <?php if ($form->has('download')) {
+                $downladButton = $form->get('download');
+                echo '<div class="btn-group">';
+                echo $this->formButton($form->get('download'));
+                echo '<button type="button" name="remove_attachment" id="remove-attachment" data-toggle="modal" data-target="#delete-attachment-modal"  class="btn btn-info pull-left state hidden-file-input"><span class="' . $downladButton->getOption('remove-icon') . '"></span></button>';
+                echo '</div>';
+            }
+        ?>
+        </div>
+    </div>
+    <div class="col-sm-12 form-group">
+        <label class="col-sm-2 control-label" for="document_url">
+            <?= $this->info('URL', 'Paste a URL here'); ?>
+        </label>
+        <div class="col-sm-10">
+            <?php echo $this->formElement($form->get('document_url')); ?>
+        </div>
+    </div>
+    <div class="col-sm-12 form-group">
+        <label class="col-sm-2 control-label" for="document_description">
+            Description
+            <?= $this->required(); ?>
+        </label>
+        <div class="col-sm-10">
+            <?php echo $this->formElement($form->get('document_description')); ?>
+        </div>
+    </div>
+
+    <div class="col-sm-12">
+        <fieldset>
+            <legend>
+                Attachment
+            </legend>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <?php
+                        echo $this->formElement($form->get('document_attachment'));
+                        echo $this->formElement($form->get('document_file_name'));
+                    ?>
+                    <input type="hidden" name="validAttachment" id="validAttachment" value="0" />
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <div class='well well-sm margin-1 pull-left file-name soft-hide text-muted'></div>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+</div>
+<div class="page-actions container">
+    <div class="row text-right">
+        <a href="javascript:void(0)" class="btn btn-success col-sm-2 col-xs-12 margin-left-10 pull-right" id="save-document" data-url="<?php echo $saveUrl; ?>">Save</a>
+        <a href="<?php echo $userEditUrl; ?>#documents-tab" class="btn btn-default col-sm-2 col-xs-12 margin-left-10 pull-right">Cancel</a>
+    </div>
+</div>
+<?php echo $this->form()->closeTag($form); ?>
+
+<?php if ($form->has('download')) { ?>
+<!-- Delete modal -->
+<div id="delete-attachment-modal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-danger">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel">Delete Attachment</h4>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <a class="btn btn-danger" id="rates_delete_button" href="<?= $downladButton->getOption('remove-url') ?>">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>
+<?php } ?>

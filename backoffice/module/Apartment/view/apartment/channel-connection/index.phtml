@@ -1,0 +1,130 @@
+<?php
+
+$this->headTitle($this->layout()->apartmentName . 'Apartment Connections')->setSeparator(' - ');
+$this->headLink()->appendStylesheet($this->basePath() . '/css/apartment/common.css');
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/pages/apartment.connection.js')
+    ->appendFile($this->basePath() . '/js/pages/apartment.ota.js');
+$element = new Zend\Form\Element\Select('rate');
+
+?>
+<div class="row">
+    <div class="col-sm-12">
+        <hr>
+        <?= $this->apartmentNavigation($this->apartmentId, $this->apartmentStatus, 'apartment/channel-connection')?>
+    </div>
+</div>
+<?php
+    echo $this->partial(
+        'apartment/partial/ota-distribution',
+        [
+            'itemId' => $this->apartmentId,
+            'OTAList' => $this->apartmentOTAList,
+            'partnerList' => $this->partnerList,
+            'OTAStatus' => $this->OTAStatus,
+            'formAction' => $this->url('apartment/channel-connection/add-ota', ['apartment_id' => $this->apartmentId]),
+        ]
+    );
+?>
+<?php if($this->isCubilisConnecter){?>
+<div class="row">
+    <div class="col-sm-7 col-md-6 col-lg-5" id="credentials-block"
+         data-cubilis-sync="<?php echo $this->cubilisDetails['sync_cubilis']; ?>"
+         data-url-save="<?php echo $this->url('apartment/channel-connection/save', ['apartment_id' => $this->apartmentId]); ?>"
+         data-url-connect="<?php echo $this->url('apartment/channel-connection/connect', ['apartment_id' => $this->apartmentId]); ?>"
+         data-url-test-pull="<?php echo $this->url('apartment/channel-connection/test-pull-reservations', ['apartment_id' => $this->apartmentId]); ?>"
+         data-url-test-availability="<?php echo $this->url('apartment/channel-connection/test-update-availability', ['apartment_id' => $this->apartmentId]); ?>"
+         data-url-test-list="<?php echo $this->url('apartment/channel-connection/test-fetch-list', ['apartment_id' => $this->apartmentId]); ?>">
+        <?= $this->formOutput ?>
+    </div>
+    <div class="col-sm-7">
+        <form class="link-rates" action="<?php echo $this->urlLinkRates; ?>" method="post">
+            <fieldset>
+                <legend>Rate Mapping</legend>
+            </fieldset>
+            <?php
+                if ($this->rateConnections) {
+            ?>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Cubilis ID</th>
+                        <th>Ginosi ID</th>
+                        <th>Rate Name</th>
+                        <th>Status</th>
+                        <th>Connect With</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                        foreach ($this->rateConnections as $cubilisRateId => $rateDetails) {
+                    ?>
+                        <tr>
+                            <td><?= $cubilisRateId ?></td>
+                            <td><?= isset($this->rates['cubilis_rate'][$cubilisRateId]['rate_id']) ? $this->rates['cubilis_rate'][$cubilisRateId]['rate_id'] : '-' ?></td>
+                            <td><?= $rateDetails["name"] ?></td>
+                            <td>
+                                <?php
+                                    if ($rateDetails["status"] == "connected") {
+                                        echo '<span class="label label-success">Connected</span>';
+                                    } else {
+                                        echo '<span class="label label-error">Not Connected</span>';
+                                    }
+                                ?>
+                            </td>
+                            <td>
+                                <input type="hidden" name="room_id" value="<?php echo $rateDetails['room_id']; ?>">
+                                <select name="rate_links[<?php echo $cubilisRateId; ?>]" class="form-control">
+                                    <option value="0" class="text-muted">-- Select Rate --</option>
+                                    <?php
+                                         foreach ($this->rates['bo_rate'] as $rate) {
+                                             $checked = '';
+
+                                             if (!is_null($rate['cubilis_rate_id']) && $cubilisRateId == $rate['cubilis_rate_id']) {
+                                                 $checked = ' selected="selected"';
+                                             }
+                                    ?>
+                                    <option value="<?php echo $rate['rate_id']; ?>"<?php echo $checked; ?>><?php echo $rate['name']; ?></option>
+                                    <?php
+                                         }
+                                    ?>
+                                </select>
+                            </td>
+                        </tr>
+                    <?php
+                        }
+                    ?>
+                </tbody>
+            </table>
+            <?php
+                } else {
+            ?>
+            <div class="alert alert-danger">
+                The apartment is not connected to Cubilis.
+            </div>
+            <?php
+                }
+            ?>
+
+            <input type="submit" class="btn btn-medium btn-primary pull-right hide" value="Synchronize" id="sync">
+        </form>
+    </div>
+</div>
+<?php } ?>
+<div id="OTADeleteModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-danger">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel">Delete OTA<span id="delete_group"></span></h4>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <a class="btn btn-danger" href="#" id="deleteOTAButton">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>

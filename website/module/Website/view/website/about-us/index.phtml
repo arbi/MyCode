@@ -1,0 +1,56 @@
+<?php
+
+$this->headTitle($this->textline(1334))->setSeparator(' - ');
+$this->headMeta($this->textline(1457), 'description');
+$this->headLink([
+    'rel' => 'canonical',
+    'href' => $this->url('about-us', [], ['force_canonical' => true])]);
+
+?>
+<div itemscope itemtype="http://schema.org/Brand">
+    <span itemprop="name" class="hidden">Ginosi</span>
+    <span itemprop="url" class="hidden">http://ginosi.com</span>
+    <span itemprop="logo" itemscope itemtype="http://schema.org/ImageObject" class="hidden">
+        <span itemprop="contentUrl"><?php echo $this->serverUrl().$this->basePath(); ?>/img/logo.png</span>
+    </span>
+
+    <div class="col-sm-12 grid-sep">
+        <h1 class="text-primary"><?php echo $this->textline(1334);?></h1>
+    </div>
+
+    <div class="col-sm-6 grid-sep">
+        <h2><?php echo $this->textline(1335);?></h2>
+        <span itemprop="description"><?php echo $this->textline(1337);?></span>
+    </div>
+
+    <div class="col-sm-6 grid-sep">
+        <h2><?php echo $this->textline(1336);?></h2>
+        <?php echo $this->textline(1338);?>
+    </div>
+
+    <div class="col-sm-12 grid-sep">
+        <h2><?php echo $this->textline(1339);?></h2>
+        <?php echo $this->textline(1340);?>
+    </div>
+
+    <div class="col-sm-3 grid-sep">
+        <h3><?php echo $this->textline(1341);?></h3>
+        <?php echo $this->textline(1343);?>
+    </div>
+
+    <div class="col-sm-3 grid-sep">
+        <h3><?php echo $this->textline(1344);?></h3>
+        <?php echo $this->textline(1346);?>
+    </div>
+
+    <div class="col-sm-3 grid-sep">
+        <h3><?php echo $this->textline(1347);?></h3>
+        <?php echo $this->textline(1349);?>
+    </div>
+
+    <div class="col-sm-3 grid-sep">
+        <h3><?php echo $this->textline(1350);?></h3>
+        <?php echo $this->textline(1352);?>
+    </div>
+
+</div>

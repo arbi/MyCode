@@ -1,0 +1,19 @@
+<?php
+use \DDD\Service\Frontier;
+?>
+<div id="building-card" class="bs-callout bs-callout-info<?= $entityType != Frontier::CARD_BUILDING ? ' soft-hide' : ''?>">
+    <h4>
+                    <span id="building-name">
+                        <?= (!empty($card['name']) ? $card['name'] : '')?>
+                    </span>
+        <input type="hidden" id="building-id" value="<?= (!empty($card['id']) ? $card['id'] : '')?>">
+    </h4>
+    <p>
+        <input type="text" class="form-control" placeholder="Apartment Name, Unit Number, Bedroom Count" id="search-apartment">
+    </p>
+    <?php
+    echo $this->partial('backoffice/frontier/partial/building-apartments', [
+        'apartments' => isset($card['apartments']) ? $card['apartments'] : []
+    ]);
+    ?>
+</div>

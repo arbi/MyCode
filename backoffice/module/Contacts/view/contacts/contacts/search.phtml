@@ -1,0 +1,46 @@
+<?php
+
+$pageTitle = 'Contact Cards';
+
+$this->headTitle($pageTitle)->setSeparator(' - ');
+
+$this->layout()->breadcrumb =
+    '<li>Administration</span></li>
+    <li class="active">Contact Management</li>';
+
+$this->layout()->viewTitle  = $pageTitle;
+
+$this->InlineScript()->appendFile($this->basePath() . '/js/module/contacts/search-contact.js');
+$this->headLink()->appendStylesheet($this->basePath() . '/css/pages/contacts.css');
+?>
+
+<script>
+    var GLOBAL_SEARCH_CONTACT_URL = '<?php echo $this->url('contacts/ajax-search-contact'); ?>';
+    var GLOBAL_GET_CONTACT_URL = '<?php echo $this->url('contacts/ajax-get-contact'); ?>';
+</script>
+
+<div class="row">
+
+    <div class="col-md-12">
+        <select class="form-control" id="omni-search-contact" placeholder="Find a contact by name, company, position, apartment, building or partner..."></select>
+        <div id="contacts">
+            <?php if (!empty($this->status)) {
+                if ($this->status == 'success') {
+                    echo $this->cardsPartial;
+                } elseif ($this->status == 'error') {
+                    ?>
+                    <div class="alert alert-danger"><?php echo $this->msg?></div>
+            <?php
+                }
+            }?>
+        </div>
+    </div>
+
+    <div class="col-lg-6"></div>
+</div>
+
+<div class="container page-actions">
+    <div class="row text-right">
+        <a href="<?php echo $this->url('contacts/edit');?>" class="btn btn-primary col-sm-2 col-xs-12 pull-right">Add New Contact</a>
+    </div>
+</div>

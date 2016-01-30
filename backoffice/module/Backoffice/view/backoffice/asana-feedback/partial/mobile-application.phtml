@@ -1,0 +1,8 @@
+<div class="form-group mobile-application-sub-container">
+    <select class="form-control" id="mobile-application-sub-type" name="mobile-application-sub-type">
+        <?php $subTypes = \DDD\Service\Asana\Feedback::getMobileApps(); ?>
+        <?php foreach ($subTypes as  $text) : ?>
+            <option value="<?= $text ?>" ><?= $text ?></option>
+        <?php endforeach; ?>
+    </select>
+</div>

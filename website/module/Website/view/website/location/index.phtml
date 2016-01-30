@@ -1,0 +1,38 @@
+<?php
+
+$this->headTitle($this->textline(1320));
+$this->headMeta($this->textline(1465), 'description');
+$this->headLink([
+    'rel' => 'canonical',
+    'href' => $this->url('location', [], ['force_canonical' => true])]);
+
+?>
+<div class="col-sm-12">
+	<h1><?=$this->textline(1320)?></h1>
+    <?=$this->textline(1610)?>
+</div>
+<div class="col-sm-12">
+	<div class="row location" itemscope itemtype="http://schema.org/Organization">
+        <?php foreach ($this->cities as $city) { ?>
+        <div class="col-sm-6" itemprop="location" itemscope itemtype="http://schema.org/Place">
+	        <div class="thumbnail">
+	            <?php if ($city['img']) { ?>
+                <a href="<?=$city['url']?>" itemprop="url">
+                    <div itemprop="photo" itemscope itemtype="http://schema.org/ImageObject" style="background:url(<?=$city['img']?>)" class="location-thumb">
+                    </div>
+                </a>
+	            <?php } ?>
+		        <div class="content">
+			        <h3 class="margin-0">
+				        <a href="<?=$city['url']?>" itemprop="url">
+					        <strong itemprop="name"><?=$this->cityname($city['city_id'])?></strong>
+				            <?=$this->countryname($city['country_id'])?>
+				        </a>
+			        </h3>
+		            <a href="<?=$city['apartment_url']?>"><?=$this->textline(1419)?></a>
+		        </div>
+	        </div>
+		</div>
+        <?php } ?>
+	</div>
+</div>

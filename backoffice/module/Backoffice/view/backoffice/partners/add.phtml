@@ -1,0 +1,92 @@
+<?php
+    $this->layout()->viewTitle = 'Add Partner';
+	$this->headTitle()->setSeparator(' - ');
+	$this->headTitle($this->layout()->viewTitle);
+	$this->layout()->breadcrumb = $this->breadcrumb([
+		['Administration'],
+		['Partner Management', $this->url('backoffice/default', ['controller' => 'partners'])],
+		[$this->layout()->viewTitle],
+	]);
+
+$this->headLink()
+    ->appendStylesheet($this->basePath() . '/css/pages/partners.css');
+    $this->InlineScript()
+        ->appendFile($this->basePath() . '/js/plugins/jquery.form.min.js')
+        ->appendFile($this->basePath() . '/js/pages/partner.edit.js')
+        ->appendFile($this->basePath() . '/js/validation/partners.js');
+?>
+
+<script type="text/javascript">
+	$(document).ready(function() {
+    	$("#cubilis_id").selectize({
+            delimiter: ',',
+            persist: false,
+            create: function(input) {
+                return {
+                    value: input,
+                    text: input
+                }
+            }
+        });
+  	});
+</script>
+
+<ul id="groupTabs" class="nav nav-tabs tabs-general" role="tablist">
+    <li class="active">
+        <a href="#administration" data-toggle="tab" role="tab" id="administration-tab">Administration</a>
+    </li>
+    <li>
+        <a href="#commission-part" data-toggle="tab" role="tab" id="commission-tab">Commission</a>
+    </li>
+    <?php if ($hasGCMSpecificRole) : ?>
+        <li>
+            <a href="#gcm-specific" data-toggle="tab" role="tab" id="gcm-specific-tab">GCM Specific</a>
+        </li>
+    <?php endif; ?>
+</ul>
+<?php $form = $this->form; ?>
+<!-- Form opening tag -->
+<?= $this->form()->openTag($form) ?>
+<div id="groupTabsContent" class="tab-content">
+
+    <div class="tab-pane fade active in" id="administration">
+        <?= $this->formOutput ?>
+    </div>
+    <div class="tab-pane fade" id="commission-part">
+        <div class="row">
+            <fieldset class="col-sm-6">
+                <legend>
+                    General
+                </legend>
+                <div class="row form-group">
+                    <label for="<?php echo $form->get('commission')->getAttribute('id'); ?>" class="control-label col-sm-4">
+                        <?= $this->info($form->get('commission')->getLabel(), 'The commission that will be used for all locations which are not specified otherwise.'); ?>
+                    </label>
+                    <div class="col-sm-3">
+                        <?php echo $this->formSelect($form->get('commission')); ?>
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <label for="<?php echo $form->get('additional_tax_commission')->getAttribute('id'); ?>" class="control-label col-sm-4">
+                        <?= $this->info('Delta', 'We pay commission to this partner for tax additional amount.'); ?>
+                    </label>
+                    <div class="col-sm-3 checkbox">
+                        <?php echo $this->formCheckbox($form->get('additional_tax_commission')); ?>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="gcm-specific">
+
+    </div>
+    <div class="container page-actions">
+        <div class="row text-right">
+            <?php echo $this->formSubmit($form->get('submit')); ?>
+        </div>
+    </div>
+</div>
+<!-- Form close tag -->
+<?= $this->form()->closeTag() ?>
+
+

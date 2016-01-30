@@ -1,0 +1,6 @@
+<AvailStatusMessage BookingLimit="%availability%">
+	<StatusApplicationControl InvCode="%room_id%" Start="%start_date%" End="%end_date%" %rate_id% />
+	%stays%
+	%prices%
+	<RestrictionStatus Status="%status%" />
+</AvailStatusMessage>

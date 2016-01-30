@@ -1,0 +1,159 @@
+<?php
+use \Library\Constants\Constants;
+use \Library\Utility\Helper;
+
+$currUrl = $this->serverUrl(true);
+
+$this->headTitle($announcement->getTitle() . ' | ' . $this->textline(1368))->setSeparator(' | ');
+$this->headMeta($announcement->getMetaDescription(), 'description');
+$this->headMeta($announcement->getMetaDescription(), 'og:description');
+$this->headMeta('website', 'og:type');
+$this->headMeta($currUrl, 'og:url');
+$this->headMeta($this->serverUrl() . '/s/logo/500x500_white.png', 'og:image');
+$this->headMeta($this->serverUrl() . '/s/logo/500x500_white.png', 'image');
+$this->headMeta($announcement->getTitle() . ' ' . $this->textline(1496), 'og:title');
+
+$this->headLink()
+    ->appendStylesheet($this->basePath() . '/css/jobs.announcement.css');
+$this->inlineScript()
+    ->appendFile($this->basePath() . '/js/vendor/jquery.validate.min.js')
+    ->appendFile($this->basePath() . '/js/jobs.announcement.js')
+    ->appendFile($this->basePath() . '/js/jobs.announcement.validate.js');
+?>
+<div class="col-sm-12" id="notifications">
+
+</div>
+<div class="col-sm-12">
+    <h2>
+        <?=$this->textline(1480)?>
+    </h2>
+    <hr>
+</div>
+<script>
+    var CV_REQUIRED = <?=$announcement->getCvRequired() ?>;
+</script>
+<div class="col-sm-9">
+    <h3>
+        <b><?= $announcement->getTitle() ?></b>&nbsp; <?php if (strlen($announcement->getSubtitle())) { ?> <small class='subtitle'>( <?=$announcement->getSubtitle()?> )</small> <?php } ?>
+    </h3>
+    <h4>
+        <?= $this->cityname($announcement->getCityId()) ?>,
+        <?= $this->countryname($announcement->getCountryId()) ?>
+    </h4>
+    <br>
+    <p><b><?=$this->textline(1491)?></b></p>
+    <?= $announcement->getDescription() ?>
+    <p><b><?=$this->textline(1492)?></b></p>
+    <?= $announcement->getRequirements() ?>
+    <br>
+    <div class="row">
+        <div class="col-sm-10">
+            <div id="share-buttons" class="pull-left">
+                <?php
+                $twitterText = Helper::evaluateTextline($this->textline(1494),
+                    [
+                        '{{JOB_TITLE}}' => $announcement->getTitle()
+                    ]
+                );
+                ?>
+                <!-- Facebook -->
+                <a class="share-icon fb-icon" href="http://www.facebook.com/sharer.php?u=<?= $currUrl; ?>" target="_blank"><img src="<?= Constants::VERSION?>img/web/facebook.png" alt="Facebook" /></a>
+                <!-- Twitter -->
+                <a class="share-icon tw-icon" href="http://twitter.com/share?url=<?= $currUrl; ?>&text=<?= $twitterText ?>&hashtags=<?=$this->textline(1495)?>" target="_blank"><img src="<?= Constants::VERSION?>img/web/twitter.png" alt="Twitter" /></a>
+                <!-- Google+ -->
+                <a class="share-icon gp-icon" href="https://plus.google.com/share?url=<?= $currUrl; ?>" target="_blank"><img src="<?= Constants::VERSION?>img/web/googleplus.png" alt="Google" /></a>
+                <!-- LinkedIn -->
+                <a class="share-icon in-icon" href="http://www.linkedin.com/shareArticle?mini=true&url=<?= $currUrl; ?>" target="_blank"><img src="<?= Constants::VERSION?>img/web/linkedin.png" alt="LinkedIn" /></a>
+            </div>
+        </div>
+        <div class="col-sm-2 col-xs-12">
+            <button type="button" class="btn btn-primary pull-right" id="btn-apply" data-toggle="modal" data-target="#job-form-dialog">
+                <?php echo $this->textline(1584); ?>
+            </button>
+        </div>
+    </div>
+    <div class="clearfix"></div>
+    <br>
+</div>
+<div class="modal fade" id="job-form-dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <img class="icon icons8-Delete" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAABiUlEQVRoQ+3Z/U3DMBAF8NcN2ISOABt0kzICTMQIMAJs0hGqk4gUVUl8H+/ZpUr+jBI7P5/t+HQHPMh1eBAHdsi9RXKPyH+LyAnAN4DL4A9/AnAG8LH2HVtTyxCfAH4AvA7EGOILwPEP8r6E2YJYAxaN54GYOeIXwMvagLYW+0iMG2ERakHsmRGYEMIL6Y0JIyKQXpgUIgpRY9KIDESFKSGyEDamjKhAWBgKogqpYmgIBiSLoSJYkCiGjmBCvBgJgg1pYWQIBWQNY/eno/jmKTab93gOjZm2bw+a1oblExKEKiITfI6xezJED8g0nawvaaapnFrzNWEQaaapgCztTgaRps1syNYWK800mRDPf0KGYUE8iKXdjLYBMCARhAxThWQQEkwFUkHQMVkIA0HFZCBMBA0ThSgQFEwEokSUMV5ID0QJ44H0RKQxLcgIRArTKvRI01NH6uk+m3lKb9LMLoixGmK49GZ93FMx9G0NoU51HYPNe6S12Hk9iVvaIeIBDje/RyQ8ZOIXriZt0DO01u6oAAAAAElFTkSuQmCC" width="30" height="30">
+                    <span class="sr-only">Close</span>
+                </button>
+                <img src="<?php echo $this->basePath(); ?>/img/logo.png" class="brand" alt="Ginosi Apartments" width="135" height="52">
+            </div>
+            <form enctype="multipart/form-data">
+            <input type="hidden" name="job_id" value="<?= $announcement->getId() ?>">
+            <div class="modal-body">
+                <div class="row form-group">
+                    <div class="col-sm-6">
+                        <input type="text" name="firstname" placeholder="<?=$this->textline(1487)?>" class="form-control">
+                    </div>
+                    <div class="col-sm-6">
+                        <input type="text" name="lastname" placeholder="<?=$this->textline(1266)?>" class="form-control">
+                    </div>
+                </div>
+
+                <div class="row form-group">
+                    <div class="col-sm-6">
+                        <input type="text" name="email" placeholder="<?=$this->textline(1267)?>" class="form-control">
+                    </div>
+                    <div class="col-sm-6">
+                        <input type="text" name="referred_by" placeholder="<?=$this->textline(1482)?>" class="form-control">
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-sm-6">
+                        <input type="text" name="phone" placeholder="<?=$this->textline(649)?>" class="form-control">
+                    </div>
+                    <div class="col-sm-6">
+                        <input type="text" name="skype" placeholder="<?=$this->textline(1483)?>" class="form-control">
+                    </div>
+                </div>
+
+                <div class="row form-group">
+                    <div class="col-sm-12">
+                        <textarea name="motivation" class="form-control" placeholder="<?=$this->textline(1484)?>" rows="6"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" name="upload" class="btn btn-primary pull-left col-sm-3 col-xs-12" id="attach-btn">
+                    <?=$this->textline(1486)?>
+                </button>
+                <?php //if hiding with display:none, jQuery validator not working properly, so I've hided element by putting it out of page ?>
+                <input type="file" name="cv" id="input-cv" accept=".doc, .docx, .pdf, .odt, .rtf" style="position: absolute; top: -5000px">
+                <label class="help-block col-sm-5 text-left"></label>
+                <button type="button" name="submit" data-text="<?=$this->textline(1485)?>" class="btn btn-success pull-right col-sm-3 col-xs-12" id="submit-application">
+                    <?=$this->textline(1485)?>
+                </button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="hide" id="success-msg">
+    <div class="alert alert-success alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <?=$this->textline(1489)?>
+    </div>
+</div>
+<div class="hide" id="failure-msg">
+    <div class="alert alert-danger alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <?=$this->textline(1490)?>
+    </div>
+</div>
+<div class="hide" id="failure-msg-file">
+    <div class="alert alert-danger alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        File format not allowed. Please upload .pdf, .doc, .docx, .odt or .rtf
+    </div>
+</div>
+
+<div class="modal fade" id="loader-dialog">
+    <img src="<?php  echo $this->basePath().'/img/loading-modal.gif' ?>" width="200" height="204" />
+</div>

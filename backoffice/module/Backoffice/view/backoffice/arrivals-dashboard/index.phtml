@@ -1,0 +1,57 @@
+<?php 
+
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle('Arrivals Dashboard');
+
+
+$this->InlineScript()->appendFile($this->basePath() . '/js/pages/arrivalsdashboard.js');
+
+$this->headLink()->appendStylesheet($this->basePath() . '/css/pages/arrivals.dashboard.css')
+
+?>
+<div class="row">
+    <div class="col-sm-9">
+        <table class="table table-condensed arrivals-dashboard">
+            <tbody>
+                <?php /** @var \DDD\Domain\ApartmentGroup\ConciergeView $row */ ?>
+                <?php foreach ($this->arrivalsRed as $row) { ?>
+                    <tr class="ad-red-bg">
+                        <td><?php echo $row->getGuestFirstName() . ' ' . $row->getGuestLastName(); ?></td>
+                        <td><?php echo $row->acc_name; ?></td>
+                        <td class="ad-city"><?php echo $row->acc_city_name; ?></td>
+                    </tr>
+                <?php } ?>
+                <?php /** @var \DDD\Domain\ApartmentGroup\ConciergeView $row */ ?>
+                <?php foreach ($this->arrivalsOrange as $row) { ?>
+                    <tr class="ad-orange-bg">
+                        <td><?php echo $row->getGuestFirstName() . ' ' . $row->getGuestLastName(); ?></td>
+                        <td><?php echo $row->acc_name; ?></td>
+                        <td class="ad-city"><?php echo $row->acc_city_name; ?></td>
+                    </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="col-sm-3">
+        <table class="table arrivals-dashboard-green">
+            <tbody>
+                <?php /** @var \DDD\Domain\ApartmentGroup\ConciergeView $row */ ?>
+                <?php foreach ($this->arrivalsGreen as $row) { ?>
+                    <tr>
+                        <td>
+                            <h3 class="ad-green"><?php echo $row->getGuestFirstName() . ' ' . $row->getGuestLastName(); ?></h3>
+                            <p>
+                                <strong><?php echo $row->acc_name; ?></strong>
+                                <span class="muted"><?php echo $row->acc_city_name; ?></span>
+                                <?php if ($row->arrival_status == 1): ?>
+                                <span class="text-muted" style="color: #258CD1; font-size: 12px;"> (Checked-in)</span>
+                                <?php endif;?>
+                            </p>
+                        </td>
+                    </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+    </div>
+</div>

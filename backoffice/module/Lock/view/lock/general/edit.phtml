@@ -1,0 +1,178 @@
+<?php
+use DDD\Service\Lock\General as LockServiceGeneral;
+use Library\Constants\DomainConstants;
+$basePath = DomainConstants::BO_DOMAIN_NAME;
+	$this->layout()->viewTitle = $this->pageTitle;
+    $this->headTitle()->setSeparator(' - ');
+    $this->headTitle($this->pageTitle);
+	$this->layout()->breadcrumb = $this->breadcrumb([
+		['Apartments'],
+		['Lock Management', $this->url('lock', ['controller' => 'general'])],
+		[$this->pageTitle]
+	]);
+
+	$form = $this->form;
+    $this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/pages/lock-search.css');
+
+    $this->InlineScript()
+		->appendFile($this->basePath() . '/js/plugins/jquery.validate.min.js')
+		->appendFile($this->basePath() . '/js/validation/lock.edit.js')
+		->appendFile($this->basePath() . '/js/pages/lock.edit.js');
+?>
+<script>
+    var GENERAL_EDIT_LOCK         = '<?=$this->url('lock/ajax-edit-lock')?>';
+    var GENERAL_DELETE_LOCK       = '<?=$this->url('lock/ajax-delete-lock')?>';
+    var GENERAL_RETURN_PATH       = '<?=$this->url('lock')?>';
+</script>
+<div class="row">
+    <?= $this->form()->openTag($form)?>
+    <div class="col-sm-12">
+        <fieldset name="General">
+            <legend>General</legend>
+            <?php
+                echo $this->formHidden($form->get('id'));
+            ?>
+            <div class="form-group">
+                <label for="<?php echo $form->get('name')->getAttribute('id'); ?>" class="col-sm-2 control-label">
+                    <?php echo $form->get('name')->getLabel(); ?> <?php echo $this->required()?>
+                </label>
+                <div class="col-sm-9">
+                    <?php echo $this->formInput($form->get('name')); ?>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="<?php echo $form->get('description')->getAttribute('id'); ?>" class="col-sm-2 control-label">
+                    <?php echo $form->get('description')->getLabel(); ?>
+                </label>
+                <div class="col-sm-9">
+                    <?php echo $this->formTextarea($form->get('description')); ?>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="<?php echo $form->get('type_id')->getAttribute('id'); ?>" class="col-sm-2 control-label">
+                    <?php echo $form->get('type_id')->getLabel(); ?> <?php echo $this->required()?>
+                </label>
+                <div class="col-sm-9">
+                    <?php echo $this->formSelect($form->get('type_id')); ?>
+                    <p class="help-block"><?= $this->explanation ?></p>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="is_physical">
+                    <?= $this->info('Physical', 'Physical locks can only be assigned to one Entity.'); ?>
+                </label>
+                <div class="col-sm-10 checkbox">
+                    <?php echo $this->formElement($form->get('is_physical')); ?>
+                </div>
+            </div>
+        </fieldset>
+        </div>
+    <?php if (count($assignedLinks)) { ?>
+        <div class="col-sm-12">
+            <fieldset name="Assigned">
+                <legend>Assigned To</legend>
+             <?php foreach ($assignedLinks as $link) { ?>
+                 <div class="col-sm-4"><p><?= $link ?> </p> </div>
+             <?php } ?>
+            </fieldset>
+        </div>
+    <?php } ?>
+
+
+    <div class="col-sm-12">
+        <fieldset name="Settings">
+            <legend>Settings</legend>
+             <?php
+             if(!(empty($this->settingsWithNames))) {
+                 $eachType = [];
+                 $lastType = '';
+                 foreach ($this->settingsWithNames as $key => $item) {
+                     if ($lastType != $item['type'] && $lastType!='') {
+                         echo '</div>';
+                     }
+                     if (!isset($eachType[$item['type']])) {
+                         $eachType[$item['type']] = 1;
+                     }
+                     else {
+                         $eachType[$item['type']]++;
+                     }
+
+                     if ($item['type'] == LockServiceGeneral::SETTING_ITEM_TYPE_INPUT || $item['type'] == LockServiceGeneral::SETTING_ITEM_TYPE_OFFICES_DROPDOWN) {
+                         $onOneLine = 2;
+                     }
+                     elseif ($item['type'] == LockServiceGeneral::SETTING_ITEM_TYPE_INPUT_MONTH) {
+                         $onOneLine = 3;
+                     }
+
+                     if (($eachType[$item['type']] % $onOneLine) ==1) {
+                         echo '<div class="form-group">';
+                     }
+                     ?>
+                         <label for="<?php echo $form->get('setting_' . $key)->getAttribute('id'); ?>"
+                                class="col-xs-5 col-sm-2 control-label">
+                             <?php echo $form->get('setting_' . $key)->getLabel(); ?>
+                             <?php if ($item['isRequired']) {
+                                 echo $this->required();
+                             }
+                             ?>
+                         </label>
+
+                     <?php
+
+                     if ($item['type'] == LockServiceGeneral::SETTING_ITEM_TYPE_INPUT || $item['type'] == LockServiceGeneral::SETTING_ITEM_TYPE_OFFICES_DROPDOWN) {
+                         echo '<div class="col-xs-5 col-sm-3">';
+                     }
+                     elseif ($item['type'] == LockServiceGeneral::SETTING_ITEM_TYPE_INPUT_MONTH) {
+                         echo '<div class="col-xs-5 col-sm-1">';
+                     }
+                     ?>
+                             <?php
+
+                             if ($item['type'] == LockServiceGeneral::SETTING_ITEM_TYPE_INPUT || $item['type'] == LockServiceGeneral::SETTING_ITEM_TYPE_INPUT_MONTH) {
+                                 echo $this->formInput($form->get('setting_' . $key));
+                             }
+                             elseif ($item['type'] == LockServiceGeneral::SETTING_ITEM_TYPE_OFFICES_DROPDOWN) {
+                                 echo $this->formSelect($form->get('setting_' . $key));
+                             }
+                             ?>
+                         </div>
+                 <?php
+                 if (($eachType[$item['type']] % $onOneLine) ==0 ) {
+                     echo '</div>';
+                 };
+                     $lastType = $item['type'];
+                 }
+             } else {
+             ?>
+                 <div class="alert alert-success" role="alert"><span class="glyphicon glyphicon-ok-sign" aria-hidden="true"></span> This type of lock does not have any additional settings</div>
+            <?php } ?>
+        </fieldset>
+    </div>
+    <div class="container page-actions">
+        <div class="row text-right">
+            <?php echo $this->formSubmit($form->get('submit')); ?>
+            <button name="delete_button" type="button" data-toggle="modal" data-target="#delete-modal" class="btn btn-danger pull-right margin-left-10 col-sm-2 col-xs-12 state" data-loading-text="Saving..." id="delete_button" value="">Delete Lock</button>
+        </div>
+    </div>
+    <?= $this->form()->closeTag()?>
+</div>
+
+<div id="delete-modal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-danger">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel">Delete Lock <span id="delete_group"></span></h4>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <a class="btn btn-danger" id="lock_delete_button" href="#">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>

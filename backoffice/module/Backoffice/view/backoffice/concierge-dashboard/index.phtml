@@ -1,0 +1,53 @@
+<?php
+    $this->headTitle()->setSeparator(' - ');
+    $this->headTitle('Concierge Dashboards');
+
+    $this->InlineScript()
+        ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+        ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+        ->appendFile($this->basePath() . '/js/module/backoffice/concierge-dashboard/index.js');
+
+    $this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css');
+
+    $this->layout()->breadcrumb = '<li>Dashboards</li>
+                                   <li class="active">Concierge Dashboards</li>';
+    $this->layout()->viewTitle  = 'Concierge Dashboards';
+?>
+
+<?php if ($conciergeApartmentGroups && count($conciergeApartmentGroups) > 0) { ?>
+    <div class="row">
+        <div class="col-sm-12">
+            <table class="table table-striped table-condensed table-bordered table-responsive table-hover" id="tbl_concierge_dashboard_index">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th style="width: 1px;" class="nosort">&nbsp;</th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php foreach($this->conciergeApartmentGroups as $apartmentGroup) { ?>
+                    <tr>
+                        <td><?= $apartmentGroup->getNameWithApartelUsage() ?></td>
+                        <td>
+                            <?php
+                                $dashboardUrl = $this->url(
+                                    'backoffice/default',
+                                    [
+                                        'controller' => 'concierge',
+                                        'action' => 'item',
+                                        'id' => $apartmentGroup->getId()
+                                    ]
+                                );
+                            ?>
+                            <a href="<?= $dashboardUrl ?>" class="btn btn-xs btn-primary pull-right" target="_blank" data-html-content="Open Dashboard"></a>
+                        </td>
+                    </tr>
+                <?php } ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+<?php } else { ?>
+    <div style="font-size: 20px;text-align: center;height: 600px;">Aweee, it looks like no dashboards are assigned to you.</div>
+<?php } ?>

@@ -1,0 +1,141 @@
+<?=$this->doctype()?>
+<html lang="en">
+<head>
+    <?php
+        $this->headMeta()->appendHttpEquiv('Content-Type', 'text/html; charset=UTF-8');
+        $this->headMeta()->appendHttpEquiv('X-UA-Compatible', 'IE=edge');
+        $this->headMeta()->appendName('robots', 'noindex');
+
+        echo $this->headTitle('Welcome Note');
+        echo $this->headMeta()->appendName('viewport', 'width=device-width, initial-scale=1');
+
+        $this->headLink()
+            ->appendStylesheet($this->basePath()  . '/css/bootstrap-3.3.5.min.css', 'all')
+            ->appendStylesheet($this->basePath()  . '/css/plugins/selectize.bootstrap3.css')
+            ->appendStylesheet($this->basePath()  . '/css/layout.css')
+            ->appendStylesheet($this->basePath()  . '/css/print.css', 'print')
+            ->appendStylesheet($this->basePath () . '/css/apartment/welcome.note.css', 'all');
+
+        $this->headScript()
+            ->prependFile($this->basePath() . '/js/plugins/jquery-ui-1.11.4-custom/js/jquery-ui-1.11.4.custom.min.js')
+            ->prependFile($this->basePath() . '/js/bootstrap/bootstrap-3.3.5.min.js')
+            ->prependFile($this->basePath()  . '/js/plugins/selectize/selectize.min.js')
+            ->prependFile($this->basePath() . '/js/apartment/welcome.note.js');
+
+        $environment = getenv('APPLICATION_ENV') ?: 'production';
+
+        if ($environment === 'production') {
+            $this->headScript()
+                ->prependFile('//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js');
+        } else {
+            $this->headScript()
+                ->prependFile($this->basePath() . '/js/vendor/jquery/2.1.4/jquery.min.js');
+        }
+
+        echo $this->headLink();
+        echo $this->headScript();
+    ?>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400' rel='stylesheet' type='text/css'>
+</head>
+<body>
+    <div id="welcomeNote" class="a4">
+        <div class="header blue-box">
+            <div class="col-sm-12 margin-top-25 center-block">
+                <div class="pull-left">
+                    <img src="/<?= \Library\Constants\Constants::APP_VERSION ?>/img/logo_white.png" class="brand" alt="Ginosi Apartments" width="135" height="52">
+                </div>
+                <div class="pull-right text-right margin-right-10 margin-top-5">
+                    <div>
+                        <div><?= $this->textline(1353 . '-en') ?></div>
+                        <div><?= $this->apartment['contact_phone']; ?></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 center-block apartment-welcome-text">
+            <?=
+                \Library\Utility\Helper::evaluateTextline($this->textline(1656 . '-en'),
+                [
+                    '{{CITY_NAME}}' => $this->apartment['city_name']
+                ])
+            ?>
+            <a class="print-btn btn btn-info" data-toggle="modal" data-target="#printModal">
+                <span>Click Here to Print Your Welcome Note</span>&nbsp;&nbsp;<i class="glyphicon glyphicon-print"></i>
+            </a>
+        </div>
+        <div class="col-sm-12 center-block apartment-features">
+            <div class="col-sm-6">
+                <div class="col blue-box icon-circle">
+                    <i class="btn-check-in icon"></i>
+                </div>
+                <div class="col margin-left-20">
+                    <div class="pull-left margin-right-30">
+                        <div>Check In</div>
+                        <div>Check Out</div>
+                    </div>
+                    <div class="pull-right text-right">
+                        <div><?= date('h:i A', strtotime($this->apartment['check_in'])) ?></div>
+                        <div><?= date('h:i A', strtotime($this->apartment['check_out'])) ?></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="col blue-box margin-left-20 icon-circle">
+                    <i class="btn-wifi icon"></i>
+                </div>
+                <div class="col margin-left-20 margin-top-5">
+                    <div class="pull-left margin-right-30">
+                        <div>Wi-Fi Name</div>
+                        <div>Password</div>
+                    </div>
+                    <div class="pull-right text-right">
+                        <div><?= $this->apartment['primary_wifi_network'] ?></div>
+                        <div><?= $this->apartment['primary_wifi_pass'] ?></div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 center-block wrapper">
+            <div class="col-sm-6 border-right">
+                <div class="margin-top-20 margin-right-10 left">
+                    <div><?= $this->apartmentBuildingFacility['en'] ?></div>
+                    <div><?= $this->apartmentBuildingUsage['en'] ?></div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="margin-top-20 margin-left-20">
+                    <div><?= $this->apartmentUsage['en'] ?></div>
+                    <div><?= $this->textline(1655 . '-en') ?></div>
+                    <div class="margin-top-minus-20"><?= $this->apartmentBuildingPolicy['en'] ?></div>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+        <div class="apartmentBlock">Unit: <span><?= $this->apartment['unit_number'] ?></span></div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="printModal" tabindex="-1" role="dialog" aria-labelledby="printModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Choose Paper Size</h4>
+                </div>
+                <div class="modal-body">
+                    <a class="printTypeBlock" onclick="setPaperType('letter')" data-toggle="tooltip" data-placement="bottom" title="Use this option, if you are in USA">
+                        <h2>Letter</h2>
+                        <p>US paper</p>
+                    </a>
+                    <a class="printTypeBlock right" onclick="setPaperType('a4')" data-toggle="tooltip" data-placement="bottom" title="Use this option, if you are in Armenia">
+                        <h2>A4</h2>
+                        <p>European paper</p>
+                    </a>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>

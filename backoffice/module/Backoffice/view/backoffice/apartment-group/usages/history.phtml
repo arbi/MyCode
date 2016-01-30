@@ -1,0 +1,60 @@
+<?php
+    $actionTitle = $this->apartmentGroupName;
+
+    $this->headTitle()->setSeparator(' - ');
+    $this->headTitle($actionTitle . ' | Product Groups');
+    $this->layout()->viewTitle = $actionTitle;
+    $this->layout()->breadcrumb = $this->breadcrumb([
+        ['Apartment'],
+        ['Apartment Groups', $this->url('backoffice/default', ['controller' => 'apartment-group', 'action' => 'index'])],
+        [$actionTitle]
+    ]);
+
+    $this->InlineScript()
+        ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+        ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+        ->appendFile($this->basePath() . '/js/pages/apartment-group-history.js');
+
+    $this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css')
+        ->appendStylesheet($this->basePath() . '/css/pages/apartment.group.css');
+?>
+<script>
+    var historyAaData = <?= $historyAaData ?>;
+</script>
+    <?php if ($this->id > 0) { ?>
+   <div class="row">
+        <div class="col-sm-12">
+            <hr>
+            <?= $this->apartmentGroupNavigation($this->id, 'apartment-group/history')?>
+        </div>
+    </div>
+    <?php } ?>
+
+    <?php if ($this->id > 0) { ?>
+     <div class="row">
+        <div class="col-sm-12">
+        <div id="history">
+            <table id="historyDatatable_info" class="table table-striped table-bordered table-condensed table-hover">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Employee</th>
+                        <th>Action</th>
+                        <th>Message</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+         </div>
+    </div>
+    <?php } ?>
+

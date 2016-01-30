@@ -1,0 +1,115 @@
+<?php
+/**
+ * @var \DDD\Domain\Partners\Partners $card
+ */
+
+use Library\Constants\Constants;
+use Library\Constants\DomainConstants;
+
+
+
+if (!isset($card) || empty($card)) {
+    return null;
+}
+?>
+
+<div class="bs-callout bs-callout-primary">
+    <h4>
+        <span>
+            <?php echo $card->getPartnerName(); ?>
+        </span>
+    </h4>
+    <table class="table table-condensed">
+
+        <?php if (!empty($card->getContactName())) { ?>
+        <tr>
+            <td>Contact Person Name</td>
+            <td>
+                <span>
+                    <?php echo $card->getContactName(); ?>
+                </span>
+            </td>
+        </tr>
+        <?php } ?>
+
+
+            <tr>
+                <td>URL</td>
+                <td>
+                    <a href="<?php echo 'https://' . DomainConstants::WS_DOMAIN_NAME . '/?gid=' . $card->getGId(); ?>" target="_blank">
+                        <?php echo DomainConstants::WS_DOMAIN_NAME . '/?gid=' . $card->getGId(); ?>
+                    </a>
+                </td>
+            </tr>
+
+        <?php if (!empty($card->getMobile())) { ?>
+            <tr>
+                <td>Mobile</td>
+                <td>
+                    <span>
+                        <?php $mobilePhoneNumber = '+' . $card->getMobile()?>
+                        <?php if (($userInternalNumber && $card->getMobile())) { ?>
+                        <a href="<?php echo sprintf(Constants::GINOSI_CALL_CENTER_URL, $userInternalNumber, filter_var($card->getMobile(), FILTER_SANITIZE_NUMBER_INT)); ?>" target="_blank">
+                            <?php echo $mobilePhoneNumber; ?>
+                        </a>
+                        <?php } else { ?>
+                            <span><?php echo $mobilePhoneNumber; ?></span>
+                        <?php } ?>
+                    </span>
+                </td>
+            </tr>
+        <?php } ?>
+
+        <?php if (!empty($card->getPhone())) { ?>
+            <tr>
+                <td>Phone</td>
+                <td>
+                    <span>
+                        <?php $companyPhoneNumber = '+' . $card->getPhone()?>
+                        <?php if (($userInternalNumber && $card->getPhone())) { ?>
+                        <a href="<?php echo sprintf(Constants::GINOSI_CALL_CENTER_URL, $userInternalNumber, filter_var($card->getPhone(), FILTER_SANITIZE_NUMBER_INT)); ?>" target="_blank">
+                            <?php echo $companyPhoneNumber; ?>
+                        </a>
+                        <?php } else { ?>
+                            <span><?php echo $companyPhoneNumber; ?></span>
+                        <?php } ?>
+                    </span>
+                </td>
+            </tr>
+        <?php } ?>
+
+
+        <?php if (!empty($card->getEmail())) { ?>
+            <tr>
+                <td>Email</td>
+                <td>
+                    <a href="mailto:<?php echo $card->getEmail(); ?>" target="_blank">
+                        <?php echo $card->getEmail(); ?>
+                    </a>
+                </td>
+            </tr>
+        <?php } ?>
+
+
+        <?php if (!empty($card->getNotes())) { ?>
+            <tr>
+                <td>Notes</td>
+                <td>
+                    <span>
+                        <?php echo $card->getNotes(); ?>
+                    </span>
+                </td>
+            </tr>
+        <?php } ?>
+
+    </table>
+
+    <div class="text-right">
+        <a
+            class="btn btn-primary btn-sm hand-task-button"
+            href="/partners/edit/<?php echo $card->getGid(); ?>"
+            >
+            Edit
+        </a>
+    </div>
+</div>

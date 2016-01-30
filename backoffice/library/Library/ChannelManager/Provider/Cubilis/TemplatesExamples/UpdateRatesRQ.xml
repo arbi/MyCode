@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<OTA_HotelAvailNotifRQ Version="2.0" xmlns="http://www.opentravel.org/OTA/2003/05">
+	<POS>...</POS>
+	<AvailStatusMessages BrandCode="562">
+		<AvailStatusMessage BookingLimit="0">
+			<StatusApplicationControl InvCode="1280" Start="2012-11-07" End="2012-11-10" RatePlanID="8166" />
+			<LengthsOfStay>
+				<LengthOfStay MinMaxMessageType="SetMinLOS" Time="0" />
+				<LengthOfStay MinMaxMessageType="SetMinLOS" Time="2" />
+				<LengthOfStay MinMaxMessageType="SetMaxLOS" Time="-1" />
+				<LengthOfStay MinMaxMessageType="SetMaxLOS" Time="99" />
+			</LengthsOfStay>
+			<BestAvailableRates>
+				<BestAvailableRate Amount="120.34" />
+				<BestAvailableRate Amount="115.62" RatePlanCode="Single" />
+			</BestAvailableRates>
+			<RestrictionStatus Status="Open" />
+		</AvailStatusMessage>
+		<AvailStatusMessage BookingLimit="0">
+			<StatusApplicationControl InvCode="1281" Start="2012-11-07 " End="2012-11-10" />
+			<LengthsOfStay>
+				<LengthOfStay MinMaxMessageType="SetMinLOS" Time="1" />
+			</LengthsOfStay>
+			<BestAvailableRates>
+				<BestAvailableRate Amount="150.34" />
+				<BestAvailableRate Amount="146.75" RatePlanCode="Single" />
+			</BestAvailableRates>
+			<RestrictionStatus Status="Open" />
+		</AvailStatusMessage>
+		<AvailStatusMessage BookingLimit="0">
+			<StatusApplicationControl InvCode="1280" Start="2012-11-10 " End="2012-11-11" RatePlanID="8166" />
+			<LengthsOfStay>
+				<LengthOfStay MinMaxMessageType="SetMinLOS" Time="0" />
+				<LengthOfStay MinMaxMessageType="SetMinLOS" Time="2" />
+				<LengthOfStay MinMaxMessageType="SetMaxLOS" Time="-1" />
+				<LengthOfStay MinMaxMessageType="SetMaxLOS" Time="99" />
+			</LengthsOfStay>
+			<BestAvailableRates>
+				<BestAvailableRate Amount="100.34" />
+			</BestAvailableRates>
+			<RestrictionStatus Status="Open" />
+		</AvailStatusMessage>
+	</AvailStatusMessages>
+</OTA_HotelAvailNotifRQ>

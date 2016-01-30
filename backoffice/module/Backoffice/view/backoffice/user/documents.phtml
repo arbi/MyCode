@@ -1,0 +1,101 @@
+<?php
+use Library\Constants\Constants;
+
+/**
+ * @var \DDD\Domain\User\Document\Documents[]|\ArrayObject $documentsList
+ */
+$documentsList = $this->documentsList;
+
+?>
+<script type="text/javascript">
+	$(function() {
+        if (window.location.hash == '#documents-tab') {
+            $('#documents-tab').tab('show');
+
+            setTimeout(function() {
+                $('#documents-tab').trigger('click').trigger('blur');
+            }, 100);
+        }
+    });
+</script>
+
+<table class="table table-bordered table-stripped table-hover table-condensed documents-table">
+    <thead>
+    <tr>
+        <th style="width: 90px">Date</th>
+        <th style="width: 180px">Type</th>
+        <th>Description</th>
+        <th class="w1"></th>
+        <th class="w1"></th>
+        <th class="w1"></th>
+        <th class="w1"></th>
+    </tr>
+    </thead>
+    <tbody>
+<?php
+    if ($documentsList && $documentsList->count()) {
+        foreach ($documentsList as $document) {
+            if (!is_null($document->getUrl())) {
+                $buttonOpen = ' <a href="' . $document->getUrl() . '" class="btn btn-xs btn-info" target="_blank">Open</a>';
+            } else {
+                $buttonOpen = '';
+            }
+
+            if ($document->getAttachment()) {
+                $urlDownload = '//' . \Library\Constants\DomainConstants::BO_DOMAIN_NAME . $this->url('backoffice/default', [
+                    'controller'    => 'user',
+                    'action'        => 'download-document-attachment',
+                    'id'            => $document->getId()
+                ]);
+                $buttonDownload = ' <a href="' . $urlDownload . '" class="btn btn-xs btn-info" name="download-attachment" download="' . $document->getAttachment() . '">Download</a> ';
+            } else {
+                $buttonDownload = '';
+            }
+
+            $urlDelete = $this->url('backoffice/default', [
+                'controller'    => 'user',
+                'action'        => 'ajax-delete-document',
+                'id'            => $document->getId()
+            ]);
+            $buttonDelete = ' <a href="' . $urlDelete . '" class="btn btn-xs btn-danger delete-document" data-loading-text="Removing...">Remove</a> ';
+
+            $urledit = $this->url('backoffice/default', [
+                'controller'    => 'user',
+                'action'        => 'edit-document',
+                'id'            => $document->getId()
+            ]);
+            $buttonEdit = ' <a href="' . $urledit . '" class="btn btn-xs btn-primary edit-document">Edit</a> ';
+?>
+            <tr>
+                <td><?php echo date(Constants::GLOBAL_DATE_FORMAT, strtotime($document->getDateCreated())); ?></td>
+                <td><?php echo $document->getType(); ?></td>
+                <td><?php echo $document->getDescription(); ?></td>
+                <td class="w1"><?php echo $buttonOpen; ?></td>
+                <td class="w1"><?php echo $buttonDownload; ?></td>
+                <td class="w1"><?php echo $buttonDelete; ?></td>
+                <td class="w1"><?php echo $buttonEdit; ?></td>
+            </tr>
+<?php
+            }
+        } else { ?>
+    <?php } ?>
+    </tbody>
+</table>
+
+<div class="modal fade" id="documentsRemoveModal" tabindex="-1" role="dialog" aria-labelledby="documentsRemoveModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-danger">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">Remove Document</h4>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger exact-remove-document-button" data-loading-text="Removing...">Remove</button>
+            </div>
+        </div>
+    </div>
+</div>

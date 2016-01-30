@@ -1,0 +1,252 @@
+
+/* Hide apartment-general page elements */
+.container .row {
+    display: none;
+}
+.container .row:last-of-type {
+    display: block;
+}
+#apartment_general {
+    display: none;
+}
+
+/*********** print container **********/
+body {
+    padding: 0 !important;
+}
+.col-sm-12 {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+}
+#welcomeNote {
+    position: relative;
+    margin: 0 auto;
+    max-width: 1000px;
+    overflow: hidden !important;
+    background: url(../../img/note-footer.jpg) no-repeat bottom !important;
+    background-size: contain !important;
+    -webkit-print-color-adjust: exact;
+    font-family: 'Open Sans', sans-serif !important;
+    color: #757575;
+}
+#welcomeNote p, #welcomeNote div, #welcomeNote span
+{
+    font-family: 'Open Sans', sans-serif !important;
+    font-weight: 400;
+}
+#welcomeNote.a4 {
+    height: 1018px !important;
+}
+#welcomeNote.letter {
+    height: 955px !important;
+}
+#welcomeNote .margin-right-30 {
+    margin-right: 30px !important;
+}
+#welcomeNote .margin-right-10 {
+    margin-right: 10px !important;
+}
+#welcomeNote .margin-left-20 {
+    margin-left: 20px !important;
+}
+#welcomeNote .margin-top-25 {
+    margin-top: 25px !important;
+}
+#welcomeNote .margin-top-20 {
+    margin-top: 20px !important;
+}
+#welcomeNote .margin-top-15 {
+    margin-top: 15px !important;
+}
+#welcomeNote .margin-top-5 {
+    margin-top: 5px !important;
+}
+#welcomeNote .margin-left-10 {
+    margin-left: 10px !important;
+}
+#welcomeNote .margin-left-15 {
+    margin-left: 15px !important;
+}
+#welcomeNote .col-sm-12 {
+    float: left;
+    width: 100%;
+    position: relative;
+    min-height: 1px;
+    padding-right: 15px !important;
+    padding-left: 15px !important;
+    box-sizing: border-box;
+}
+#welcomeNote .col-sm-6 {
+    float: left;
+    padding: 0 !important;
+    width: 50%;
+    position: relative;
+    min-height: 1px;
+    box-sizing: border-box;
+    color: #000000;
+}
+#welcomeNote {
+    display: block !important;
+}
+#welcomeNote .header {
+    width: 100%;
+    height: 100px;
+}
+#welcomeNote .blue-box {
+    background-color: #0091d0 !important;
+    color: #ffffff !important;
+    -webkit-print-color-adjust: exact;
+}
+#welcomeNote .blue-box * {
+    color: #ffffff !important;
+}
+#welcomeNote .apartment-welcome-text {
+    position: relative;
+    margin-bottom: 20px !important;
+    font-size: 12px;
+    color: #000000;
+}
+#welcomeNote .apartment-welcome-text p {
+    margin-bottom: 0 !important;
+}
+#welcomeNote .apartment-welcome-text .print-btn {
+    position: absolute;
+    top: 10px;
+    right: 0;
+}
+#welcomeNote .apartment-features {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+#welcomeNote .apartment-features > div {
+    margin: 20px 0;
+    font-size: 12px !important;
+}
+#welcomeNote .apartment-features .col {
+    display: inline-block;
+    vertical-align: middle;
+}
+#welcomeNote .apartment-features .col-sm-6 .pull-left > div {
+    color: rgba(0,0,0,0.7) !important;
+}
+#welcomeNote .apartment-features .col-sm-6 .pull-right > div {
+    color: rgba(0,0,0,1) !important;
+}
+#welcomeNote .apartment-features .btn-check-in {
+    display: block;
+    background: url(../../img/check-in.png) no-repeat center !important;
+    background-size: contain !important;
+    -webkit-print-color-adjust: exact;
+    width: 20px;
+    height: 20px;
+    margin: 15px auto 0 auto;
+}
+#welcomeNote .apartment-features .btn-wifi {
+    display: block;
+    background: url(../../img/wifi.png) no-repeat center !important;
+    background-size: contain !important;
+    -webkit-print-color-adjust: exact;
+    width: 20px;
+    height: 20px;
+    margin: 15px auto 0 auto;
+}
+#welcomeNote .wrapper {
+    padding-bottom: 20px;
+    color: #000000;
+}
+#welcomeNote .wrapper * {
+    font-size: 12px;
+}
+#welcomeNote .wrapper ul, #welcomeNote .wrapper ol {
+    padding: 5px 15px;
+}
+#welcomeNote .wrapper h1, #welcomeNote .wrapper h2, #welcomeNote .wrapper h3 {
+    font-size: 14px !important;
+    font-weight: bold !important;
+}
+#welcomeNote .border-right {
+    border-right: 1px solid rgba(0,0,0, 0.05) !important;
+}
+#welcomeNote .apartmentBlock {
+    position: absolute !important;
+    right: 10px !important;
+    bottom: 25px !important;
+    padding: 5px 10px !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    word-break: normal !important;
+    white-space: nowrap !important;
+    font-size: 12px;
+}
+#welcomeNote .apartmentBlock span {
+    display: inline !important;
+    color: #0188cc !important;
+}
+.icon-circle {
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    line-height: 50px !important;
+    text-align: center;
+}
+.icon-circle .icon{
+    color: #ffffff !important;
+    font-size: 120%;
+}
+.icon-circle .glyphicon-log-in:before, .icon-circle .icon:before {
+    color: #ffffff !important;
+}
+.icon-circle .icon.glyphicon-log-in {
+    line-height: 250%;
+    margin-left: -3px;
+}
+#printModal {
+    text-align: center;
+}
+#printModal .printTypeBlock {
+    display: inline-block;
+    padding: 5px;
+    margin-right: 10px;
+    border: 1px solid #dcdcdc;
+    text-align: center;
+    width: 120px;
+    cursor: pointer;
+}
+#printModal .printTypeBlock.right {
+    margin-right: 0;
+}
+#printModal .printTypeBlock:hover {
+    text-decoration: none;
+    background-color: #f5f5f5;
+}
+.margin-top-minus-20 {
+    margin-top:-20px;
+}
+@media (max-width: 768px) {
+    .col-sm-6 {
+        border-right: 0 !important;
+    }
+    .col-sm-6 > div {
+        margin: 10px 0 0 10px;
+    }
+}
+@media print {
+    .print-btn, #printModal {
+        display: none !important;
+    }
+    .icon {
+        color: #ffffff !important;
+    }
+    #welcomeNote .apartment-features .col {
+        margin-top: 0 !important;
+    }
+    #welcomeNote .wrapper div.left {
+        margin-left: 5px  !important;
+    }
+    #welcomeNote .apartment-welcome-text {
+        padding-left: 25px !important;
+    }
+}

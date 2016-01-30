@@ -1,0 +1,145 @@
+<?php
+
+use Mailer\Constants\Inline;
+
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>A Simple Responsive HTML Email</title>
+</head>
+<body yahoo bgcolor="#E0E0E0" style="font-family: Arial, Helvetica; margin: 0; padding: 0; min-width: 100%!important;">
+    <table width="100%" bgcolor="#E0E0E0" border="0" cellpadding="0" cellspacing="0" style="font-family: Arial, Helvetica; color: #757575;">
+        <tr>
+            <td>
+                <table style="width: 100%;" border="0" cellpadding="0" cellspacing="0" align="center">
+
+                    <?php
+                    // TEMPLATE INCLUDE HERE
+                    include __DIR__ . '/../templates/' . $this->template . '.phtml';
+                    ?>
+
+                </table>
+                <!-- footer: start -->
+                <table border="0" cellpadding="0" cellspacing="0" align="center" data-editable="text" style="width:100%; <?php echo Inline::MAX_WIDTH; ?> margin:0 auto 20px auto;">
+                    <tbody>
+                    <tr>
+                        <td valign="top" align="center">
+                            <table cellpadding="0" cellspacing="0" align="center" data-editable="socialmedia">
+                                <tbody>
+                                <tr>
+                                    <td valign="top" align="left" style="padding: 0; margin: 0;">
+                                        <table cellpadding="0" cellspacing="0" align="center">
+                                            <tbody>
+                                            <tr data-columns="no">
+                                                <!-- social icons: start -->
+                                                <td style="display: inline-block !important; width: auto !important; margin: auto; padding: 5px;">
+                                                    <a
+                                                        href="https://twitter.com/ginosi"
+                                                        title="Twitter" style="
+                                                            background-color: #00ACEE;
+                                                            display: inline-block;
+                                                            border: 1px solid #E0E0E0;
+                                                            border-radius: 50%;
+                                                            min-height: 33px;
+                                                            min-width: 33px;
+                                                            text-align: center;
+                                                            vertical-align: middle;
+                                                            color: #FFFFFF;
+                                                            ">
+                                                        <img
+                                                            src="https://www.ginosi.com/images/emails/t.png"
+                                                            alt="t"
+                                                            border="0"
+                                                            style="display: block;width:32px;"
+                                                            >
+                                                    </a>
+                                                </td>
+                                                <td style="display: inline-block !important; width: auto !important; margin: auto; padding: 5px;">
+                                                    <a
+                                                        href="https://www.facebook.com/ginosi"
+                                                        title="Facebook" style="
+                                                            background-color: #4460AE;
+                                                            display: inline-block;
+                                                            border: 1px solid #E0E0E0;
+                                                            border-radius: 50%;
+                                                            min-height: 33px;
+                                                            min-width: 33px;
+                                                            text-align: center;
+                                                            vertical-align: middle;
+                                                            color: #FFFFFF;
+                                                            ">
+                                                        <img
+                                                            src="https://www.ginosi.com/images/emails/face.png"
+                                                            alt="f"
+                                                            border="0"
+                                                            style="display: block;width:32px;"
+                                                            >
+                                                    </a>
+                                                </td>
+                                                <td style="display: inline-block !important; width: auto !important; margin: auto; padding: 5px;">
+                                                    <a
+                                                        href="https://plus.google.com/113386384616383124605/posts"
+                                                        title="GooglePlus" style="
+                                                            background-color: #DB4437;
+                                                            display: inline-block;
+                                                            border: 1px solid #E0E0E0;
+                                                            border-radius: 50%;
+                                                            min-height: 33px;
+                                                            min-width:33px;
+                                                            text-align: center;
+                                                            vertical-align: middle;
+                                                            color: #FFFFFF;
+                                                            ">
+                                                        <img
+                                                            src="https://www.ginosi.com/images/emails/g+.png"
+                                                            alt="g"
+                                                            border="0"
+                                                            style="display: block;width:32px;"
+                                                            >
+                                                    </a>
+                                                </td>
+                                                <!-- social icons: end -->
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <table style="width: 100%;" border="0" cellpadding="0" cellspacing="0" align="center">
+                    <tbody>
+                        <tr>
+                            <td style="padding: 0px 20px 10px" align="center">
+                                <table cellpadding="0" cellspacing="0" border="0" bgcolor="#FFFFFF" width="100%" style="<?php echo Inline::MAX_WIDTH . Inline::BORDER_RADIUS; ?>">
+                                    <tr>
+                                        <td style="padding: 20px">
+                                            <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                                                <tr>
+                                                    <td align="center">
+                                                        <?= $this->textline(1479, true) ?> - <?= $this->textline(1659) ?>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- footer: end -->
+                <!-- Analytics:start -->
+                <?php if (isset($this->analyticsImage)) : ?>
+                    <?= $analyticsImage ?>
+                <?php endif; ?>
+                <!-- Analytics:end -->
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

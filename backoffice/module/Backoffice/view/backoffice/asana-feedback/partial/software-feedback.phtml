@@ -1,0 +1,24 @@
+<?php
+use DDD\Service\Asana\Feedback;
+?>
+
+<div class="form-group">
+    <select class="form-control" id="feedback-application-types" name="feedback-application-types">
+        <?php
+        $subTypes = Feedback::getApplicationTypes();
+        foreach ($subTypes as  $text) {
+            ?>
+            <option value="<?= $text ?>" ><?= $text ?></option>
+        <?php } ?>
+    </select>
+</div>
+<div class="form-group">
+    <input type="text" name="feedback-title" id="feedback-title" class="form-control" placeholder="Meaningful Title" value="">
+</div>
+<div class="form-group">
+    <input type="checkbox" value="1" id="feedback-is-bug">
+    <label for="feedback-is-bug">I think this is a bug or malfunction</label>
+</div>
+<div class="form-group">
+    <textarea name="feedback-description" id="feedback-description" class="form-control" placeholder="Description" rows="4"></textarea>
+</div>

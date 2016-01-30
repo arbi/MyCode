@@ -1,0 +1,16 @@
+<OTA_NotifReportRQ>
+	<NotifDetails>
+		<HotelNotifReport>
+			<HotelReservations>
+				<HotelReservation>
+					%pos%
+					<ResGlobalInfo>
+						<HotelReservationIDs>
+							%reservations%
+						</HotelReservationIDs>
+					</ResGlobalInfo>
+				</HotelReservation>
+			</HotelReservations>
+		</HotelNotifReport>
+	</NotifDetails>
+</OTA_NotifReportRQ>

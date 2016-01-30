@@ -1,0 +1,155 @@
+<?php
+    $this->headTitle($this->textline(1577))->setSeparator(' - ');
+
+    $this->inlineScript()
+        ->appendFile($this->basePath() . '/js/vendor/jquery.validate.min.js')
+        ->appendFile($this->basePath() . '/js/vendor/jquery.barrating.min.js')
+        ->appendFile($this->basePath() . '/js/pages/charge-authorization.js');
+
+    $this->headLink()
+        ->prependStylesheet($this->basePath() . '/css/charge-authorization.css')
+        ->prependStylesheet($this->basePath() . '/css/charge-authorization.print.css', ['media' => 'print']);
+
+    $this->headMeta()->appendName('robots', 'noindex');
+?>
+
+<?php
+    /**
+     * @var \DDD\Domain\Booking\ChargeAuthorization\ChargeAuthorizationForm $reservationData
+     * @var \DDD\Domain\Booking\ChargeAuthorization\ChargeAuthorizationCreditCard $creditCardData
+     * @var \DDD\Domain\Booking\ChargeSummary $chargesSummary
+     */
+    $reservationData = $this->reservationData;
+    $creditCardData = $this->creditCardData;
+    $chargesSummary = $this->chargesSummary;
+
+    $form = $this->cccaForm;
+    $form->setAttribute('action', '/add-review/ajax-save-review');
+?>
+
+<div class="col-md-8">
+
+    <div class="row">
+        <div class="col-sm-12">
+            <h2><?= $this->textline(1577) ?></h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            <table class="table table-bordered">
+                <tbody>
+                <tr>
+                    <td width="40%">Reservation</td>
+                    <td><?= $reservationData->getReservationNumber() ?></td>
+                </tr>
+                <tr>
+                    <td width="40%">Check-in Date</td>
+                    <td><?= $reservationData->getReservationDateFrom() ?></td>
+                </tr>
+                <tr>
+                    <td width="40%">Check-out Date</td>
+                    <td><?= $reservationData->getReservationDateTo() ?></td>
+                </tr>
+                <tr>
+                    <td width="40%">Refund and Cancelation Policy</td>
+                    <td><?= $reservationData->getCancellationPolicy() ?></td>
+                </tr>
+                <tr>
+                    <td width="40%">Total</td>
+                    <td><?= $amount . ' ' . $reservationData->getApartmentCurrencyCode() ?></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            <p><?= $this->textline(1578) ?></p>
+        </div>
+    </div>
+
+	<div class="row">
+	    <div class="col-sm-12 col-md-12">
+
+            <?= $this->form()->openTag($form) ?>
+
+            <table class="table table-bordered">
+                <thead></thead>
+                <tbody>
+                    <tr>
+                        <td width="40%">Credit Card Brand</td>
+                        <td><?= \Library\Finance\CreditCard\CreditCard::getNameById($creditCardData->getBrand()) ?></td>
+                    </tr>
+                    <tr>
+                        <td width="40%">Cardholder Name</td>
+                        <td><?= $creditCardData->getHolder() ?></td>
+                    </tr>
+                    <tr>
+                        <td width="40%">PAN (last 4 digits)</td>
+                        <td><?= $creditCardData->getLast4Digits() ?></td>
+                    </tr>
+                    <tr>
+                        <td width="40%">CIV/CID (security code)</td>
+                        <td id="cc-security-code-container"><span id="cc-security-code-for-print" class="visible-print-inline-block"></span><?= $this->formElement($form->get('security-code')) ?></td>
+                    </tr>
+                    <tr>
+                        <td width="40%">Expiration Date</td>
+                        <td id="cc-expiration-date-container">
+                            <div class="row hidden-print">
+                                <div class="col-md-6"><?= $this->formElement($form->get('cc-expiration-month')) ?></div>
+                                <div class="col-md-6"><?= $this->formElement($form->get('cc-expiration-year')) ?></div>
+                            </div>
+                            <span id="cc-expiration-date-for-print" class="visible-print-inline-block"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="40%">Billing Address</td>
+                        <td id="billing-address-container"><span id="billing-address-for-print" class="visible-print-inline-block"></span><?= $this->formElement($form->get('billing-address')) ?></td>
+                    </tr>
+                </tbody>
+                <tfoot></tfoot>
+            </table>
+
+            <?php if ($reservationData->getReservationPartner()): ?>
+                <table class="table table-bordered">
+                    <tbody>
+                        <tr>
+                            <td width="40%">The platform used for booking</td>
+                            <td><?= $reservationData->getReservationPartner() ?></td>
+                        </tr>
+                    </tbody>
+                </table>
+            <?php endif; ?>
+
+		    <div class="form-group">
+			    <div class="row">
+				    <div class="col-sm-4 col-md-4">
+                        <?= $this->formElement($form->get('print-ccca-form')) ?>
+                        &nbsp;&nbsp;&nbsp;
+				    </div>
+				    <div class="col-sm-8 col-md-8">
+                        <table class="table charge-authorization-table visible-print">
+                            <tbody>
+                            <tr>
+                                <td width="40%">Cardholder's Signature</td>
+                                <td class="text-right">_________________________________________________</td>
+                            </tr>
+                            <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+                            <tr>
+                                <td width="40%">Date</td>
+                                <td class="text-right">_________________________________________________</td>
+                            </tr>
+                            </tbody>
+                        </table>
+				    </div>
+			    </div>
+            </div>
+
+	        <?php echo $this->form()->closeTag(); ?>
+
+		    <hr>
+	    </div>
+	</div>
+</div>

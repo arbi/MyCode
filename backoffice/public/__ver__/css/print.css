@@ -1,0 +1,175 @@
+@media print {
+
+    .breadcrumb,
+    #dynamicLoginForm,
+    footer {
+            display: none;
+    }
+
+    @page {
+            margin: 0.5cm;
+    }
+
+    body {
+            font: 12pt Georgia, "Times New Roman", Times, serif;
+            line-height: 1.3;
+    }
+
+    h1 {
+            font-size: 24pt;
+    }
+
+    h2 {
+            font-size: 14pt;
+            margin-top: 25px;
+    }
+
+    h3 {
+            font-size: 12pt;
+    }
+
+    li {
+            content: "» ";
+    }
+
+    /******** housekeeping *********/
+    .spinner,
+    .housekeeping-person,
+    .gem_housekeeper_block img,
+    .hk_showhide_past {
+            display: none;
+    }
+
+    .housekeeping-row-container-header:after {
+            content: ".";
+            display: block;
+            clear: both;
+            visibility: hidden;
+            line-height: 0;
+            height: 0;
+    }
+
+    .housekeeping-row-container-header {
+            display: inline-block;
+            height: 30px;
+            font-size: 12px;
+    }
+
+    html[xmlns] .housekeeping-row-container-header {
+            display: block;
+    }
+
+    * html .housekeeping-row-container-header {
+            height: 1%;
+    }
+
+    .housekeeping-row-container-header select {
+            width: 200px;
+            line-height: 0;
+    }
+
+    .housekeeping-row-container-header button:before {
+            content: "nobody";
+            visibility: visible;
+            display: block;
+            position: absolute;
+            background-color: red;
+            padding: 5px;
+            top: -4px;
+    }
+    .housekeeping-row-container-header button {
+            visibility: hidden;
+    }
+
+    .housekeeping-row {
+            width: 300px;
+            text-overflow: ellipsis;
+    }
+
+    .housekeeping-row,
+    .housekeeping-row-name,
+    .action-buttons {
+            float: left;
+    }
+
+    .housekeeping-row .muted {
+            padding-right: 10px;
+    }
+
+    .checkin-person-details {
+            float: right;
+    }
+
+    .rel_top23 {
+            position: relative;
+            top: -21px;
+    }
+
+    .gem_housekeeper_block {
+            display: inline;
+            position: relative;
+            width: 100px;
+            text-overflow: ellipsis;
+            font-size: 14px;
+    }
+
+    .gem_housekeeper_block * {
+            line-height: 100%;
+    }
+
+    h3 {
+            display: block;
+            clear: both;
+    }
+
+    #concierge_checkout{ display: none}
+    #concierge_tomorrow{ display: none}
+
+    .cp_main td{ padding:4px 9px; font-size: 17px; border: 1px solid #dddddd}
+    .conciergeGroupName{ font-weight: bold; font-size: 20px; margin-bottom: 15px;}
+    .printLogo { display: block; margin-bottom: 30px; }
+
+    .ui-pnotify { display: none !important; }
+
+    .page-actions {
+        display: none !important;
+    }
+
+    .xdsoft_datetimepicker {
+        display: none;
+    }
+
+    #date-div .reservation-item {
+        position: absolute;
+        text-align: center;
+        cursor: move;
+        height: 30px;
+        border-radius: 30px !important;
+        background-color: #dddddd !important;
+        -webkit-print-color-adjust: exact;
+        font-size: 15px;
+    }
+
+    #date-div .closed-day {
+        position: absolute;
+        background-color: #dddddd !important;
+        -webkit-print-color-adjust: exact;
+        border-radius: 0 !important;
+        text-align: center;
+        padding: 2px;
+        line-height: 40px;
+    }
+
+    .pi-ginosi-icon-print {
+        position: absolute;
+        top: -60px;
+        right: 10px;
+    }
+
+    .pi-lot-name {
+        position: absolute;
+        top: -20px;
+        right: 10px;
+        font-size: 18px;
+    }
+}

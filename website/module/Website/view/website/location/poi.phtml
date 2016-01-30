@@ -1,0 +1,153 @@
+<?php
+
+use Library\Utility\Helper;
+
+$this->inlineScript()
+	->appendFile('https://maps.googleapis.com/maps/api/js?key=AIzaSyCLpdxX2wUp-KAxXwyB6ggmnkIkxi_eFwU&sensor=false')
+	->appendFile($this->basePath() . '/js/vendor/bootstrap-datepicker.min.js')
+	->appendFile($this->basePath() . '/js/destination.js')
+	->appendFile($this->basePath() . '/js/destination.maps.js')
+	->appendFile($this->basePath() . '/js/destination.page.js')
+	->appendFile($this->basePath() . '/js/destination.search.js');
+
+$this->headLink()
+	->appendStylesheet($this->basePath() . '/css/vendor/datepicker3.min.css');
+
+$this->headTitle((isset($this->individualData['poi_name']) ? $this->individualData['poi_name'] . '-':'') . $this->options['city_name']);
+
+$metaDescriptionRaw = $this->individualData['description'];
+$metaDescription = strip_tags($metaDescriptionRaw);
+$metaDescription = str_replace("&rsquo;","'", $metaDescription);
+$metaDescription = preg_replace("/&#?[a-z0-9]{2,8};/i","", $metaDescription );
+$metaDescription = join("\n", array_map("ltrim", explode("\n", $metaDescription )));
+$metaDescription = Helper::cutStringAndAppend($metaDescription, 140, '...');
+
+if ($metaDescription !== '') {
+    $this->headMeta()
+        ->appendHttpEquiv('Content-Type', 'text/html;charset=utf-8')
+        ->appendName('description', $metaDescription);
+}
+
+if ($this->isCity) {
+    $this->headLink([
+        'rel' => 'canonical',
+        'href' => $this->urlToCity($this->options['city_id']),
+    ]);
+} else {
+    $urlToThisPOI = explode('?', $this->serverUrl(true));
+
+    $this->headLink([
+        'rel' => 'canonical',
+        'href' => $urlToThisPOI[0]]);
+}
+
+$showRightColumn = false;
+$leftColumnWidth = 'col-sm-12';
+
+if ($this->individualData['ws_show_right_column']) {
+    $showRightColumn = true;
+    $leftColumnWidth = 'col-sm-8';
+}
+
+?>
+<?php if (isset($this->individualData['img']) && $this->individualData['img']) { ?>
+        <div class="col-sm-12">
+            <div class="directory-cover directory-cover-poi" data-background="<?=$this->individualData['img']?>">
+                <h1 class="poi-title"><?php echo $this->individualData['poi_name']; ?></h1>
+            </div>
+        </div>
+<?php } ?>
+		<div class="col-sm-12">
+			<div class="row" itemscope itemtype="http://schema.org/Organization">
+                <div class="<?=$leftColumnWidth?>" itemprop="location" itemscope itemtype="http://schema.org/Place">
+                    <span itemprop="name" class="hidden"><?php echo $this->options['city_name'];?></span>
+                    <span itemprop="photo" itemscope itemtype="http://schema.org/ImageObject" class="hidden">
+                        <span itemprop="contentUrl"><?php echo $this->individualData['img'];?></span>
+                    </span>
+					<?php if (!(isset($this->individualData['img']) && $this->individualData['img'] != '')) { ?>
+					<h2><?=$this->individualData['poi_name']?></h2>
+					<?php } else { ?>
+                    <br>
+                    <?php } ?>
+                    <?=$this->individualData['description']?>
+                    <?php if ($this->isCity) { ?>
+					<h2><?=$this->textline(1198)?></h2>
+                    <span itemprop="geo" itemscope itemtype="http://schema.org/GeoCoordinates" class="hidden">
+                        <span itemprop="latitude"><?=$this->individualData['latitude']?></span>
+                        <span itemprop="longitude"><?=$this->individualData['longitude']?></span>
+                    </span>
+                    <div id="map-canvas" data-apartment-name="asdasd" data-lattitude="<?=$this->individualData['latitude']?>" data-longitude="<?=$this->individualData['longitude']?>" style="height: 500px;">
+                    </div>
+                    <?php } ?>
+                    <div class="margin-bottom-15"></div>
+                    <?php if (!empty($this->poiList)) { ?>
+                    <h2 class="margin-top-0"><?=$this->textline(1323)?></h2>
+                    <div class="row destination-panels">
+	                    <?php foreach ($this->poiList as $poi) { ?>
+	                    <div class="col-xs-12 col-sm-6 col-lg-4">
+		                    <div class="panel panel-default">
+			                    <div class="panel-heading"><i class="glyphicon glyphicon-plus text-small-80"></i> <?=$poi['poi_type_name']?></div>
+			                    <div class="list-group">
+				                    <?php foreach ($poi['poi_list'] as $p) { ?>
+				                    <a href="<?=$p['url']?>" class="list-group-item"><?=$p['name']?></a>
+				                    <?php } ?>
+			                    </div>
+		                    </div>
+	                    </div>
+	                    <?php } ?>
+                    </div>
+                    <?php } ?>
+				</div>
+                <?php if ($showRightColumn) { ?>
+				<div class="col-sm-4 hidden-xs apartment-list">
+                    <?php if($this->apartmentList) {?>
+                    <h3><a href="/search?city=<?=$this->options['city_url']?>&amp;show=all"><?=$this->textline(1419)?></a></h3>
+                    <?php foreach ($this->apartmentList as $al) { ?>
+					<a href="<?=$al['url']?>?show=reviews" class="thumbnail directory-thumb">
+						<h3><?=$al['name']?></h3>
+						<img alt="" src="<?=$al['img']?>" class="full-with">
+					</a>
+                    <?php } }?>
+				</div>
+                <?php } ?>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="container-fluid directory-search-footer hidden-xs">
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12">
+				<h2 class="text-center"><?=Helper::evaluateTextline($this->textline(1321),['{{CITY_NAME}}' => $this->options['city_name']])?></h2>
+
+				<form class="row search search-general" data-today="<?=$this->options['current_date']?>" action="<?=$this->options['url']?>">
+					<input type="hidden" class="form-control input-lg" name="city" value="<?=$this->options['city_url']?>">
+
+					<div class="input-daterange">
+						<div class="col-sm-offset-1 col-md-offset-3 col-sm-3 col-md-2 col">
+							<input type="text" name="arrival" class="form-control input-lg text-left" readonly placeholder="<?=$this->textline(1222)?>">
+							<i class="glyphicon glyphicon-calendar text-muted"></i>
+						</div>
+						<div class="col-sm-3 col-md-2 col">
+							<input type="text" name="departure" class="form-control input-lg text-left" readonly placeholder="<?=$this->textline(1223)?>">
+							<i class="glyphicon glyphicon-calendar text-muted"></i>
+						</div>
+					</div>
+					<div class="col-sm-2 col-md-1 col search-guest">
+						<select class="form-control input-lg" name="guest">
+							<?php foreach ($this->options['guest'] as $key => $guest) { ?>
+							<option value="<?=$key?>" <?php if (2 == $key) echo 'selected="selected"'?>><?=$guest?></option>
+							<?php } ?>
+						</select>
+					</div>
+					<div class="col-sm-2 col-md-1 col">
+						<input type="button" class="searchButton btn-lg go-search" value="<?=$this->textline(1322)?>">
+					</div>
+				</form>
+			</div>
+		</div>
+<!-- div's close in layout: because we close 2 div in top of this view file
+    </div>
+</div>
+-->

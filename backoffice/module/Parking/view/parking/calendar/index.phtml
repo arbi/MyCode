@@ -1,0 +1,237 @@
+<?php
+use Library\Utility\Helper;
+$this->headTitle()->setSeparator(' - ');
+echo $this->parkingPageTitle($this->parkingLotId);
+$this->headTitle($this->layout()->parkingLotName . ' - Parking Calendar');
+
+$this->headLink()
+	->appendStylesheet($this->basePath() . '/css/pages/parking.common.css');
+
+$this->InlineScript()
+	->appendFile($this->basePath() . '/js/module/parking/calendar.js');
+?>
+<script xmlns="http://www.w3.org/1999/html">
+	var GLOBAL_TOGGLE_AVAILABILITY   = '<?php echo $this->urlToggleAvailability; ?>';
+	var GLOBAL_UPDATE_AVAILABILITIES = '<?php echo $this->urlUpdateAvailabilities; ?>';
+</script>
+
+<div class="row">
+    <div class="col-sm-12">
+        <hr>
+        <?= $this->parkingNavigation($this->parkingLotId, 'parking/calendar')?>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Month navigation -->
+    <div class="col-sm-2">
+        <?= $this->parkingInventoryCalendarMonthNavigation($this->parkingLotId, $this->year, $this->month)?>
+
+        <ul class="spot-list">
+        <?php
+            $spots = [];
+            /**
+             * @var \DDD\Domain\Parking\Spot $spot
+             */
+            foreach ( $this->spots as $key => $spot ) {
+                array_push($spots, $spot);
+                $parentSymbol = '';
+            } ?>
+        </ul>
+
+    </div>
+
+    <!-- Week Days -->
+    <div class="col-sm-10">
+        <div class="row_week">
+            <div class="col_week_day">
+                <div class="calendar-header-item bg-primary">Sunday</div>
+            </div>
+            <div class="col_week_day">
+                <div class="calendar-header-item bg-primary">Monday</div>
+            </div>
+            <div class="col_week_day">
+                <div class="calendar-header-item bg-primary">Tuesday</div>
+            </div>
+            <div class="col_week_day">
+                <div class="calendar-header-item bg-primary">Wednesday</div>
+            </div>
+            <div class="col_week_day">
+                <div class="calendar-header-item bg-primary">Thursday</div>
+            </div>
+            <div class="col_week_day">
+                <div class="calendar-header-item bg-primary">Friday</div>
+            </div>
+            <div class="col_week_day">
+                <div class="calendar-header-item bg-primary row-last-item">Saturday</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar -->
+    <div class="col-sm-10 calendar-container" style="position: relative">
+        <div id="locker"></div>
+        <div class="row_week">
+        <?php
+
+        $calendarFirstDayShift = 1;
+        $warning = 0;
+
+        if ($this->dayOfWeek) {
+            $calendarFirstDayShift = 1;
+        }
+
+        for ($i = 0; $i < $this->dayOfWeek; $i ++) {
+            echo '<div class="col_week_day"><div class="calendar-day-item-empty"></div></div>';
+        }
+
+        for ($i = 1; $i <= $this->givenMonthDaysCount; $i ++) {
+            $availabilityCounter = 0;
+            $lastItem = '';
+
+            if (($this->dayOfWeek + $i - $calendarFirstDayShift + 1) % 7 == 0) {
+                $lastItem = 'row-last-item';
+            }
+
+            $tpl = '<span %6$s class="spot-information" data-spot-id="%1$s" data-status="%2$s">
+                        <span class="spot-icon %3$s"></span>
+                        <span class="spot-price" data-price-decimal="%4$s">%5$s</span>
+                    </span>';
+            $spotsHTML = '';
+            $k = 0;
+            foreach ($spots as $spot) {
+                $goodLookingDate = $this->year . '-' . str_pad ( $this->month, 2, '0', STR_PAD_LEFT ) . '-' . str_pad ( $i, 2, '0', STR_PAD_LEFT );
+
+                if (isset($this->inventory[$spot->getId()]) && isset($this->inventory[$spot->getId()][$goodLookingDate])) {
+                    $availability = $this->inventory[$spot->getId()][$goodLookingDate]['availability'];
+                    $price = $this->inventory[$spot->getId()][$goodLookingDate]['price'];
+                } else {
+                    $availability = 0;
+                    $price = 'N/A';
+                    if ($goodLookingDate >= date('Y-m-d')) {
+                        $warning++;
+                    }
+                }
+
+                $availabilityCounter += $availability;
+
+                $availabilityColor = 'red';
+                $spotStatus = 'close';
+
+                if ($availability) {
+                    $spotStatus = 'open';
+                    $availabilityColor = 'green';
+                }
+                $style = ($k >= 6) ? 'style="display:none"' : '';
+                $spotsHTML .= sprintf (
+                    $tpl,
+                    $spot->getId(),
+                    $spotStatus,
+                    $availabilityColor,
+                    $price,
+                    ($price == 'N/A' ? 'N/A' : floor($price)),
+                    $style
+                );
+                if ($k == 5) {
+                    if (count($spots) > 6) {
+                        $spotsHTML .= '<div class="clearfix"></div><div class="more-modal margin-top-7"><span class="btn btn-primary btn-xs hidden-xs hidden-sm">More</span><i class="glyphicon glyphicon-chevron-right hidden-lg hidden-md "></i></div>';
+                    }
+                }
+                $k++;
+            }
+
+            $status = $availabilityCounter ? 'open' : 'close';
+            $calendarItemClass = $availabilityCounter ? 'bg-success' : 'bg-danger';
+            $date = $this->year . '-' . str_pad($this->month, 2, '0', STR_PAD_LEFT) . '-' . str_pad($i, 2, '0', STR_PAD_LEFT);
+            // init locker protocol
+
+            if ($date < date('Y-m-d', strtotime('-1 days'))) {
+                $locker = '<div class="locker"></div>';
+
+            } else {
+                $locker = '';
+            }
+            $date = date('Y-m-d l', strtotime($date));
+            echo '
+                <div class="col_week_day">
+                    <div class="calendar-day-item ' . $lastItem . ' ' . $calendarItemClass . '" data-date="' . $date . '" data-status="' . $status . '">
+                        ' . $locker . '
+                        <div class="calendar-item-header">
+                            <div class="day-of-month">' . $i . '</div>
+                            <div class="availability-badge availability-badge-' . $status . '"></div>
+                        </div>
+                        <div class="spots-container">
+                            ' . $spotsHTML . '
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>';
+        }
+        ?>
+        </div>
+    </div>
+</div>
+
+<div id="update-availabilities" class="modal fade" tabindex="-1" aria-labelledby="dialogLabel">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-primary">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                </button>
+                <h4 id="dialogLabel">Update Availabilities <small class="modal-selected-date"></small></h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" id="spot-availabilities-form">
+                    <input type="hidden" name="date" value="">
+                    <?php foreach ($spots as $spot) { ?>
+                        <?php $slugAvailability = 'availability-' . strtolower(str_replace(' ', '-', $spot->getUnit())); ?>
+                    <div class="form-group">
+                        <label class="control-label col-sm-4"><?php echo $spot->getUnit(); ?></label>
+                        <div class="col-sm-4">
+                            <div class="checkbox">
+                                <span id="spot_<?php echo $spot->getId(); ?>"></span>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="availability-toggle-block">
+                                <label for="<?php echo $slugAvailability; ?>-open">
+                                    <span class="label label-success">Open</span>
+                                    <input type="radio" value="1" name="availability[<?php echo $spot->getId(); ?>]" id="<?php echo $slugAvailability; ?>-open" data-master="0" data-status="open">
+                                    </label>
+                                <label for="<?php echo $slugAvailability; ?>-close">
+                                    <input type="radio" value="0" name="availability[<?php echo $spot->getId(); ?>]" id="<?php echo $slugAvailability; ?>-close" data-master="0" data-status="close">
+                                    <span class="label label-danger">Closed</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <?php } ?>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <button class="btn btn-primary" id="spot-availabilities-form-update">Update</button>
+            </div>
+        </div>
+    </div>
+</div>
+<?php
+	if ($warning) {
+?>
+<script>
+	$(function(){
+        new PNotify({
+			title: 'Availability table is broken.',
+			text: 'Please inform development team to repair and fix this problem.',
+			type: 'error',
+			history: false,
+			icon: true,
+			hide: false,
+			sticker: false
+		});
+	});
+</script>
+<?php
+	}
+?>

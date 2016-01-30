@@ -1,0 +1,27 @@
+.panel-heading .accordion-toggle .glyphicon-chevron-down {
+    display:none;
+}
+
+.panel-heading .accordion-toggle .glyphicon-chevron-up {
+    display:block;
+}
+
+.panel-heading .accordion-toggle.collapsed .glyphicon-chevron-down {
+    display:block;
+}
+
+.panel-heading .accordion-toggle.collapsed .glyphicon-chevron-up {
+    display:none;
+}
+
+.panel-heading .accordion-toggle {
+    text-decoration: none;
+}
+
+.panel-body button {
+    margin-top: 5px;
+}
+
+.panel-heading {
+    font-size: 15px !important;
+}

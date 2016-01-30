@@ -1,0 +1,12 @@
+/db/*
+/images/*
+/uploads/*
+/incubator/*
+/tools/*
+/.idea/*
+/tmp/*
+/backoffice/.idea/*
+/website/.idea/*
+/api/.idea/*
+/developers/.idea/*
+backoffice/module/UnitTesting/test/logfile.json

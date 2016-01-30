@@ -1,0 +1,17 @@
+<?php
+use Library\Utility\Helper;
+
+$this->headTitle($this->textline(1371));
+$this->headMeta($this->textline(1458), 'description');
+$this->headLink([
+    'rel' => 'canonical',
+    'href' => $this->url('about-us', ['action' => 'privacy-policy'], ['force_canonical' => true])]);
+
+?>
+<div class="col-sm-12">
+    <h3 class="text-primary"><?=$this->textline(1371)?></h3>
+	<?= Helper::evaluateTextline($this->textline(1372),
+        [
+            '{{CONTACT_PHONE}}' => $this->phoneNumber()
+        ]) ?>
+</div>

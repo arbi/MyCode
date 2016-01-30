@@ -1,0 +1,8 @@
+<POS>
+	<Source>
+		<RequestorID Type="1" ID="%id%" MessagePassword="%password%"/>
+	</Source>
+	<Source>
+		<RequestorID Type="2" ID="%cubilis_id%"/>
+	</Source>
+</POS>

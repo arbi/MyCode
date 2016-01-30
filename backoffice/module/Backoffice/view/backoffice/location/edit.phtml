@@ -1,0 +1,628 @@
+<?php
+
+use \DDD\Service\Location as LocationService;
+
+$typeForTranslation = ($this->type == 2 ) ? 'country': (($this->type == 4) ? 'province' : (($this->type == 8) ? 'city' : 'poi'));
+
+if ($this->edit) {
+    $locationName = $this->locationForm->get('name')->getValue();
+} else {
+    $locationName = 'Add Location';
+}
+
+$this->layout()->viewTitle = $locationName;
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($locationName);
+
+$this->layout()->breadcrumb = $this->breadcrumb([
+    ['Content'],
+    ['Locations', $this->url('backoffice/default', ['controller' => 'location'])],
+    [$this->layout()->viewTitle],
+]);
+
+$this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css');
+
+$this->InlineScript()
+        ->appendFile($this->basePath() . '/js/plugins/jquery.form.min.js')
+        ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+        ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+        ->appendFile($this->basePath() . '/js/module/backoffice/location/index.js')
+        ->appendFile($this->basePath() . '/js/module/backoffice/location/edit.js')
+        ->appendFile($this->basePath() . '/js/plugins/map.js');
+
+$form = $this->locationForm;
+
+$environment = getenv('APPLICATION_ENV') ?: 'production';
+$maxDurationInfo = '<b>Max. Duration</b> is the maximum number of days the tax will be applied for.';
+
+echo "<script src='{$this->basePath()}/js/vendor/tinymce/tinymce.min.js' type='text/javascript'></script>";
+
+?>
+<script src="//maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
+<script>
+    var GLOBAL_UPLOAD_IMG      = '<?= $this->url('backoffice/default', array('controller' => 'location', 'action' => 'ajax-upload-image'))?>';
+    var GLOBAL_SAVE            = '<?= $this->url('backoffice/default', array('controller' => 'location', 'action' => 'ajaxsave'))?>';
+    var GLOBAL_DELETE          = '<?= $this->url('backoffice/default', array('controller' => 'location', 'action' => 'ajaxremove'))?>';
+    var GLOBAL_GET_PARENT_AUTO = '<?= $this->url('backoffice/default', array('controller' => 'location', 'action' => 'ajaxgetparent'))?>';
+    var GLOBAL_DELETE_CHECK    = '<?= $this->url('backoffice/default', array('controller' => 'location', 'action' => 'ajax-delete-check'))?>';
+    var GLOBAL_DELETE_LOCAION  = '<?= $this->url('backoffice/default', array('controller' => 'location', 'action' => 'ajax-delete-location'))?>';
+    var aaData = <?= $logsAaData ?>;
+
+    $(function() {
+		tinymce.init({
+			selector: ".tinymce",
+            skin: "clean",
+			plugins: [
+				"link advlist autolink lists charmap preview anchor",
+				"searchreplace visualblocks code",
+				"insertdatetime table contextmenu paste"
+			],
+			image_advtab: true,
+            browser_spellcheck : true,
+			menu : {},
+            extended_valid_elements : "i[*]",
+            verify_html : false,
+            toolbar: "undo redo | styleselect | bold italic underline | aligncenter alignjustify alignleft alignright | bullist numlist outdent indent | link | print | fontsizeselect | code | removeformat"
+		});
+    });
+</script>
+<?php
+    if (is_object($form)) {
+	    $form->prepare();
+	    $form->setAttribute('action', $this->url('backoffice/default', ['controller' => 'location', 'action' => 'edit']));
+	    $form->setAttribute('method', 'post');
+	    $form->setAttribute('class', 'form-horizontal');
+	    $form->setAttribute('id', 'location_form');
+
+	    echo $this->form()->openTag($form);
+?>
+
+<?php if ($this->edit > 0) { ?>
+<!-- Tabs : START -->
+<ul id="groupTabs" class="nav nav-tabs tabs-general" role="tablist">
+    <li class="active">
+        <a href="#administration" data-toggle="tab" role="tab" id="administration-tab">
+            Administration
+        </a>
+    </li>
+    <li class="pull-right">
+        <a href="#history" data-toggle="tab" role="tab" id="history-tab">
+            <span class="glyphicon glyphicon-list-alt"></span> History
+        </a>
+    </li>
+</ul>
+<?php } ?>
+
+<div id="groupTabsContent" class="tab-content">
+    <div class="tab-pane fade active in" id="administration">
+        <div class="row">
+            <div class="col-sm-6">
+                <fieldset name="general">
+                    <legend>General</legend>
+
+                    <?php if ($this->edit == 0) { ?>
+                     <div class="form-group">
+                        <label class="control-label col-sm-4" for="name">Type</label>
+                        <div class="col-sm-6">
+                            <select onchange="changeLocationType(this.value)" name="add_type" id="add_type" class="form-control">
+                                <option value="<?= LocationService::LOCATION_TYPE_COUNTRY ?>">Country</option>
+                                <option value="<?= LocationService::LOCATION_TYPE_PROVINCE ?>">Province</option>
+                                <option value="<?= LocationService::LOCATION_TYPE_CITY ?>">City</option>
+                                <option value="<?= LocationService::LOCATION_TYPE_POI ?>">POI</option>
+                            </select>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <?php } ?>
+
+                    <div class="form-group">
+                        <label class="control-label col-sm-4" for="name">Name <?php echo $this->required() ?></label>
+                        <div class="col-sm-6">
+                            <?php
+                                echo $this->formInput($form->get('name'));
+                            ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+
+                    <?php if (!$this->edit || $this->type == LocationService::LOCATION_TYPE_PROVINCE) { ?>
+                    <div class="form-group<?php if (!$this->edit) { ?> soft-hide<?php } ?>">
+                        <label class="control-label col-sm-4" for="name">Short Name <?php echo $this->required() ?></label>
+                        <div class="col-sm-6">
+                            <?php
+                                echo $this->formInput($form->get('province_short_name'));
+                            ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <?php } ?>
+
+                    <?php if (!$this->edit || $this->type == LocationService::LOCATION_TYPE_CITY) { ?>
+                    <div class="form-group"<?php if (!$this->edit) { ?> style="display: none"<?php } ?>>
+                        <label class="control-label col-sm-4" for="name">Timezone <?php echo $this->required() ?></label>
+                        <div class="col-sm-6">
+                            <?php
+                                echo $this->formselect($form->get('timezone'));
+                            ?>
+                        </div>
+                    </div>
+                    <?php } ?>
+
+                    <?php if ($this->edit > 0) { ?>
+                    <div class="form-group" id="get_parent">
+                        <label class="control-label col-sm-4" for="name"><span id="get_parent_txt"><?=$this->parent_view?></span></label>
+                        <div class="col-sm-6">
+                            <div class="checkbox" style="padding-left: 0">
+                                <?=$this->parent_text?>
+                            </div>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <?php if ($this->type == 8) { ?>
+                    <div class="form-group">
+                        <label class="control-label col-sm-4">Currency</label>
+                        <div class="col-sm-6">
+                            <div class="checkbox" style="padding-left: 0">
+                                <?= isset($this->parentCurrency) ? $this->parentCurrency : '' ?>
+                            </div>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <?php } ?>
+                    <?php } else { ?>
+                    <div class="form-group">
+                        <label class="control-label col-sm-4" for="name"><span id="get_parent_txt">Continent</span> <?php echo $this->required() ?></label>
+                        <div class="col-sm-6">
+                            <?php
+                                echo $this->formInput($form->get('autocomplete_txt'));
+                            ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <?php } ?>
+                    <div class="form-group city-hide province-hide poi-hide" style="display: <?php echo ($this->type == LocationService::LOCATION_TYPE_COUNTRY || $this->type == '') ? 'block' : 'none'?>">
+                        <label class="control-label col-sm-4" for="is_selling">
+                            <?= $this->info('Allow as Origin', 'People from this destination can make reservations.'); ?>
+                        </label>
+                        <div class="col-sm-6">
+                            <div class="checkbox">
+                            <?php
+                                echo $this->formElement($form->get('is_selling'));
+                            ?>
+                            </div>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <div style="display: <?php echo ($this->type == LocationService::LOCATION_TYPE_COUNTRY || $this->type == '') ? 'block' : 'none'?>" id="view_type_countries">
+                        <div class="form-group">
+                            <label class="control-label col-sm-4" for="iso">
+                                <?= $this->info('ISO', '<span class="text-primary">ISO 3166-1</span> two-letter country code. Ex. AM, NL, US, etc.'); ?>
+                            </label>
+                            <div class="col-sm-3">
+                                <?php
+                                    echo $this->formInput($form->get('iso'));
+                                ?>
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-4" for="currency">Currency</label>
+                            <div class="col-sm-4">
+                                <?php
+                                    echo $this->formSelect($form->get('currency'));
+                                ?>
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-4" for="required_postal_code">
+                                <?= $this->info('Postal Code', 'This setting will determine if a postal code is required during the reservation process on our website.'); ?>
+                            </label>
+                            <div class="col-sm-4">
+                                <?php echo $this->formSelect($form->get('required_postal_code')); ?>
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-4" for="<?= $form->get('contact_phone')->getAttribute('id') ?>">
+                                <?= $form->get('contact_phone')->getLabel() ?></label>
+                            <div class="col-sm-6">
+                                <?php
+                                    echo $this->formInput($form->get('contact_phone'));
+                                ?>
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="is_searchable_container" style="display: <?php echo ($this->type == LocationService::LOCATION_TYPE_CITY || $this->type == '') ? 'block' : 'none'?>" class="country-hide province-hide poi-hide">
+                        <div class="form-group">
+                            <label class="control-label col-sm-4" for="is_searchable">
+                                <?= $this->info('Searchable', 'Displays this location in the website as searchable and shows up on the location pages.'); ?>
+                            </label>
+                            <div class="col-sm-6">
+                                <div class="checkbox">
+                                <?php
+                                    echo $this->formElement($form->get('is_searchable'));
+                                ?>
+                                </div>
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="view_type_poi" style="display: <?php echo ($this->type == LocationService::LOCATION_TYPE_POI) ? 'block' : 'none'?>">
+                        <label class="control-label col-sm-4" for="poi_type">POI Type</label>
+                        <div class="col-sm-6">
+                            <?php
+                                echo $this->formElement($form->get('poi_type'));
+                            ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="show_right_column" style="display: <?php echo ($this->type == LocationService::LOCATION_TYPE_POI) ? 'block' : 'none'?>">
+                        <label class="control-label col-sm-4" for="ws_show_right_column">
+                            <?= $this->info('Show Right Column', 'Show Right Column with Apartments in Website UI'); ?>
+                        </label>
+                        <div class="col-sm-6">
+                            <div class="checkbox">
+                                <?php
+                                echo $this->formElement($form->get('ws_show_right_column'));
+                                ?>
+                            </div>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+
+                </fieldset>
+            </div>
+            <div class="col-sm-6 country-hide province-hide poi-hide img-part" style="display: <?php echo (in_array($this->type, [LocationService::LOCATION_TYPE_CITY, LocationService::LOCATION_TYPE_POI, ''])) ? 'block' : 'none'?>">
+                 <fieldset name="Images">
+                    <legend>Images</legend>
+                    <div class="form-group">
+                        <div class="col-sm-6">
+                            <?php echo $this->formElement($form->get('cover_image')); ?>
+                            <div class="help-block pull-left">Recommended: 1920x600 pixels</div>
+                        </div>
+                        <div class="help-block col-sm-4 pull-right" id="img1_preview">
+                            <?php if ($form->get('cover_image_post')->getValue() != '') { ?>
+                            <div id="img1_attachment-container" class="preview">
+                                <img style="width: 100%;" src="//<?=$this->imgDomain.$form->get('cover_image_post')->getValue()?>">
+                            </div>
+                            <?php } ?>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-sm-6">
+                            <?php echo $this->formElement($form->get('thumbnail')); ?><br>
+                            <div class="help-block pull-left">Recommended: 400x400 pixels</div>
+                        </div>
+                        <div class="help-block col-sm-4 pull-right" id="img2_preview">
+                            <?php if ($form->get('thumbnail_post')->getValue() != '') { ?>
+
+                            <div id="img2_attachment-container" class="preview">
+                                <img style="width: 100%;" src="//<?php echo $this->imgDomain.$form->get('thumbnail_post')->getValue(); ?>">
+                            </div>
+                            <?php } ?>
+                        </div>
+                    </div>
+
+                </fieldset>
+            </div>
+        </div>
+        <div id="view_type_cities" style="display: <?php echo ($this->type == LocationService::LOCATION_TYPE_CITY) ? 'block' : 'none'?>">
+        <fieldset name="taxes">
+            <legend>Taxes</legend>
+
+                <div class="form-group">
+                    <label class="control-label col-sm-2" for="tot">
+                        <?= $this->info('TOT', $maxDurationInfo); ?>
+                    </label>
+                    <div class="col-sm-10">
+                        <div class="row">
+                            <div class="col-sm-3"><?php echo $this->formSelect($form->get('tot_type'));?></div>
+                            <div class="col-sm-2 tax-val-group soft-hide">
+                                <div class="input-group">
+                                    <?php echo $this->formInput($form->get('tot'));?>
+                                    <span class="input-group-addon">
+                                        <span class="addon-percent">%</span>
+                                        <span class="addon-currency"><?php echo $this->parentCurrency; ?></span>
+                                    </span>
+                                 </div>
+                            </div>
+                            <div class="col-sm-2 tax-val-group soft-hide">
+                                <div class="input-group">
+                                    <?php echo $this->formInput($form->get('tot_additional'));?>
+                                    <span class="input-group-addon">
+                                        <span class="addon-percent">%</span>
+                                        <span class="addon-currency"><?php echo $this->parentCurrency; ?></span>
+                                    </span>
+                                 </div>
+                            </div>
+                            <div class="col-sm-2 tax-duration soft-hide">
+                                <?= $this->formInput($form->get('tot_max_duration')); ?>
+                            </div>
+                            <div class="col-sm-2 tax-included-group soft-hide">
+                                <?= $this->formSelect($form->get('tot_included')); ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-sm-2" for="vat">
+                        <?= $this->info('VAT', $maxDurationInfo); ?>
+                    </label>
+                    <div class="col-sm-10">
+                        <div class="row">
+                            <div class="col-sm-3"><?php echo $this->formSelect($form->get('vat_type'));?></div>
+                            <div class="col-sm-2 tax-val-group soft-hide">
+                                <div class="input-group">
+                                    <?php echo $this->formInput($form->get('vat'));?>
+                                    <span class="input-group-addon">
+                                        <span class="addon-percent">%</span>
+                                        <span class="addon-currency"><?php echo $this->parentCurrency; ?></span>
+                                    </span>
+                                 </div>
+                            </div>
+                            <div class="col-sm-2 tax-val-group soft-hide">
+                                <div class="input-group">
+                                    <?php echo $this->formInput($form->get('vat_additional'));?>
+                                    <span class="input-group-addon">
+                                        <span class="addon-percent">%</span>
+                                        <span class="addon-currency"><?php echo $this->parentCurrency; ?></span>
+                                    </span>
+                                 </div>
+                            </div>
+                            <div class="col-sm-2 tax-duration soft-hide">
+                                <?= $this->formInput($form->get('vat_max_duration')); ?>
+                            </div>
+                            <div class="col-sm-2 tax-included-group soft-hide">
+                                <?= $this->formSelect($form->get('vat_included')); ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-sm-2" for="sales_tax">
+                        <?= $this->info('Sales Tax', $maxDurationInfo); ?>
+                    </label>
+                    <div class="col-sm-10">
+                        <div class="row">
+                            <div class="col-sm-3"><?php echo $this->formSelect($form->get('sales_tax_type'));?></div>
+                            <div class="col-sm-2 tax-val-group soft-hide">
+                                <div class="input-group">
+                                    <?php echo $this->formInput($form->get('sales_tax'));?>
+                                    <span class="input-group-addon">
+                                        <span class="addon-percent">%</span>
+                                        <span class="addon-currency"><?php echo $this->parentCurrency; ?></span>
+                                    </span>
+                                 </div>
+                            </div>
+                            <div class="col-sm-2 tax-val-group soft-hide">
+                                <div class="input-group">
+                                    <?php echo $this->formInput($form->get('sales_tax_additional'));?>
+                                    <span class="input-group-addon">
+                                        <span class="addon-percent">%</span>
+                                        <span class="addon-currency"><?php echo $this->parentCurrency; ?></span>
+                                    </span>
+                                 </div>
+                            </div>
+                            <div class="col-sm-2 tax-duration soft-hide">
+                                <?= $this->formInput($form->get('sales_tax_max_duration')); ?>
+                            </div>
+                            <div class="col-sm-2 tax-included-group soft-hide">
+                                <?= $this->formSelect($form->get('sales_tax_included')); ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-sm-2" for="city_tax">
+                        <?= $this->info('City Tax', $maxDurationInfo); ?>
+                    </label>
+                    <div class="col-sm-10">
+                        <div class="row">
+                            <div class="col-sm-3"><?php echo $this->formSelect($form->get('city_tax_type'));?></div>
+                            <div class="col-sm-2 tax-val-group soft-hide">
+                                <div class="input-group">
+                                    <?php echo $this->formInput($form->get('city_tax'));?>
+                                    <span class="input-group-addon">
+                                        <span class="addon-percent">%</span>
+                                        <span class="addon-currency"><?php echo $this->parentCurrency; ?></span>
+                                    </span>
+                                 </div>
+                            </div>
+                            <div class="col-sm-2 tax-val-group soft-hide">
+                                <div class="input-group">
+                                    <?php echo $this->formInput($form->get('city_tax_additional'));?>
+                                    <span class="input-group-addon">
+                                        <span class="addon-percent">%</span>
+                                        <span class="addon-currency"><?php echo $this->parentCurrency; ?></span>
+                                    </span>
+                                 </div>
+                            </div>
+
+                            <div class="col-sm-2 tax-duration soft-hide">
+                                <?= $this->formInput($form->get('city_tax_max_duration')); ?>
+                            </div>
+                            <div class="col-sm-2 tax-included-group soft-hide">
+                                <?= $this->formSelect($form->get('city_tax_included')); ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+
+
+        <?php if ($this->sub) { ?>
+        <fieldset name="Sub">
+            <legend><?=$this->type_view?></legend>
+                <?php foreach ($this->sub as $row) { ?>
+                <div class="col-sm-5">
+                    <a href="<?= $this->url('backoffice/default', ['controller' => 'location', 'action' => 'edit', 'id'=>$row['detail_id'].'-'.$row['id'].'-'.$row['type']])?>"><?=$row['name']?></a>
+                </div>
+                <?php } ?>
+        </fieldset>
+        <?php } ?>
+
+        <br>
+        <fieldset name="Google Map" class="country-hide province-hide poi-hide" style="display: <?php echo ($this->type == LocationService::LOCATION_TYPE_CITY || $this->type == '') ? 'block' : 'none'?>">
+            <legend>Google Map</legend>
+
+            <div class="row">
+                <div class="col-sm-12">
+                    <?php
+                        $latitude_element = $form->get('latitude');
+                        echo $this->formInput($latitude_element);
+                        $latitude = ($latitude_element->getValue()) ? $latitude_element->getValue() : '40.17860116681791';
+
+                        $longitude_element = $form->get('longitude');
+                        echo $this->formInput($longitude_element);
+                        $longitude = ($longitude_element->getValue()) ? $longitude_element->getValue() : '44.515721797943115';
+                    ?>
+                    <div id="map-canvas" class="l_map"></div>
+                </div>
+            </div>
+        </fieldset>
+
+        <br>
+
+        <fieldset name="Content" class="country-hide province-hide" style="display: <?php echo ($this->type == LocationService::LOCATION_TYPE_CITY || $this->type == LocationService::LOCATION_TYPE_POI || $this->type == '') ? 'block' : 'none'?>">
+            <legend>Content</legend>
+            <div class="row form-group">
+                <label class="control-label col-sm-2" for="information">Information</label>
+                <div class="col-sm-10">
+                    <?php
+                        echo $this->formElement($form->get('information'));
+                    ?>
+                    <div class="help-block"></div>
+                </div>
+            </div>
+        </fieldset>
+        <div class="container page-actions">
+            <div class="row text-right">
+                <?php
+
+                if ($this->edit > 0 && $this->type > 6) {
+                    $urlFunc = "locationViewSiteUrl('".$this->urlSie."')";
+
+                    if ($this->type == LocationService::LOCATION_TYPE_POI) {
+                        $urlFunc = "viewSitePOI('".$this->urlSie."')";
+                    }
+
+                ?>
+                <a href="javascript:void(0)" onclick="<?=$urlFunc?>" target="_blank" class="btn btn-info col-sm-2 col-xs-12 pull-left">View on Website</a>
+                <?php
+
+                }
+
+                echo $this->formInput($form->get('edit_id'));
+                echo $this->formInput($form->get('type_location'));
+                echo $this->formInput($form->get('cover_image_post'));
+                echo $this->formInput($form->get('thumbnail_post'));
+                echo $this->formInput($form->get('autocomplete_id'));
+                echo $this->formInput($form->get('edit_name'));
+                echo $this->formInput($form->get('poi_type_chaneg'));
+                echo $this->formInput($form->get('edit_location_id'));
+
+                ?>
+
+                <?php if ($this->edit > 0) { ?>
+                <div class="btn-group pull-right dropup margin-left-10">
+                    <button id="save_dropdown" class="btn btn-primary state" data-toggle="dropdown" data-loading-text="Saving..." aria-expanded="false">
+                        Save
+                    </button>
+                    <button class="btn btn-primary dropdown-toggle hidden-xs" data-toggle="dropdown" aria-expanded="true">
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li>
+                            <a href="javascript:void(0)" class="" id="save_button">Save Changes</a>
+                        </li>
+                        <li>
+                            <a href="javascript:void(0)" class="" id="save_button_with_slug">Save and Update Slug</a>
+                        </li>
+                    </ul>
+                </div>
+                <?php } else { ?>
+                <button name="save_button" type="button" class="btn btn-primary pull-right col-sm-2 col-xs-12 margin-left-10" data-loading-text="Creating..." id="save_button" value="Create">Create New Location</button>
+                <?php } ?>
+
+                <?php
+
+                if ($this->edit > 0) {
+                    echo $this->formButton($form->get('delete_button'));
+                }
+
+                ?>
+            </div>
+        </div>
+        <?php echo $this->form()->closeTag(); ?>
+    </div>
+    <?php if ($this->edit > 0) { ?>
+        <div class="tab-pane fade" id="history">
+            <table id="historyDatatable" class="table table-striped table-bordered table-condensed table-hover">
+                <thead>
+                <tr>
+                    <th> Date </th>
+                    <th> Employee </th>
+                    <th> Action </th>
+                    <th> Message </th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    <?php } ?>
+</div>
+
+<div id="deleteModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-danger">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel" class="modal-title">Warning</h4>
+            </div>
+            <div class="modal-body">
+                <p id="delete_location_text">Be very careful when deleting a location, there is no way to undo this action, and there are serious SEO considerations. Do not do this unless you know exactly what you're doing</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <button class="btn btn-danger" id="delete_location_button">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="changeUrlModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-warning">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel" class="modal-title">Warning</h4>
+            </div>
+            <div class="modal-body">
+                <p>If you change slug the permanent URL will be changed too.</p>
+                <p>Think about SEO and make sure you really want to make this change.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <button class="btn btn-warning" id="save_modal_button">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+   var LATITUDE_MAP = <?=$latitude?>;
+   var LONGITUDE_MAP = <?=$longitude?>;
+   var EDIT_MODE = <?=$this->edit?>;
+   var LOCATION_TYPE = '<?=$this->type?>';
+</script>
+<?php } else { ?>
+<div class="text-center" style="font-size: 20px; height: 600px;">Aweee, </div>
+<?php } ?>

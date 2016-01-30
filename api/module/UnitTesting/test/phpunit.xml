@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit  backupStaticAttributes="false"
+          colors="true"
+          convertErrorsToExceptions="true"
+          convertNoticesToExceptions="true"
+          convertWarningsToExceptions="true"
+          processIsolation="true"
+          stopOnFailure="false"
+          syntaxCheck="false"
+          bootstrap="Bootstrap.php">
+    <testsuites>
+        <!-- Start Warehouse API TESTS -->
+        <testsuite name="API_Warehouse_Assets_Resource">
+            <file>ApiTest/Warehouse/Controller/AssetsResourceTest.php</file>
+        </testsuite>
+        <testsuite name="API_Warehouse_Categories_Resource">
+            <file>ApiTest/Warehouse/Controller/CategoriesResourceTest.php</file>
+        </testsuite>
+        <testsuite name="API_Warehouse_Histories_Resource">
+            <file>ApiTest/Warehouse/Controller/HistoriesResourceTest.php</file>
+        </testsuite>
+        <testsuite name="API_Warehouse_Configs_Resource">
+            <file>ApiTest/Warehouse/Controller/ConfigsResourceTest.php</file>
+        </testsuite>
+        <!-- Start Common API TESTS -->
+        <testsuite name="API_Common_Locations_Resource">
+            <file>ApiTest/Common/Controller/LocationsResourceTest.php</file>
+        </testsuite>
+        <testsuite name="API_Common_Users_Resource">
+            <file>ApiTest/Common/Controller/UsersResourceTest.php</file>
+        </testsuite>
+        <!-- Start Task API TESTS -->
+        <testsuite name="API_Task_Incidents_Resource">
+            <file>ApiTest/Task/Controller/IncidentsResourceTest.php</file>
+        </testsuite>
+        <!-- Start Application API TESTS -->
+        <testsuite name="API_Application_Authenticate_Controller">
+            <file>ApiTest/Application/Controller/AuthenticateControllerTest.php</file>
+        </testsuite>
+    </testsuites>
+    <logging>
+        <log type="json" target="logfile.json"/>
+    </logging>
+</phpunit>

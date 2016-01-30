@@ -1,0 +1,196 @@
+<?php
+
+use Mailer\Constants\Inline;
+
+?><tr>
+    <td style="padding: 20px">
+        <!-- header: start -->
+        <table border="0" cellpadding="0" cellspacing="0" align="center" data-editable="text" style="<?php echo Inline::BACKGROUND_WHITE. Inline::BORDER_RADIUS . InlinE::WIDTH; ?>margin-bottom:20px;">
+            <tbody>
+            <tr>
+                <td style="padding:20px; text-align:left; font-size:100%">
+                    <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                        <tr>
+                            <td>
+                                <a href="https://www.ginosi.com?<?= $this->analyticsQuery ?>" style="text-decoration: none;">
+                                    <img src="https://www.ginosi.com/images/emails/logo-grey-new.png" alt="Ginosi Apartments" title="Ginosi Apartments" style="width:100px;"/>
+                                </a>
+                            </td>
+                            <td align="right" valign="middle" style="font-size: 14px;">
+                                <?php if ($this->phone1) { ?>
+                                    <a href="tel:<?= $this->phone1 ?>" style="text-decoration: none; color: #757575;">
+                                        <?= $this->phone1 ?>
+                                    </a>
+                                <?php } ?>
+                                <?php if($this->phone2 && $this->phone2 != $this->phone1) { ?>
+                                    <br>
+                                    <a href="tel:<?= $this->phone2 ?>" style="text-decoration: none; color: #757575;">
+                                        <?= $this->phone2 ?>
+                                    </a>
+                                <?php } ?>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td style="<?php echo Inline::getBG('#379fe1', 'https://www.ginosi.com/images/emails/receipt_background.jpg'); ?>">
+                    <table border="0" cellpadding="0" cellspacing="0" align="left">
+                        <tbody>
+                            <tr>
+                                <td style="<?php echo Inline::getCover(); ?>font-size:46px">
+                                    <p style="<?php echo Inline::SUBHEADING_P; ?>">
+                                        <?= $this->title ?>
+                                    </p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td style="<?php echo Inline::PADDING_20 . Inline::PADDING_BOTTOM_5; ?>" align="center">
+                    <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                        <tr>
+                            <td>
+                                <div style="font-size: 14px; margin: 0">
+                                    <?= $this->textline(1671) ?>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <!-- header: end -->
+
+        <table border="0" cellpadding="0" cellspacing="0" align="center" data-editable="text" style="<?php echo Inline::WIDTH_100 . Inline::MAX_WIDTH . Inline::BACKGROUND_WHITE . Inline::BORDER_RADIUS; ?> margin:20px auto 0 auto; color:#757575;">
+            <tbody>
+                <tr>
+                    <td style="padding: 20px; font-size: 14px;" align="center">
+                        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                            <tr>
+                                <td style="padding: 5px 0 0 0;font-weight:bold;" colspan="2">
+                                    <?= $this->textline(1679, true) ?>
+                                </td>
+                                <td align="right" style="padding: 5px 0 0 0;">
+                                    <?= $receiptIssueDate ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 15px 0 0 0;font-weight:bold;" colspan="2">
+                                    <?= $this->textline(1678, true) ?>
+                                </td>
+                                <td align="right" style="padding: 15px 0 0 0;">
+                                    <?= $customerName ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 5px 0 0 0;font-weight:bold;" colspan="2">
+                                    <?= $this->textline(1677, true) ?>
+                                </td>
+                                <td align="right" style="padding: 5px 0 0 0;">
+                                    <?= $customerAddress ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 15px 0 0 0;font-weight:bold;" colspan="2">
+                                    <?= $this->textline(1418, true) ?>
+                                </td>
+                                <td align="right" style="padding: 15px 0 0 0;">
+                                    <?= $apartmentName ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 5px 0 0 0;font-weight:bold;" colspan="2">
+                                    <?= $this->textline(1306, true) ?>
+                                </td>
+                                <td align="right" style="padding: 5px 0 0 0;">
+                                    <?= $reservationNumber ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 7px 0 0 0; width: 25px;">
+                                    <img src="https://www.ginosi.com/images/emails/location.png" alt="">
+                                </td>
+                                <td style="padding: 5px 0 0 0;font-weight:bold;">
+                                    <?= $this->textline(785, true) ?>
+                                </td>
+                                <td align="right" style="padding: 5px 0 0 0;">
+                                    <?= $apartmentAddress ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 7px 0 0 0; width: 25px;">
+                                    <img src="https://www.ginosi.com/images/emails/checkin.png" alt="">
+                                </td>
+                                <td style="padding: 5px 0 0 0;font-weight:bold; color: #757575">
+                                    <?= $this->textline(706, true) ?>
+                                </td>
+                                <td align="right" style="padding: 5px 0 0 0;">
+                                    <?= $checkInDate ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 7px 0 15px 0; width: 25px;">
+                                    <img src="https://www.ginosi.com/images/emails/checkout.png" alt="">
+                                </td>
+                                <td style="padding: 5px 0 15px 0;font-weight:bold; color: #757575">
+                                    <?= $this->textline(707, true) ?>
+                                </td>
+                                <td align="right" style="padding: 5px 0 15px 0;">
+                                    <?= $checkOutDate ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" style="padding-bottom: 15px;">
+                                    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                        <?php foreach ($this->taxes as $taxName => $taxAmount) : ?>
+                                            <tr>
+                                                <td style="padding: 5px 0 0 0;font-weight:bold;" colspan="2">
+                                                    <?= $taxName ?>
+                                                </td>
+                                                <td align="right" style="padding: 5px 0 0 0;">
+                                                    <?php if ($taxAmount < 0) : ?>
+                                                        <?= '-' . $this->reservationSymbol .  number_format(abs($taxAmount), 2, '.', '') ?>
+                                                    <?php else : ?>
+                                                        <?= $this->reservationSymbol . number_format($taxAmount, 2, '.', '') ?>
+                                                    <?php endif; ?>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border-top: 1px solid #E0E0E0; padding: 15px 0 0 0;font-weight:bold;" colspan="2">
+                                    <?= $this->textline(1675, true) ?>
+                                </td>
+                                <td align="right" style="border-top: 1px solid #E0E0E0; padding: 10px 0 0 0;">
+                                    <?= $this->reservationSymbol . number_format($totalAmountPaid, 2, '.', '') ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 5px 0 15px 0;font-weight:bold;" colspan="2">
+                                    <?= $this->textline(1674, true) ?>
+                                </td>
+                                <td align="right" style="padding: 5px 0 15px 0;">
+                                    <?= $this->reservationSymbol . number_format($balance, 2, '.', '') ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border-top: 1px solid #E0E0E0; padding: 15px 0 0 0;font-weight:bold;" colspan="2" valign="top">
+                                    <?= $this->textline(1673, true) ?>
+                                </td>
+                                <td align="right" style="border-top: 1px solid #E0E0E0; padding: 15px 0 0 0;" valign="top">
+                                    <?= $this->textline(1672) ?>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </td>
+</tr>

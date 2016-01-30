@@ -1,0 +1,1788 @@
+<?php
+    use Library\Utility\Helper;
+    use Library\Constants\TextConstants;
+    use DDD\Service\Booking;
+    use Library\Constants\DomainConstants;
+    use Library\Constants\Constants;
+    use DDD\Service\Partners as BookingPartners;
+    use DDD\Service\Booking\BookingAddon;
+    use DDD\Service\Booking\Charge as ChargeService;
+
+    /* @var $data \DDD\Domain\Booking\BookingTicket */
+    $data = $this->data;
+	$this->headTitle()->setSeparator(' - ');
+	$this->headTitle('R# '.$data->getReservationNumber());
+
+	$this->layout()->breadcrumb = '<li>Administration</li>
+	                               <li><a href="'.$this->url('backoffice/default', array('controller' => 'booking')).'">Booking Management</a></li>
+	                               <li class="active">' . $data->getApartmentAssigned() . ' (' . $this->data->getReservationNumber() . ')</li>';
+
+	$this->InlineScript()
+        ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+        ->appendFile($this->basePath() . '/js/plugins/jquery.datetimepicker.full.min.js')
+        ->appendFile($this->basePath() . '/js/pages/booking.edit.js')
+        ->appendFile($this->basePath() . '/js/module/backoffice/charge-authorization/reservation-ticket.js')
+        ->appendFile($this->basePath() . '/js/pages/charges.js')
+        ->appendFile($this->basePath() . '/js/DT_bootstrap.js');
+
+
+	$this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css')
+        ->appendStylesheet($this->basePath() . '/css/plugins/jquery.datetimepicker.css')
+        ->appendStylesheet($this->basePath() . '/css/pages/booking-edit.css');
+
+    $today = Helper::getCurrenctDateByTimezone($data->getTimezone());
+
+	$guestFirstName = $data->getGuestFirstName();
+	$guestLastName = $data->getGuestLastName();
+	$guestFullName = $guestFirstName . '&nbsp;' . $guestLastName;
+
+	if ($this->dataOther['ginosiBalanceInApartmentCurrency'] > 0) {
+		$ginosiBalanceText = 'Customer Balance';
+		$ginosiBalanceTextClass = 'label-warning';
+	} elseif ($this->dataOther['ginosiBalanceInApartmentCurrency'] == 0) {
+		$ginosiBalanceText = 'Customer Balance';
+		$ginosiBalanceTextClass = 'label-success';
+	} elseif ($this->dataOther['ginosiBalanceInApartmentCurrency'] < 0) {
+		$ginosiBalanceText = 'Customer Owes';
+		$ginosiBalanceTextClass = 'label-danger';
+	}
+
+	if ($this->dataOther['partnerBalanceInApartmentCurrency'] > 0) {
+		$partnerBalanceText = 'Partner Balance';
+		$partnerBalanceTextClass = 'label-warning';
+	} elseif ($this->dataOther['partnerBalanceInApartmentCurrency'] == 0) {
+		$partnerBalanceText = 'Partner Balance';
+		$partnerBalanceTextClass = 'label-success';
+	} elseif ($this->dataOther['partnerBalanceInApartmentCurrency'] < 0) {
+		$partnerBalanceText = 'Partner Owes';
+		$partnerBalanceTextClass = 'label-danger';
+	}
+?>
+
+<!-- Reservation ticket header -->
+<div class="row hidden-print">
+    <div class="col-sm-12">
+	<div class="row">
+		<div class="col-lg-8 text-left">
+            <!-- Apartment name, reservation #, guest fullname -->
+            <h3>
+                <?php
+                    $bedroom = null;
+                    if ((int)$data->getBedroomCountAssigned() == 0) {
+                        $bedroom = 'Studio';
+                        $bedroomInfo = '<small>' . $bedroom . '</small>';
+                    } else {
+                        $bedroom = (int)$data->getBedroomCountAssigned();
+                        if ((int)$data->getBedroomCountAssigned() > 1) {
+                            $bedroom .= '&nbsp;Bedrooms';
+                        } else {
+                            $bedroom .= '&nbsp;Bedroom';
+                        }
+                        $bedroomInfo = '<small>' . $bedroom . '</small>';
+                    }
+                if($this->roleAMM) { ?>
+                <a href="<?=$this->url('apartment', ['apartment_id' => $data->getApartmentIdAssigned()])?>" target="_blank">
+                    <?php echo trim($data->getApartmentAssigned()) ?></a>
+                <?php } else { ?>
+                <?php echo $data->getApartmentAssigned()?>
+                <?php } ?>
+                <small class="text-muted">
+                    <span dir="ltr"><?= $guestFullName ?></span>
+                    <span dir="ltr"><?= '&nbsp;(' . $this->data->getReservationNumber() . ')' ?></span>
+                </small>
+            </h3>
+			<h4>
+                <?php
+                $isBuilding = $data->getApartmentAssignedBuilding();
+                $isUnit = $data->getApartmentAssignedUnit();
+                $isBlock = $data->getApartmentAssignedBlock();
+
+                if (!empty($isBuilding)) {
+                    echo $isBuilding . ', ';
+                }
+
+                if (!empty($isUnit)) {
+                    echo 'Unit ' . $isUnit;
+                }
+
+                if (!empty($isBlock)) {
+                    echo ' (' . $isBlock . ')';
+                }
+                echo ',&nbsp;' . $bedroomInfo;
+                ?>
+            </h4>
+		</div>
+
+		<!-- Ginosi balance with partner -->
+		<div class="col-lg-4 text-right mobile-text-center">
+            <h3 class="margin-top-20">
+                <span class="label <?= $ginosiBalanceTextClass ?>"><?= $ginosiBalanceText. ' ' . number_format($this->dataOther['ginosiBalanceInApartmentCurrency'], 2, '.', '') . ' (' . $data->getApartmentCurrencyCode().')' ?></span>
+            </h3>
+			<h4>
+                <span class="label <?= $partnerBalanceTextClass ?>"><?= $partnerBalanceText . ' ' . number_format($this->dataOther['partnerBalanceInApartmentCurrency'], 2, '.', ''). ' (' . $data->getApartmentCurrencyCode().')' ?></span>
+            </h4>
+		</div>
+	</div>
+    <div class="row">
+        <div class="col-sm-12 mobile-text-center">
+            <span class="label <?=($this->dataOther['status_name'] == 'Booked') ? 'label-success' : 'label-danger';?>"><?=$this->dataOther['status_name']?></span>
+            <?php if (!$this->dataOther['hasValidCard']) {?>
+                <span class="label label-danger">No Credit Card Provided</span>
+            <?php } ?>
+            <span class="label label-default"><?=$this->dataOther['partner_name'].(($data->getPartnerRef()) ? ': ' . $data->getPartnerRef() : '' )?></span>
+            <?php if ($this->data->getApartelId()) { ?><span class="label label-warning" id="apartel-label">Apartel</span><?php } ?>
+
+            <span class="label <?=$this->dataOther['fraud']['class']?>" title="<?=strip_tags($this->dataOther['fraud']['text'])?>" title="<?=strip_tags($this->dataOther['fraud']['text'])?>">Fraud Score <?=$this->dataOther['fraud']['value']?></span>
+            <?php if ($data->getHas_review()) { ?>
+                <?php if($this->roleAMM) { ?>
+                <a href="<?=$this->url('apartment/review', ['apartment_id' => $data->getApartmentIdAssigned()]) . '#' . $data->getResNumber();?>" target="_blank"><span class="label label-success">Reviewed</span></a>
+                <?php } else { ?>
+                <span class="label label-success">Reviewed</span>
+                <?php } ?>
+			<?php } ?>
+
+            <?php if ($this->dataOther['hasValidCard']) { ?>
+            <span class="label label-success">Card on File</span>
+			<?php } ?>
+
+			<?php if ($data->getKiMailSent() == 1) { ?>
+            <span class="label label-success">KI Sent</span>
+			<?php } ?>
+
+			<?php if (!$this->dataOther['hasValidCard'] && $data->getProvideCcPageStatus() == Booking\BookingTicket::PROVIDE_CC_PAGE_STATUS_PROVIDE) { ?>
+            <span class="label label-warning">No CC Details</span>
+			<?php } ?>
+
+			<?php if ($data->getParking()) { ?>
+            <span class="label label-info">Parking</span>
+			<?php } ?>
+
+            <div id="round-buttons">
+                <button id="lock-btn" class="btn btn-<?= $data->isLocked() ? 'danger active' : 'default' ?>"
+                        title="Lock toggler" data-content="Use this button to lock/unlock the reservation. Reservation is locked, when the button is <span class='label label-danger'>red</span>"
+                        data-toggle="popover" data-placement="bottom" data-animation="true" data-container="body"
+                >
+                    <span class="glyphicon glyphicon-lock"></span>
+                </button>
+                <button id="pin-btn" class="btn btn-<?= $this->pin ?'primary active' : 'default' ?>" data-res_num="<?=$this->data->getReservationNumber()?>" data-user_id="<?=$this->userId?>"
+                        title="Pin toggler" data-content="Use this button to pin/unpin the reservation to your dashboard. Reservation is pinned, when the button is <span class='label label-primary'>blue</span>"
+                        data-toggle="popover" data-placement="bottom" data-animation="true" data-container="body"
+                >
+                    <span class="glyphicon glyphicon-pushpin"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <br>
+</div>
+</div>
+
+<div class="row hidden-print">
+    <div class="col-sm-12">
+        <ul class="nav nav-tabs tabs-general">
+            <li class="active">
+                <a href="#customer_details" data-toggle="tab">Customer</a>
+            </li>
+            <li id="identity_tab" class="identity-tab
+                <?php
+                switch ($this->dataOther['fraud']['class']) {
+                    case 'label-warning':
+                        echo 'tab-warning';
+                        break;
+                    case 'label-danger':
+                        echo 'tab-danger';
+                        break;
+                }
+                ?>">
+                <a href="#identity" data-toggle="tab" id="identity-tab">
+                    Identity
+                </a>
+            </li>
+            <li>
+                <a href="#booking_details" data-toggle="tab">Reservation</a>
+            </li>
+            <li>
+                <a href="#financial_details" data-toggle="tab">Financial</a>
+            </li>
+            <li class="change_reservation_date_tab tab-highlights" style="display: none">
+                <a href="javascript:void(0)" data-toggle="tab">Change Reservation Date</a>
+            </li>
+            <li class="charge_tab tab-highlights" style="display: none">
+                <a href="javascript:void(0)" data-toggle="tab">Charges <span id="chargePending"></span></a>
+            </li>
+            <li class="transaction_tab tab-highlights" style="display: none">
+                <a href="javascript:void(0)" data-toggle="tab">Transactions <span id="transactionPending"></span></a>
+            </li>
+            <li id="attachment_tab" class="attachment-tab">
+                <a href="#attachment" data-toggle="tab" id="attachment-tab" class="attachment-tab-link">Attachments&nbsp;</a>
+            </li>
+            <li class="new_attachment_tab tab-highlights" style="display: none">
+                <a href="javascript:void(0)" data-toggle="tab">
+                    New Attachment <span id="newAttachment"></span>
+                </a>
+            </li>
+            <li id="tasks_tab" class="tasks-tab">
+                <a href="#tasks" data-toggle="tab" id="tasks-tab">
+                    Tasks
+                    <?php if ($tasksCount) { ?>
+                    <span class="badge"><?= $tasksCount ?></span>
+                    <?php } ?>
+                </a>
+            </li>
+            <li id="history_tab" class="history-tab pull-right">
+                <a href="#history" data-toggle="tab" id="history-tab"><span class="glyphicon glyphicon-list-alt"></span> History</a>
+            </li>
+        </ul>
+        <?php
+            $form = $this->bookingForm;
+            $form->prepare();
+            echo $this->form()->openTag($form);
+        ?>
+        <div class="tab-content">
+            <div class="tab-pane active" id="customer_details">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <fieldset>
+                        <legend>Customer Details</legend>
+                        <div class="form-group">
+                            <label class="col-sm-4 control-label" for="guest_name">Name</label>
+                            <div class="col-sm-8">
+                                <?php echo $this->formInput($form->get('guest_name'));?>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-4 control-label" for="guest_lastname">Last Name</label>
+                            <div class="col-sm-8">
+                                <?php echo $this->formInput($form->get('guest_last_name'));?>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-4 control-label" for="guest_email">
+                                <?= $this->info('Primary Email', TextConstants::INFO_FOR_PRIMARY_EMAIL) ?>
+                            </label>
+                            <div class="col-sm-8">
+                                <?php echo $this->formElement($form->get('guest_email')); ?>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-4 control-label" for="second_guest_email">
+                                <?= $this->info('Secondary Email', TextConstants::INFO_FOR_SECONDARY_EMAIL) ?>
+                            </label>
+                            <div class="col-sm-8">
+                                <?php echo $this->formElement($form->get('second_guest_email')); ?>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-4 control-label" for="guest_phone">Phone</label>
+                            <div class="col-sm-8 <?php echo ($form->get('guest_phone')->getValue()) ? 'input-group padding-right-15 padding-left-15' : '' ?>">
+                                <?php echo $this->formInput($form->get('guest_phone')); ?>
+                                <?php if (filter_var($form->get('guest_phone')->getValue(), FILTER_SANITIZE_NUMBER_INT) && $userInternalNumber) {?>
+                                <a class="input-group-addon" href="<?php echo sprintf(Constants::GINOSI_CALL_CENTER_URL, $userInternalNumber, filter_var($form->get('guest_phone')->getValue(), FILTER_SANITIZE_NUMBER_INT)); ?>" target="_blank">
+                                    <i class="glyphicon glyphicon-earphone"></i>
+                                </a>
+                                <?php } ?>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-4 control-label" for="guest_travel_phone">Travel Phone</label>
+                            <div class="col-sm-8 <?php echo ($form->get('guest_travel_phone')->getValue()) ? 'input-group padding-right-15 padding-left-15' : '' ?>">
+                                <?php echo $this->formInput($form->get('guest_travel_phone')); ?>
+                                <?php if (filter_var($form->get('guest_travel_phone')->getValue(), FILTER_SANITIZE_NUMBER_INT) && $userInternalNumber) {?>
+                                <a class="input-group-addon" href="<?php echo sprintf(Constants::GINOSI_CALL_CENTER_URL, $userInternalNumber, filter_var($form->get('guest_travel_phone')->getValue(), FILTER_SANITIZE_NUMBER_INT)); ?>" target="_blank">
+                                    <i class="glyphicon glyphicon-earphone"></i>
+                                </a>
+                                <?php } ?>
+                            </div>
+                        </div>
+                        </fieldset>
+                    </div>
+                    <div class="col-sm-6">
+                        <fieldset>
+                            <legend>Customer Location</legend>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label" for="guest_country">Country</label>
+                                <div class="col-sm-8">
+                                    <?php echo $this->formElement($form->get('guest_country')); ?>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label" for="guest_city">City</label>
+                                <div class="col-sm-8">
+                                    <?php echo $this->formElement($form->get('guest_city')); ?>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label" for="guest_address">Address</label>
+                                <div class="col-sm-8">
+                                    <?php echo $this->formInput($form->get('guest_address')); ?>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label" for="guest_zipcode">Zip Code</label>
+                                <div class="col-sm-8">
+                                    <?php echo $this->formInput($form->get('guest_zipcode')); ?>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="booking_details" style="overflow:hidden">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <fieldset>
+                                    <legend>General</legend>
+                                    <div class="form-group form-inline">
+                                        <label class="col-sm-4 control-label">
+                                            <?= $this->info('Status', TextConstants::INFO_RESERVATION_TICKET_STATUS) ?>
+                                        </label>
+                                        <div class="col-sm-5">
+                                            <?= $this->formElement($form->get('booking_statuses')) ?>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label" for="overbooking_status">
+                                            <?= $this->info('State', TextConstants::INFO_RESERVATION_TICKET_STATE) ?>
+                                        </label>
+                                        <div class="col-sm-5">
+                                            <?php echo $this->formElement($form->get('overbooking_status')); ?>
+                                        </div>
+                                    </div>
+
+                                    <?php if ($data->getStatus() == 1) { ?>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label" for="finance_booked_state">
+                                            Arrival Status
+                                        </label>
+                                        <div class="col-sm-5 checkbox">
+                                            <?=$this->formElement($form->get('finance_booked_state'));?>
+                                            <?=$this->formElement($form->get('finance_booked_state_changed'));?>
+                                        </div>
+                                    </div>
+                                    <?php } ?>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label" for="<?= $form->get('apartel_id')->getAttribute('id') ?>">
+                                            <?= $this->info('Apartel', TextConstants::INFO_RESERVATION_TICKET_APARTEL) ?>
+                                        </label>
+                                        <div class="col-sm-5">
+                                            <?= $this->formElement($form->get('apartel_id'));?>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-4 col-xs-6 control-label">
+                                            <?= $this->info('PAX', TextConstants::INFO_RESERVATION_TICKET_PAX) ?>
+                                        </label>
+                                        <div class="col-sm-8 col-xs-6 checkbox" id="pax"><?=$data->getPAX()?></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label" for="<?= $form->get('occupancy')->getAttribute('id') ?>">
+                                            <?= $this->info('Occupancy', 'Occupancy is the actual number of guests arriving') ?>
+                                        </label>
+                                        <div class="col-sm-5">
+                                            <?= $this->formElement($form->get('occupancy'));?>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 col-xs-6 control-label">
+                                            <?= $this->info('Channel', TextConstants::INFO_RESERVATION_TICKET_CHANNEL) ?>
+                                        </label>
+                                        <div class="col-sm-8 col-xs-6 checkbox">
+                                            <?php echo ($data->getChannel_name()) ? 'API '.$data->getChannel_name() : 'Direct - Website';?>
+                                        </div>
+                                    </div>
+                                    <?php if (isset($this->dataOther['apartel_reservations_bulk'])) {?>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 col-xs-6 control-label">
+                                            <?= $this->info('Related', TextConstants::INFO_RELATED_RESERVATION) ?>
+                                        </label>
+                                        <div class="col-sm-8 col-xs-6 checkbox">
+                                            <?php foreach ($this->dataOther['apartel_reservations_bulk'] as $res) {?>
+                                                <a href="/booking/edit/<?=$res['res_number']?>" target="_blank" class="btn-block"><?=$res['res_number']?> (<?=$res['guest']?>)</a>
+                                            <?php } ?>
+                                        </div>
+                                    </div>
+                                    <?php } ?>
+                                    <div class="form-group hidden-xs">
+                                        <label class="col-sm-4 col-xs-6 control-label">&nbsp;</label>
+                                        <div class="col-sm-8 col-xs-6 checkbox">&nbsp;</div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                            <div class="col-sm-6">
+                                <fieldset>
+                                    <legend>Date & Time</legend>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 col-xs-6 control-label">Reserved On</label>
+                                        <div class="col-sm-8 col-xs-6 checkbox">
+                                            <?=date(Constants::GLOBAL_DATE_FORMAT . ' H:i', strtotime($data->getTimestamp()))?>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 col-xs-6 control-label">Check-In</label>
+                                        <div class="col-sm-8 col-xs-6 checkbox">
+                                            <?=date(Constants::GLOBAL_DATE_FORMAT, strtotime($data->getDate_from()))?>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 col-xs-6 control-label">Check-Out</label>
+                                        <div class="col-sm-8 col-xs-6 checkbox">
+                                            <?=date(Constants::GLOBAL_DATE_FORMAT, strtotime($data->getDate_to()))?>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 col-xs-6 control-label">Duration</label>
+                                        <div class="col-sm-8 col-xs-6 checkbox">
+                                            <?=  Helper::getDaysFromTwoDate($data->getDate_to(), $data->getDate_from())?> night stay
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 col-xs-6 control-label">Arrival Time</label>
+                                        <div class="col-sm-4 col-xs-6">
+                                            <div class='input-group date'>
+                                                <?= $this->formElement($form->get('booking_arrival_time'));?>
+
+                                                <!-- <input type="text" class="form-control" id="booking_arrival_time" name ="booking_arrival_time" /> -->
+                                                <span class="input-group-addon">
+                                                    <span class="glyphicon glyphicon-time"></span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                                <fieldset>
+                                    <legend>Partner</legend>
+                                        <div class="form-group form-inline">
+                                            <label class="col-sm-4 control-label">Partner</label>
+                                            <div class="col-sm-8">
+                                                <?php
+                                                if (isset($this->dataOther['reservation_role'])) {
+                                                    echo $this->formElement($form->get('booking_partners'));
+                                                } else {
+                                                    echo '<span class="checkbox">' . $this->dataOther['affiliate'] . " (" . $data->getPartnerId(). ") </span>";
+                                                }
+                                                ?>
+                                            </div>
+                                        </div>
+                                        <div class="form-group form-inline">
+                                            <label class="col-sm-4 control-label" for="booking_affiliate_reference">Reference</label>
+                                            <div class="col-sm-8">
+                                                <?php echo $this->formInput($form->get('booking_affiliate_reference')); ?>
+                                            </div>
+                                        </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <fieldset>
+                                    <legend>
+                                        Assigned
+                                    </legend>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 col-xs-6 control-label">Apartment Name</label>
+                                        <div class="col-sm-8 col-xs-6 checkbox"><?=$data->getApartmentAssigned();?></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 col-xs-6 control-label">Building</label>
+                                        <div class="col-sm-8 col-xs-6 checkbox"><?=$data->getApartmentAssignedBuilding();?></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <?php
+                                        $block = $data->getApartmentAssignedBlock();
+
+                                        if (!empty($block)) {
+                                            $block = ' <b>' . $block . '</b>';
+                                        }
+                                        ?>
+                                        <label class="col-sm-4 col-xs-6 control-label">Unit Number</label>
+                                        <div class="col-sm-8 col-xs-6 checkbox"><?=$data->getApartmentAssignedUnit() . $block;?></div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                            <div class="col-sm-6">
+                                <fieldset>
+                                    <legend>Origin</legend>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 col-xs-6 control-label">Apartment Name</label>
+                                        <div class="col-sm-8 col-xs-6 checkbox"><?= $data->getApartmentName() ?></div>
+                                    </div>
+                                    <?php if ($data->getApartmentOriginBuilding()) {?>
+                                        <div class="form-group">
+                                            <label class="col-sm-4 col-xs-6 control-label">Building</label>
+                                            <div class="col-sm-8 col-xs-6 checkbox"><?= $data->getApartmentOriginBuilding() ?></div>
+                                        </div>
+                                    <?php } ?>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 col-xs-6 control-label">Unit Number</label>
+                                        <div class="col-sm-8 col-xs-6 checkbox"><?=$data->getApartmentOriginUnit();?></div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <fieldset>
+                                    <legend>Entry Instructions</legend>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 col-xs-6 control-label" for="finance_key_instructions">Viewed KI
+                                            <?php if ($data->isKiViewed() == 1) { ?>
+                                                <span class="glyphicon glyphicon-time" data-toggle="tooltip" data-original-title="<?=($data->getki_viewed_date()) ? $data->getki_viewed_date() : 'Not set'?>"></span>
+                                            <?php } ?>
+                                        </label>
+                                        <div class="col-sm-8 col-xs-6">
+                                            <?php echo $this->formElement($form->get('finance_key_instructions')); ?>
+                                        </div>
+                                    </div>
+                                    <?php if($data->getKiMailSent() == 1) {?>
+                                        <div class="form-group">
+                                            <?php if (!$this->isAsDsialing) { ?>
+                                                <label class="col-sm-4 col-xs-6 control-label">Building Dialing Code</label>
+                                            <?php  } else { ?>
+                                                <label class="col-sm-4 col-xs-6 control-label">Building Entry Code</label>
+                                            <?php } ?>
+                                            <div class="col-sm-8 col-xs-6 checkbox"><?=($data->getOutsideDoorCode()) ? $data->getOutsideDoorCode() : 'Not set yet'?></div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-4 col-xs-6 control-label">Apartment Entry Code</label>
+                                            <div class="col-sm-8 col-xs-6 checkbox"><?=($data->getPin()) ? $data->getPin() : 'Not set yet'?></div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-4 col-xs-6 control-label">Key Page URL</label>
+                                            <div class="col-sm-8 col-xs-6 checkbox"><?=$this->dataOther['keyPageStatus']?></div>
+                                        </div>
+                                    <?php } ?>
+                                </fieldset>
+                            </div>
+                            <div class="col-sm-6">
+                                <fieldset>
+                                    <legend> Cancelation </legend>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 col-xs-6 control-label">Cancelation Period</label>
+                                        <div class="col-sm-8 col-xs-6 checkbox"><?=$this->dataOther['penalty_period']?></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 col-xs-6 control-label">Cancelation</label>
+                                        <div class="col-sm-8 col-xs-6 checkbox"><?=$this->dataOther['cancellation']?></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 col-xs-6 control-label">Penalty</label>
+                                        <div class="col-sm-8 col-xs-6 checkbox"><?=$this->dataOther['panelty_type']?></div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php
+                $accommodationNormal  = number_format($data->getPrice(), 2, '.', '');
+                $accommodationPenalty = number_format($data->getPenaltyFixedAmount(), 2, '.', '');
+                $customerNormal       = number_format($data->getBooker_price(), 2, '.', '');
+                $customerPenalty      = number_format(($data->getPenaltyFixedAmount()*$data->getCurrency_rate()), 2, '.', '');
+                $accToCustomer        = number_format(($data->getPrice()*$data->getCurrency_rate()), 2, '.', '');
+
+
+                $accomodationPrice = '0.00';
+
+                // If firstcharge is not done and has not any manual charges, set apartment normal price equal to booker price.
+                if (array_key_exists(0, $dataOther['totalChargeView']) && !$data->getCheckCharged()) {
+                    $accomodationPrice = number_format($data->getBooker_price() / $data->getCurrency_rate(), 2, '.', '');
+                }
+
+                if (array_key_exists(BookingAddon::ADDON_TYPE_ACC, $this->dataOther['totalChargeView'])) {
+                    $accomodationPrice = number_format($this->dataOther['totalChargeView'][BookingAddon::ADDON_TYPE_ACC]['price'] / $data->getCurrency_rate(), 2, '.', '');
+                }
+            ?>
+
+            <div class="tab-pane" id="financial_details">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <!-- Charge table -->
+                        <?php
+                            echo $this->partial('backoffice/booking/charges', [
+                                'charges'                           => $this->dataOther['charged'],
+                                'totalChargesView'                  => $this->dataOther['totalChargeView'],
+                                'totalChargesType'                  => $this->dataOther['totalChargeType'],
+                                'hasReversedCharges'                => $this->dataOther['hasReversedCharges'],
+                                'charges'                           => $this->dataOther['charged'],
+                                'accToCustomer'                     => $accToCustomer,
+                                'customerNormal'                    => $customerNormal,
+                                'customerCurrency'                  => $data->getGuestCurrencyCode(),
+                                'apartmentCurrency'                 => $data->getApartmentCurrencyCode(),
+                                'chargesSummaryInApartmentCurrency' => $this->dataOther['chargesSummaryInApartmentCurrency'],
+                                'chargesSummaryInCustomerCurrency'  => $this->dataOther['chargesSummaryInCustomerCurrency'],
+                            ]);
+
+                        if ($this->dataOther['ginosiBalanceInApartmentCurrency'] == 0) {
+                            $validationPrice = $accommodationNormal;
+                            foreach($this->dataOther['charged'] as $chargesItem) {
+                                if (
+                                    $chargesItem->getStatus() != ChargeService::CHARGE_STATUS_DELETED &&
+                                    in_array(
+                                        $chargesItem->getAddons_type(),
+                                        [
+                                            BookingAddon::ADDON_TYPE_TAX_TOT,
+                                            BookingAddon::ADDON_TYPE_TAX_VAT,
+                                            BookingAddon::ADDON_TYPE_SALES_TAX,
+                                            BookingAddon::ADDON_TYPE_CITY_TAX,
+                                            BookingAddon::ADDON_TYPE_CLEANING_FEE,
+                                        ]
+                                    )
+                                ) {
+                                    $validationPrice += ($chargesItem->getAcc_amount());
+                                }
+                            }
+                        }
+                        else {
+                            $validationPrice =  abs($this->dataOther['ginosiBalanceInApartmentCurrency']);
+                        }
+                        ?>
+                        <!-- New balance inputs -->
+                        <input type="hidden" id="ginosi_collect_debt_customer_currency" name="ginosi_collect_debt_customer_currency" value="<?= $this->dataOther['ginosiBalanceInCustomerCurrency'] ?>" />
+                        <input type="hidden" id="ginosi_collect_debt_apartment_currency" name="ginosi_collect_debt_apartment_currency" value="<?= $this->dataOther['ginosiBalanceInApartmentCurrency'] ?>" />
+                        <input type="hidden" id="partner_collect_debt_customer_currency" name="partner_collect_debt_customer_currency" value="<?= $this->dataOther['partnerBalanceInCustomerCurrency'] ?>" />
+                        <input type="hidden" id="partner_collect_debt_apartment_currency" name="partner_collect_debt_apartment_currency" value="<?= $this->dataOther['partnerBalanceInApartmentCurrency'] ?>" />
+                    </div>
+                    <div class="col-lg-6">
+                    <!-- Transactions table -->
+                    <?php
+                        echo $this->partial('backoffice/booking/transactions', [
+                            'transactions' => $this->dataOther['transactions'],
+                            'hasPayableRole' => $this->dataOther['hasPayableRole'],
+                            'hasTransactionVerifierRole' => $this->dataOther['hasTransactionVerifierRole'],
+                            'apartmentCurrency' => $this->data->getApartmentCurrencyCode(),
+                            'creditCardView' => $this->dataOther['credit_card_view'],
+                            'transactionSumAcc' => $this->dataOther['transactionsSummaryInApartmentCurrency']
+                        ]);
+                    ?>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="row">
+                            <div class="col-sm-6 col-xs-12">
+                                <fieldset>
+                                    <legend>Apartment (<?=$data->getApartmentCurrencyCode()?>)</legend>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 col-xs-6 control-label">Normal</label>
+                                        <div class="col-sm-8 col-xs-6 checkbox"><?=$accomodationPrice?></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 col-xs-6 control-label">Penalty</label>
+                                        <div class="col-sm-8 col-xs-6 checkbox"><?=$this->dataOther['penaltyPrice']?></div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                            <div class="col-sm-6 col-xs-12">
+                                <fieldset>
+                                    <legend>Customer (<?=$data->getGuestCurrencyCode()?>)</legend>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 col-xs-6 control-label">Normal</label>
+                                        <div class="col-sm-8 col-xs-6 checkbox"><?=$customerNormal?></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 col-xs-6 control-label">Penalty</label>
+                                        <div class="col-sm-8 col-xs-6 checkbox"><?=$customerPenalty?></div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <fieldset>
+                                    <legend>Details</legend>
+                                    <div class="form-group form-inline">
+                                        <label class="col-sm-4 control-label" for="model">Default Model</label>
+                                        <div class="col-sm-8"><?=$this->formElement($form->get('model'));?></div>
+                                    </div>
+                                    <?php if($this->dataOther['credit_card_view'] && $data->getProvideCcPageStatus() == Booking\BookingTicket::PROVIDE_CC_PAGE_STATUS_PROVIDE){?>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">
+                                            <?= $this->info('Payment Request', TextConstants::INFO_REQUSET_PAYMENT); ?>
+                                        </label>
+                                        <div class="col-sm-8 checkbox">
+                                            <a href="<?= $this->dataOther['secure_url'];?>" target="_blank" style="margin-right: 20px;">URL Link</a>
+                                        </div>
+                                    </div>
+                                    <?php } ?>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <fieldset>
+                            <legend>Attributes</legend>
+                            <div class="form-group form-inline">
+                                <label class="col-sm-4 col-xs-6 control-label" for="finance_valid_card">
+                                    <?= $this->info('Credit Status', TextConstants::INFO_VALID_CARD); ?>
+                                </label>
+                                <div class="col-sm-8 col-xs-6">
+                                    <?=$this->formElement($form->get('finance_valid_card'));?>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 col-xs-6 control-label" for="ccca_verified">
+                                    <?= $this->info('CCCA Verified', TextConstants::INFO_CCCA_VERIFIED); ?>
+                                </label>
+                                <div class="col-sm-8 col-xs-6">
+                                    <?=$this->formElement($form->get('ccca_verified'));?>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 col-xs-6 control-label" for="finance_reservation_settled">
+                                    <?= $this->info('Customer Settled', TextConstants::INFO_SETTLING); ?>
+                                </label>
+                                <div class="col-sm-8 col-xs-6">
+                                    <?=$this->formElement($form->get('finance_reservation_settled'));?>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 col-xs-6 control-label" for="finance_no_collection">
+                                    <?= $this->info('No Collection', TextConstants::INFO_NO_COLLACTION); ?>
+                                </label>
+                                <div class="col-sm-8 col-xs-6">
+                                    <?=$this->formElement($form->get('finance_no_collection'));?>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="attachment">
+                <?php if ($this->bookingDocList) { ?>
+                <table id="datatable_attachment" class="table table-striped table-bordered table-condensed table-hover">
+                    <thead>
+                    <tr>
+                        <th> Date </th>
+                        <th> Attacher </th>
+                        <th> Description </th>
+                        <th> &nbsp; </th>
+                        <th> &nbsp; </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                <?php } ?>
+            </div>
+            <div class="tab-pane" id="new_attachment_part">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <?php
+                            echo $this->partial('backoffice/booking/document', [
+                                'form' => $this->bookingDocForm
+                            ]);
+                        ?>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="tasks">
+                <?php if ($allTasksCount) { ?>
+                    <div id="task-status-switch">
+                        <div class="btn-group fn-buttons pull-right">
+                            <a href="#all" class="btn btn-sm btn-default" data-status="0">
+                                All (<?= $allTasksCount; ?>)
+                            </a>
+                            <a href="#active" class="btn btn-sm btn-default active" data-status="1">Active</a>
+                            <a href="#inactive" class="btn btn-sm btn-default" data-status="2">Inactive</a>
+                        </div>
+                        <input type="hidden" name="show_status" id="task-show-status" value="1" />
+                    </div>
+                    <table id="datatable_tasks" class="table table-striped table-bordered table-condensed table-hover">
+                        <thead>
+                        <tr>
+                            <th>P</th>
+                            <th>St</th>
+                            <th>Start Date</th>
+                            <th>Due Date</th>
+                            <th>Title</th>
+                            <th>Type</th>
+                            <th>Creator</th>
+                            <th>Responsible</th>
+                            <th>&nbsp;</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                <?php } else { ?>
+                    <div class="alert alert-success" role="alert">
+                        <span class="glyphicon glyphicon-ok-sign" aria-hidden="true"></span>
+                        There are no tasks on this reservation
+                    </div>
+                <?php } ?>
+            </div>
+
+            <div class="tab-pane" id="history">
+
+                <div class="history-switch">
+                    <div class="btn-group fn-buttons-history pull-right margin-left-10">
+                        <a href="javascript:void(0)" class="btn btn-sm btn-default all active">All</a>
+                        <a href="javascript:void(0)" class="btn btn-sm btn-default manual">Human</a>
+                    </div>
+                </div>
+
+                <table id="datatable_history" class="table table-striped table-bordered table-condensed table-hover">
+                    <thead>
+                    <tr>
+                        <th> Date </th>
+                        <th> Employee </th>
+                        <th> Message </th>
+                        <th> <?= $this->info('F', 'Frontier visibility');?> </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <fieldset>
+                            <legend>Comments</legend>
+                            <div class="row form-group">
+                                <label class="col-sm-2 control-label">
+                                    Comment
+                                </label>
+                                <div class="col-sm-8">
+                                    <?=$this->formElement($form->get('booking_ginosi_comment'));?>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-2 control-label">
+                                    Notify Team
+                                </label>
+                                <div class="col-sm-3">
+                                    <?=$this->formElement($form->get('booking_ginosi_comment_team'));?>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-2 control-label">
+                                    <?= $this->info('Frontier Visible','This comment will be visible on Concierge Dashboard, Frontier Managment and Housekeeping Dashboard pages', 'Frontier Visible') ?>
+                                </label>
+                                <div class="col-sm-3 checkbox">
+                                    <?=$this->formElement($form->get('booking_ginosi_comment_frontier'));?>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane" id="identity">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <fieldset>
+                        <legend>Personality</legend>
+                        <div class="form-group">
+                            <label class="col-sm-4 col-xs-6 control-label">Fraud</label>
+                            <div class="col-sm-8 col-xs-6 fraud_link checkbox">
+                                <?=nl2br($this->dataOther['fraud']['text'])?>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-4 col-xs-6 control-label">
+                                <?= $this->info('Reservations', 'All reservations made by this email address including this one'); ?>
+                            </label>
+                            <div class="col-sm-8 col-xs-6 checkbox">
+                                <?php if($this->dataOther['resCount'] > 0){?>
+                                <a href="<?=$this->url('booking_search', ['email'=>$data->getGuestEmail(), 'status'=>1]);?>" target="_blank" style="text-decoration: underline"><?=$this->dataOther['resCount']?></a>
+                                <?php } else {
+                                    echo $this->dataOther['resCount'];
+                                }?>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-4 col-xs-6 control-label">
+                                <?= $this->info('Cancelations', 'All reservations with cancelled statuses made by this email address including this one'); ?>
+                            </label>
+                            <div class="col-sm-8 col-xs-6 checkbox">
+                                <?php if($this->dataOther['cancelCount'] > 0){?>
+                                <a href="<?=$this->url('booking_search', ['email'=>$data->getGuestEmail()]);?>" target="_blank" style="text-decoration: underline"><?=$this->dataOther['cancelCount']?></a>
+                                <?php } else {
+                                    echo $this->dataOther['cancelCount'];
+                                }?>
+                            </div>
+                        </div>
+                        <?php if ($this->customerIdentity && !empty($this->customerIdentity->getUserId())) { ?>
+                        <div class="form-group">
+                            <label class="col-sm-4 col-xs-6 control-label">
+                                <?= $this->info('Supervisor', 'The Backoffice User who booked this reservation via Website'); ?>
+                            </label>
+                            <div class="col-sm-8 col-xs-6 fraud_link checkbox">
+                                <a href="//<?php echo DomainConstants::BO_DOMAIN_NAME; ?>/profile/<?php echo $this->customerIdentity->getUserId(); ?>" target="new">
+                                    <?php echo $this->customerIdentity->getUserName(); ?>
+                                </a>
+                            </div>
+                        </div>
+                        <?php } ?>
+                        </fieldset>
+                        <?php if ($this->customerIdentity && $this->customerIdentity->getUaFamily()) { ?>
+                        <fieldset>
+                        <legend>Browser</legend>
+                        <div class="form-group">
+                            <label class="col-sm-4 col-xs-6 control-label">Family</label>
+                            <div class="col-sm-8 col-xs-6 fraud_link checkbox">
+                                <?php echo $this->customerIdentity->getUaFamily(); ?>
+                            </div>
+                            <label class="col-sm-4 col-xs-6 control-label">Version</label>
+                            <div class="col-sm-8 col-xs-6 fraud_link checkbox">
+                                <?php
+                                    if (!is_null($this->customerIdentity->getUaMajor())) {
+                                        echo $this->customerIdentity->getUaMajor();
+                                    }
+                                    if (!is_null($this->customerIdentity->getUaMinor())) {
+                                        echo '.' . $this->customerIdentity->getUaMinor();
+                                    }
+                                    if (!is_null($this->customerIdentity->getUaPatch())) {
+                                        echo '.' . $this->customerIdentity->getUaPatch();
+                                    }
+                                ?>
+                            </div>
+                            <label class="col-sm-4 col-xs-6 control-label">Preferred Languages</label>
+                            <div class="col-sm-8 col-xs-6 fraud_link checkbox">
+                                <?php echo $this->customerIdentity->getUaLanguage(); ?>
+                            </div>
+                        </div>
+                        </fieldset>
+                        <?php } ?>
+                        <?php if ($this->customerIdentity && !empty($this->customerIdentity->getOsFamily())) { ?>
+                        <fieldset>
+                        <legend>OS</legend>
+                        <div class="form-group">
+                            <label class="col-sm-4 col-xs-6 control-label">Family</label>
+                            <div class="col-sm-8 col-xs-6 fraud_link checkbox">
+                                <?php echo $this->customerIdentity->getOsFamily(); ?>
+                            </div>
+                            <label class="col-sm-4 col-xs-6 control-label">Version</label>
+                            <div class="col-sm-8 col-xs-6 fraud_link checkbox">
+                                <?php
+                                    if (!is_null($this->customerIdentity->getOsMajor())) {
+                                        echo $this->customerIdentity->getOsMajor();
+                                    }
+                                    if (!is_null($this->customerIdentity->getOsMinor())) {
+                                        echo '.' . $this->customerIdentity->getOsMinor();
+                                    }
+                                    if (!is_null($this->customerIdentity->getOsPatch())) {
+                                        echo '.' . $this->customerIdentity->getOsPatch();
+                                    }
+                                    if (!is_null($this->customerIdentity->getOsPatchMinor())) {
+                                        echo '.' . $this->customerIdentity->getOsPatchMinor();
+                                    }
+                                ?>
+                            </div>
+                        </div>
+                        </fieldset>
+                        <?php } ?>
+                        <?php if ($this->customerIdentity && !empty($this->customerIdentity->getDeviceFamily())) { ?>
+                        <fieldset>
+                        <legend>Device</legend>
+                        <div class="form-group">
+                            <label class="col-sm-4 col-xs-6 control-label">Family</label>
+                            <div class="col-sm-8 col-xs-6 fraud_link checkbox">
+                                <?php
+                                    echo $this->customerIdentity->getDeviceFamily();
+
+                                    if ($this->customerIdentity->getDeviceFamily() == 'Other') {
+                                        echo ' (probably Desktop)';
+                                    }
+                                ?>
+                            </div>
+                            <label class="col-sm-4 col-xs-6 control-label">Brand</label>
+                            <div class="col-sm-8 col-xs-6 fraud_link checkbox">
+                                <?php echo $this->customerIdentity->getDeviceBrand(); ?>
+                            </div>
+                            <label class="col-sm-4 col-xs-6 control-label">Model</label>
+                            <div class="col-sm-8 col-xs-6 fraud_link checkbox">
+                                <?php echo $this->customerIdentity->getDeviceModel(); ?>
+                            </div>
+                        </div>
+                        </fieldset>
+                        <?php } ?>
+                    </div>
+                    <div class="col-sm-6">
+                        <?php if ($this->customerIdentity && !empty($this->customerIdentity->getGeoCountry())) { ?>
+                        <fieldset>
+                        <legend><?= $this->info('Geolocation', 'Based on IP'); ?></legend>
+                        <div class="form-group">
+                            <label class="col-sm-4 col-xs-6 control-label">Country</label>
+                            <div class="col-sm-8 col-xs-6 fraud_link checkbox">
+                                <?php echo $this->customerIdentity->getGeoCountry(); ?>
+                            </div>
+                            <label class="col-sm-4 col-xs-6 control-label">Region</label>
+                            <div class="col-sm-8 col-xs-6 fraud_link checkbox">
+                                <?php echo $this->customerIdentity->getGeoRegion(); ?>
+                            </div>
+                            <label class="col-sm-4 col-xs-6 control-label">City</label>
+                            <div class="col-sm-8 col-xs-6 fraud_link checkbox">
+                                <?php echo $this->customerIdentity->getGeoCity(); ?>
+                            </div>
+                            <label class="col-sm-4 col-xs-6 control-label">Map Coordinates</label>
+                            <div class="col-sm-8 col-xs-6 fraud_link checkbox">
+                                <a href="http://maps.google.com/?q=<?php echo $this->customerIdentity->getGeoLocation(); ?>" target="new">
+                                    <?php echo $this->customerIdentity->getGeoLocation(); ?>
+                                </a>
+                            </div>
+                        </div>
+                        </fieldset>
+                        <?php } ?>
+                        <?php if ($this->customerIdentity && !empty($this->customerIdentity->getIpAddress())) { ?>
+                        <fieldset>
+                        <legend>Internet Protocol Address</legend>
+                        <div class="form-group">
+                            <label class="col-sm-4 col-xs-6 control-label">IP</label>
+                            <div class="col-sm-8 col-xs-6 fraud_link checkbox">
+                                <?php
+                                if (!is_null($this->customerIdentity->getIpAddress())) {
+                                    echo long2ip($this->customerIdentity->getIpAddress());
+                                }
+                                ?>
+                            </div>
+                            <label class="col-sm-4 col-xs-6 control-label">Hostname</label>
+                            <div class="col-sm-8 col-xs-6 fraud_link checkbox">
+                                <?php echo $this->customerIdentity->getIpHostname(); ?>
+                            </div>
+                            <label class="col-sm-4 col-xs-6 control-label">Provider</label>
+                            <div class="col-sm-8 col-xs-6 fraud_link checkbox">
+                                <?php echo $this->customerIdentity->getIpProvider(); ?>
+                            </div>
+                        </div>
+                        </fieldset>
+                        <?php } ?>
+                        <?php if ($this->customerIdentity && !empty($this->customerIdentity->getLandingPage())) { ?>
+                        <fieldset>
+                        <legend>Headers</legend>
+                        <div class="form-group">
+                            <label class="col-sm-4 col-xs-6 control-label">Landing Page</label>
+                            <div class="col-sm-8 col-xs-6 fraud_link checkbox" style="word-break: break-all;">
+                                <?php
+                                    if (!empty($this->customerIdentity->getLandingPage())) {
+                                        echo '<a href="'.$this->customerIdentity->getLandingPage().'" target="new">'
+                                            .$this->customerIdentity->getLandingPage()
+                                            .'</a>';
+                                    }
+                                ?>
+                            </div>
+                            <label class="col-sm-4 col-xs-6 control-label">Referrer Page</label>
+                            <div class="col-sm-8 col-xs-6 fraud_link checkbox" style="word-break: break-all;">
+                                <?php
+                                    if (!empty($this->customerIdentity->getRefererPage())) {
+                                        if ($this->customerIdentity->getRefererPage() == 'No Referrer') {
+                                            echo $this->customerIdentity->getRefererPage();
+                                        } else {
+                                            echo '<a href="'.$this->customerIdentity->getRefererPage().'" target="new">'
+                                                .$this->customerIdentity->getRefererPage()
+                                                .'</a>';
+                                        }
+                                    }
+                                ?>
+                            </div>
+                            <label class="col-sm-4 col-xs-6 control-label">Referer Host</label>
+                            <div class="col-sm-8 col-xs-6 fraud_link checkbox">
+                                <?php
+                                    if (!empty($this->customerIdentity->getRefererHost())) {
+                                        if ($this->customerIdentity->getRefererHost() == 'Direct') {
+                                            echo $this->customerIdentity->getRefererHost();
+                                        } else {
+                                            echo '<a href="http://'.$this->customerIdentity->getRefererHost().'" target="new">'
+                                                .$this->customerIdentity->getRefererHost()
+                                                .'</a>';
+                                        }
+                                    }
+                                ?>
+                            </div>
+                        </div>
+                        </fieldset>
+                        <?php } ?>
+                    </div>
+                </div>
+            </div>
+
+            <input type="hidden" id="penaltyAccPrice" name="penaltyAccPrice" value="<?=$accommodationPenalty?>">
+            <input type="hidden" id="penaltyCustomerPrice" name="penaltyCustomerPrice" value="<?=$customerPenalty?>">
+            <input type="hidden" id="accPrice" name="accPrice" value="<?=$accommodationNormal?>">
+            <input type="hidden" id="accPriceValidate" name="accPriceValidate" value="<?= $validationPrice ?>">
+            <input type="hidden" id="customerPrice" name="customerPrice" value="<?=$customerNormal?>">
+            <input type="hidden" id="customerCurrency" name="customerCurrency" value="<?=$data->getGuestCurrencyCode()?>">
+            <input type="hidden" id="accommodationCurrency" name="accommodationCurrency" value="<?=$data->getApartmentCurrencyCode()?>">
+            <input type="hidden" id="accId" name="accId" value="<?=$data->getApartmentIdAssigned()?>">
+            <?php
+                echo $this->formInput($form->get('booking_id'));
+                echo $this->formInput($form->get('booking_res_number'));
+                echo $this->formInput($form->get('acc_currency_rate'));
+                echo $this->formInput($form->get('acc_currency_sign'));
+                echo $this->formInput($form->get('customer_currency_rate'));
+                echo $this->formInput($form->get('selected-email'));
+                echo $this->form()->closeTag();
+            ?>
+
+            <div class="soft-hide" id="charge_part">
+                <?php
+                    echo $this->partial('backoffice/booking/charges-modal', [
+                        'charges'             => $this->dataOther['charges'],
+                        'addons'              => $this->dataOther['addons'],
+                        'creditCardView'      => $this->dataOther['credit_card_view'],
+                        'ticketData'          => $data,
+                        'taxes'               => isset($this->dataOther['taxes']) ? $this->dataOther['taxes'] : null,
+                        'customerNormal'      => $customerNormal,
+                        'accommodationNormal' => $accommodationNormal,
+                        'defaultCommission'   => $data->getPartnerCommission()
+                    ]);
+                ?>
+            </div>
+            <div class="soft-hide" id="transaction_part">
+                <?php
+                    echo $this->partial('backoffice/booking/add-transaction-modal', [
+                        'data' => $data,
+                        'dataOther' => $this->dataOther,
+                        'guestFullName' => $guestFullName,
+                        'creditCards' => $this->creditCards,
+                        'partnerBalanceText' => $partnerBalanceText,
+                        'partnerBalanceTextClass' => $partnerBalanceTextClass,
+                        'partnerBalance' => $this->dataOther['partnerBalanceInApartmentCurrency'],
+                        'creditCardView' => $this->dataOther['credit_card_view'],
+                        'bank_transaction_list' => $this->dataOther['bank_transaction_list'],
+                    ]);
+                ?>
+            </div>
+            <div class="soft-hide" id="change_reservation_tab_part">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <fieldset>
+                            <legend>Reservation Date</legend>
+                        </fieldset>
+                        <div class="form-group form-inline">
+                            <div class="col-xs-12">
+                                Check-in <input type="text" id="res-date-from" value="<?=$data->getDate_from()?>" class="form-control change-datepicker-checkin margin-right-30" >
+                                Check-out <input type="text" id="res-date-to" value="<?=$data->getDate_to()?>" class="form-control change-datepicker-checkout" >
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6" id="change-date-info">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php
+        if ($data->getBlack_res() > 0) {
+            $fraudClass = 'danger';
+            $fraudButtonText = 'Remove from Blacklist';
+            $fraudViewText = TextConstants::FRAUD_REMOVE_BLACK_LIST;
+            $fraudCall = 2;
+        } else {
+            $fraudClass = 'black';
+            $fraudButtonText = 'Add to Blacklist';
+            $fraudViewText = TextConstants::FRAUD_ADD_BLACK_LIST;
+            $fraudCall = 1;
+        }
+    ?>
+    <div class="col-sm-12">
+        <div class="page-actions container hidden-print">
+            <div class="row ticketButtons">
+                <div class="buttonsTicket col-xs-12 padding-0">
+                    <div class="btn-group btn-type-damage dropup pull-left" id="send_mail">
+                        <button class="btn btn-primary state" data-toggle="dropdown" data-loading-text="Sending..." id="sendMailSend">Send Mail</button>
+                        <button class="btn btn-primary dropdown-toggle hidden-xs" data-toggle="dropdown" id="sendMailarrow">
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li id="mail-ginosi-res"><a href="javascript:void(0)" onclick="resend_mail(1)">Ginosi Reservation</a></li>
+                            <li class="divider"></li>
+                            <li id="mail-guest-res"><a href="javascript:void(0)">Guest Reservation</a></li>
+                            <li id="mail-key-instruction"><a href="javascript:void(0)" id="guest_key_instructions">Guest Key Instructions</a></li>
+                            <li id="mail-guest-review"><a href="javascript:void(0)">Guest Review Request</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="btn-group btn-type-damage dropup financeButtons margin-left-5-mobile" style="display: none">
+                        <button class="btn btn-primary state" data-toggle="dropdown" data-loading-text="Sending...">Actions</button>
+                        <button class="btn btn-primary dropdown-toggle hidden-xs" data-toggle="dropdown">
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <?php if ($this->dataOther['credit_card_view']) {?>
+                            <li><?php if ($data->getProvideCcPageStatus() != Booking\BookingTicket::PROVIDE_CC_PAGE_STATUS_PROVIDE) { ?>
+                                <a href="javascript:void(0)" id="reservation_action_request_payment_details">Request Payment Details</a>
+                            <?php } elseif ($data->getProvideCcPageStatus() == Booking\BookingTicket::PROVIDE_CC_PAGE_STATUS_PROVIDE) { ?>
+                                <a href="javascript:void(0)" id="reservation_action_close_payment_request">Close Payment Request</a>
+                            <?php } ?>
+                            </li>
+                            <?php } ?>
+                            <li><a  href="javascript:void(0)" id="fraudButton"><?=$fraudButtonText?></a></li>
+                            <?php if(count($this->dataOther['charged'])){?>
+                                <li><a href="javascript:void(0)" id="reservation_action_generate_receipt">Generate Receipt</a></li>
+                            <?php } ?>
+                            <?php
+                                if (
+                                    $data->getFunds_confirmed() == \DDD\Service\Booking\BookingTicket::CC_STATUS_UNKNOWN
+                                    && $this->dataOther['credit_card_view']
+                                    && isset($this->creditCards)
+                                    && count($this->creditCards)
+                                ) { ?>
+                                <li><a href="javascript:void(0)" id="reservation_action_validate_card">Validate Card</a></li>
+                            <?php
+                                }
+                                if (count($this->dataOther['creditCardsForAuthorization'])
+                                ) {
+                            ?>
+                                    <li><a href="javascript:void(0)" id="reservation_action_send_ccca">Send CCCA</a></li>
+                            <?php
+                                }
+                            ?>
+                        </ul>
+                    </div>
+                    <a href="javascript:void(0)" class="btn btn-primary financeButtons" style="display: none" id="chargeButton">Charges</a>
+                    <?php if(count($this->dataOther['charged']) && $this->dataOther['credit_card_view']) {?>
+                        <a href="javascript:void(0)" class="btn btn-primary financeButtons" style="display: none" id="collectionButton">New Transaction</a>
+                    <?php }?>
+                    <a href="javascript:void(0)" class="btn btn-primary pull-right margin-left-10" id="save_data">Save Changes</a>
+                    <?php if(strtotime($data->getDate_to()) >= strtotime($today) && $data->getStatus() == Booking::BOOKING_STATUS_BOOKED) { //&& $data->getOverbookingStatus() != ReservationTicketService::OVERBOOKING_STATUS_OVERBOOKED ?>
+                    <button type="button" class="btn btn-warning pull-left margin-left-10 soft-hide" id="change-date-btn"  data-toggle="modal" data-target="#changeDateReservationModal">
+                        Change Date
+                    </button>
+                    <?php } ?>
+                    <?php // If departure date is tomorrow or later (calculating difference in days) ?>
+                    <?php if(floor((strtotime($data->getDate_to()) - strtotime($today))/3600/24) >= 1 && $data->getStatus() == Booking::BOOKING_STATUS_BOOKED && !$data->isLocked()) { ?>
+                        <button type="button" class="btn btn-warning pull-left margin-left-10 soft-hide" id="move-reservation-btn">
+                            Move Reservation
+                        </button>
+                    <?php } ?>
+                </div>
+                <div class="change-date-buttons soft-hide">
+                    <a href="javascript:void(0)" class="btn btn-primary pull-right" id="confirm-change-date-btn">Change Reservation Date</a>
+                    <a href="javascript:void(0)" class="btn btn-default cancelChangeButton pull-right margin-right-5">Cancel</a>
+                </div>
+                <div class="buttonsCharges soft-hide col-xs-12 padding-0">
+                    <a href="javascript:void(0)" class="btn btn-primary margin-left-5 pull-right" id="chargingProcess">Charge</a>
+                    <?php if ($this->dataOther['credit_card_view']) {?>
+                        <a href="javascript:void(0)" class="btn btn-primary margin-left-5 pull-right" id="chargingCollection">Charge &amp; Transact</a>
+                    <?php } ?>
+                    <a href="javascript:void(0)" class="btn btn-default cancelCharge pull-right margin-left-5">Cancel</a>
+                </div>
+                <div class="buttonsTransactions soft-hide col-xs-12 padding-0">
+                    <?php if ($this->dataOther['credit_card_view']) { ?>
+                        <a href="javascript:void(0)" class="btn btn-primary pull-right margin-left-5" id="transactionProcess">Create Transaction</a>
+                        <a href="javascript:void(0)" class="btn btn-default cancelTransaction pull-right margin-left-5">Cancel</a>
+                    <?php } ?>
+                </div>
+                <a href="javascript:void(0)" class="btn btn-primary pull-right margin-left-5 attachBtn" style="display: none" id="attachBtn">New Attachment</a>
+                <a href="javascript:void(0)" class="btn btn-primary pull-right margin-left-5 saveNewAttachBtn" style="display: none" id="saveNewAttachBtn">Upload</a>
+                <a href="javascript:void(0)" class="btn btn-default pull-right margin-left-5 cancelAttachBtn" style="display: none" id="cancelAttachBtn">Cancel</a>
+                <a href="javascript:void(0)" class="btn btn-success uploadAttachment" style="display: none" id="uploadAttachment"><span class="glyphicon glyphicon-upload"></span>&nbsp;Select Files</a>
+                <a href="javascript:void(0)" class="btn btn-danger uploadAttachment" style="display: none" id="deleteFiles"> Delete All Files</a>
+                <div class="btn-group pull-right margin-left-5 dropup" style="display: none" id="add-task-btns">
+                    <?php
+                        $taskParams = [
+                            'res_number' => $data->getResNumber(),
+                            'res_id' => $data->getId(),
+                            'apartment_id' => $data->getApartmentIdAssigned(),
+                            'apartment_name' => $data->getApartmentAssigned()
+                        ];
+                        if ($data->getApartmentAssignedBuildingId()) {
+                            $taskParams['building_id'] = $data->getApartmentAssignedBuildingId();
+                            $taskParams['building_name'] = $data->getApartmentAssignedBuilding();
+                        }
+                    ?>
+                    <a
+                        href="/task/edit?<?= http_build_query($taskParams) ?>"
+                        class="btn btn-primary"
+                        id="add-task-btn"
+                        target="_blank"
+                    >
+                        Add Related Task
+                    </a>
+                    <a class="btn btn-primary dropdown-toggle hidden-xs" data-toggle="dropdown">
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <?php
+                                $taskParamsNS = $taskParams;
+                                $taskParamsNS['title'] = 'No Show follow-up actions';
+                                $taskParamsNS['type'] = $taskTypeReservation->getId();
+                                $taskParamsNS['team'] = $taskTypeReservation->getAssociatedTeamId();
+                            ?>
+                            <a
+                                href="/task/edit?<?= http_build_query($taskParamsNS) ?>"
+                                id="add-task-btn"
+                                target="_blank"
+                                >
+                                No Show
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <input type="hidden" id="dateFrom" value="<?=$data->getDate_from()?>">
+            <input type="hidden" id="dateTo" value="<?=$data->getDate_to()?>">
+        </div>
+    </div>
+</div>
+<div id="saveModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-info">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">Send Email</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="form-group">
+                        <p class="col-sm-12">Would you like to send a cancelation email to customer?</p>
+                    </div>
+                    <div class="form-group">
+                    <?php if ($data->getSecondaryEmail()) { ?>
+                        <label class="col-sm-3 checkbox">Select Email</label>
+                        <div class="form-group col-sm-9">
+                            <select class="form-control" id="cancel-email-options">
+                                <option value="1"><?= $data->getGuestEmail()?></option>
+                                <option value="2"><?= $data->getSecondaryEmail()?></option>
+                            </select>
+                        </div>
+                    <?php } ?>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="javascript:void(0)" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</a>
+                <a href="javascript:void(0)" class="btn btn-primary" onclick="save_data_process('no', 0)">No</a>
+                <a href="javascript:void(0)" class="btn btn-primary" onclick="save_data_process('yes', 0)">Yes</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="blacklistModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-danger">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">Send Email</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="form-group">
+                        <p class="col-sm-12">You are going to change the status to Canceled(Unwanted).</p>
+                        <p class="col-sm-12">Do you also want to move the reservation to the <b>BlackList</b></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="javascript:void(0)" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</a>
+                <a href="javascript:void(0)" class="btn btn-default" onclick="save_data_process('no', 0)">No</a>
+                <a href="javascript:void(0)" class="btn btn-danger" onclick="save_data_process('no', 1)">Yes</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="fraudModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-danger">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">Black List</h4>
+            </div>
+            <div class="modal-body">
+                <p><?=$fraudViewText?></p>
+            </div>
+            <div class="modal-footer">
+                <a href="javascript:void(0)" class="btn btn-default fraud-cancel" data-dismiss="modal" aria-hidden="true">Cancel</a>
+                <a href="javascript:void(0)" class="btn btn-danger fraud-add"  onclick="blackList(<?=$fraudCall?>)">Yes</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="guest_key_instructionsModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-warning">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">Are you sure you want to send this email?</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="form-group">
+                        <p class="key-warning col-sm-12"></p>
+                    </div>
+                    <div class="form-group">
+                    <?php if ($data->getSecondaryEmail()) { ?>
+                        <label class="col-sm-3 checkbox">Select Email</label>
+                        <div class="form-group col-sm-9">
+                            <select class="form-control" id="key-email-options">
+                                <option value="1" ><?= $data->getGuestEmail()?></option>
+                                <option value="2"><?= $data->getSecondaryEmail()?></option>
+                            </select>
+                        </div>
+                    <?php } ?>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="javascript:void(0)" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</a>
+                <a href="javascript:void(0)" class="btn btn-warning"  onclick="resend_mail(3)">Yes</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="genereteNewLinkModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-info">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">Send Mail</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="form-group">
+                        <p class="col-sm-12">Do you want to send a request for new payment details to customer by email?</p>
+                    </div>
+                    <div class="form-group">
+                    <?php if ($data->getSecondaryEmail()) { ?>
+                        <label class="col-sm-3 checkbox">Select Email</label>
+                        <div class="form-group col-sm-9">
+                            <select class="form-control" id="payment-email-options">
+                                <option value="1"><?= $data->getGuestEmail()?></option>
+                                <option value="2"><?= $data->getSecondaryEmail()?></option>
+                            </select>
+                        </div>
+                    <?php } ?>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="javascript:void(0)" class="btn btn-default genereteNewLink" data-dismiss="modal" aria-hidden="true">Cancel</a>
+                <a href="javascript:void(0)" class="btn btn-primary genereteNewLink"  onclick="generete_new_link(1)">No</a>
+                <a href="javascript:void(0)" class="btn btn-primary"  onclick="generete_new_link(2)" id="generete_nl">Yes</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="moveReservationModal" tabindex="-1" role="dialog" aria-labelledby="moveReservationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-warning">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="moveReservationModalLabel">Move Reservation</h4>
+            </div>
+            <div class="modal-body">
+                <div id="move-alerts"></div>
+                <form class="form-horizontal">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">
+                        Possible Destinations
+                    </label>
+                    <div class="col-sm-6">
+                        <select class="form-control" id="apartment-id-assigned"></select>
+                    </div>
+                </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-warning" id="confirm-move-btn">Move</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade receipt-modal" id="receiptModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" style="border: none">
+            <div class="modal-header hidden-print">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body receipt-body">
+
+            </div>
+            <div class="modal-footer hidden-print">
+                <a class="btn btn-primary pull-left" id="sendMailReceipt" href="javascript:void(0)">Send Mail</a>
+                <a class="btn btn-info" id="printReceipt" href="javascript:void(0)"><i class="glyphicon glyphicon-print"></i> Print</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="receiptBlackListModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-warning">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="moveReservationModalLabel">Send Receipt Mail</h4>
+            </div>
+            <div class="modal-body">
+                <p>This guest is blacklisted, are you sure you want to send them a receipt?</p>
+            </div>
+            <div class="modal-footer">
+                <a href="javascript:void(0)" class="btn btn-default" id="cancel_receipt_black_list">Cancel</a>
+                <a href="javascript:void(0)" class="btn btn-warning" id="send_receipt_black_list">Yes</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="image-dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="delete-dialog">
+    <div class="modal-dialog">
+        <div class="modal-content delete">
+            <div class="modal-header bg-danger text-danger">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Delete Document</h4>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <button class="btn btn-danger" id="delete_button">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="beforeSaveDataModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-info">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">Notification</h4>
+            </div>
+            <div class="modal-body">
+                <p>You are going to change date. Are You sure ?</p>
+            </div>
+            <div class="modal-footer">
+                <a href="javascript:void(0)" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</a>
+                <a href="javascript:void(0)" class="btn btn-primary" id="change-date-process">Yes</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="makeVisibleToFrontierModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-warning">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">Make Frontier Visible</h4>
+                <input type="hidden" id="chosen-comment-id">
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to make this comment frontier visible? This process is irreversible.</p>
+            </div>
+            <div class="modal-footer">
+                <a href="javascript:void(0)" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</a>
+                <a href="javascript:void(0)" class="btn btn-warning btn-send-frontier-confirm">Yes</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="sendCccaModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-info">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">Send CCCA</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="form-group">
+                        <p class="ccca-email col-sm-12">Do you want to send a CCCA form to customer by email?</p>
+                        <?php if ($data->getSecondaryEmail()) { ?>
+                        <label class="col-sm-3 checkbox">Select Email</label>
+                        <div class="form-group col-sm-9">
+                            <select class="form-control" id="ccca-email-options">
+                                <option value="1"><?= $data->getGuestEmail()?></option>
+                                <option value="2"><?= $data->getSecondaryEmail()?></option>
+                            </select>
+                        </div>
+                        <?php } ?>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 checkbox">Select Card</label>
+                        <div class="form-group col-sm-9">
+                            <select class="form-control" id="send_ccca_cc_id">
+                                <?php
+                                /**
+                                 * @var \DDD\Domain\Booking\ChargeAuthorization\ChargeAuthorizationCreditCard $ccForAuthorization
+                                 */
+                                ?>
+                                <?php foreach ($this->dataOther['creditCardsForAuthorization'] as $ccForAuthorization): ?>
+                                    <option value="<?= $ccForAuthorization->getId() ?>"><?= $ccForAuthorization->getBrand() . ' - ' . $ccForAuthorization->getLast4Digits() . ' (' . $ccForAuthorization->getHolder() . ')' ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 checkbox">Amount</label>
+                        <div class="form-group col-sm-9">
+                            <div class="input-group">
+                            <input type="text" id="amount-for-ccca" class="form-control" value="<?php echo abs(number_format($this->dataOther['ginosiBalanceInApartmentCurrency'], 2, '.', ''));?>">
+                            <label class="input-group-addon" for="amount-for-ccca" id="currency-code-for-ccca"><?php echo $data->getApartmentCurrencyCode() ?></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="javascript:void(0)" class="btn btn-default generateAndSendCccaForm" data-dismiss="modal" aria-hidden="true">Cancel</a>
+                <a href="javascript:void(0)" class="btn btn-primary"  onclick="generateAndSendCccaForm()" id="reservation_action_send_ccca_confirm">Yes</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="send-email" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-warning">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">Send Email</h4>
+                <input type="hidden" id="chosen-comment-id">
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="form-group">
+                        <label class="col-sm-3 checkbox">Select Email</label>
+                        <div class="form-group col-sm-9">
+                            <select class="form-control" id="email-options">
+                                <option value="1"><?= $data->getGuestEmail()?></option>
+                                <option value="2"><?= $data->getSecondaryEmail()?></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="javascript:void(0)" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</a>
+                    <a href="javascript:void(0)" id ="resend-mail-btn" class="btn btn-warning resend-mail" onclick=''>Yes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var SAVE_DATA                        = '<?= $this->url('backoffice/default', ['controller' => 'booking', 'action' => 'ajaxsave'])?>';
+    var GLOBAL_SEND_MAIL                 = '<?= $this->url('backoffice/default', ['controller' => 'booking', 'action' => 'ajax-send-mail'])?>';
+    var GLOBAL_GENERATE_PAGE             = '<?= $this->url('backoffice/default', ['controller' => 'cc-provide', 'action' => 'ajax-generate-page'])?>';
+    var GLOBAL_GENERATE_CCCA_PAGE        = '<?= $this->url('backoffice/default', ['controller' => 'charge-authorization', 'action' => 'ajax-generate-page'])?>';
+    var GLOBAL_GENERATE_RESET            = '<?= $this->url('backoffice/default', ['controller' => 'cc-provide', 'action' => 'ajax-generate-reset'])?>';
+    var GLOBAL_CHARGE                    = '<?= $this->url('backoffice/default', ['controller' => 'booking', 'action' => 'ajax-charge'])?>';
+    var GLOBAL_TRANSACTION               = '<?= $this->url('backoffice/default', ['controller' => 'booking', 'action' => 'ajax-transaction'])?>';
+    var GLOBAL_CHANGE_PARTNER_ID         = '<?= $this->url('backoffice/default', ['controller' => 'booking', 'action' => 'ajax-change-cc-partner-id'])?>';
+    var GLOBAL_ADD_ADDONS                = '<?= $this->url('backoffice/default', ['controller' => 'booking', 'action' => 'ajax-add-addons'])?>';
+    var GLOBAL_GET_USER                  = '<?= $this->url('backoffice/default', ['controller' => 'booking', 'action' => 'ajax-get-user'])?>';
+    var GLOBAL_BLACK_LIST                = '<?= $this->url('backoffice/default', ['controller' => 'booking', 'action' => 'ajax-black-list'])?>';
+    var GLOBAL_GET_MOVE_DESTINATIONS_URL = '<?= $this->url('backoffice/default', ['controller' => 'booking', 'action' => 'ajax-get-possible-move-destinations'])?>';
+    var GLOBAL_MOVE_RESERVATION_URL      = '<?= $this->url('backoffice/default', ['controller' => 'booking', 'action' => 'ajax-move-reservation'])?>';
+    var GLOBAL_GET_RECEIPT               = '<?= $this->url('backoffice/default', ['controller' => 'booking', 'action' => 'ajax-get-receipt'])?>';
+    var GLOBAL_SEND_RECEIPT              = '<?= $this->url('backoffice/default', ['controller' => 'booking', 'action' => 'ajax-send-receipt'])?>';
+    var GLOBAL_CHANGE_DATE               = '<?= $this->url('backoffice/default', ['controller' => 'booking', 'action' => 'ajax-change-date'])?>';
+    var GLOBAL_GET_PARKING_SPOTS         = '<?= $this->url('backoffice/default', ['controller' => 'booking', 'action' => 'ajax-get-parking-spots'])?>';
+    var GLOBAL_CHANGE_TRANSACTION_STATUS = '<?= $this->url('backoffice/default', ['controller' => 'common', 'action' => 'ajax-change-transaction-status'])?>';
+    var GLOBAL_CURRENCY                  = $.parseJSON('<?=$this->dataOther['curencyRate']?>');
+    var GLOBAL_ADDONS_LIST               = $.parseJSON('<?=json_encode($this->dataOther['addons_array'])?>');
+    var GLOBAL_DEPRECATED_ADDONS_LIST    = $.parseJSON('<?=json_encode(BookingAddon::getDeprecatedAddonTypes())?>');
+    var GLOBAL_VALID_CARD                = <?=$data->getFunds_confirmed()?>;
+    var GLOBAL_NO_COLLECTION             = <?=$data->getNo_collection()?>;
+    var GLOBAL_OVERBOOKING_STATUS        = <?= $data->getOverbookingStatus() ?>;
+    var GLOBAL_TXT_ISSUE                 = '<?=TextConstants::ERROR_ISSUE?>';
+    var GLOBAL_FRAUD_DETECT              = '<?=$this->dataOther['fraud']['value']?>';
+    var GLOBAL_TXT_FRAUD_DETECT          = '<?=TextConstants::FRAUD_ISSUE?>';
+    var GLOBAL_TXT_OVERBOOKING           = '<?=TextConstants::ERROR_OVERBOOKING?>';
+    var GLOBAL_TXT_NO_COLLECTION         = '<?=TextConstants::ERROR_NO_COLLECTION?>';
+    var GLOBAL_STATUS                    = <?=$data->getStatus()?>;
+    var GLOBAL_AFFILIATE_COMMISSION      = <?= $this->dataOther['partner_commission_charge'] ?>;
+    var GLOBAL_PARTNER_BALANCE           = <?= $this->dataOther['partnerBalanceInApartmentCurrency'] ?>;
+    var GLOBAL_GUEST_BALANCE             = <?= $this->dataOther['ginosiBalanceInApartmentCurrency'] ?>;
+    var GLOBAL_HAS_DEBT_BALANCE          = '<?= $this->dataOther['hasDebtBalance'] ?>';
+    var GLOBAL_TXT_HAS_DEBT_BALANCE      = '<?=TextConstants::ERROR_HAS_DEBT_BALANCE?>';
+    var GLOBAL_HAS_ISSUES                = '<?= $this->dataOther['hasIssues'] ?>';
+    var GLOBAL_HAS_ISSUES_TEXT           = '<?= $this->dataOther['hasIssuesText'] ?>';
+    var GLOBAL_APARTMENT_ID_ASSIGNED     = '<?= $data->getApartmentIdAssigned() ?>';
+    var GLOBAL_KEY_PAGE_TYPE             = '<?= $data->getKiPageType() ?>';
+    var GLOBAL_PIN_RESERVATION           = '<?= $this->url('backoffice/default', ['controller' => 'booking', 'action' => 'ajax-pin-reservation'])?>';
+    var GLOBAL_LOCK_RESERVATION          = '<?= $this->url('backoffice/default', ['controller' => 'booking', 'action' => 'ajax-lock-reservation'])?>';
+    var historyAaData                    = <?= $this->historyData ?>;
+    var bookingDocListAaData             = <?= $this->bookingDocList ?>;
+    var TASKS_DATATABLE_AJAX_SOURCE      = '<?= $this->url('backoffice/default', ['controller' => 'booking', 'action' => 'ajax-get-reservation-tasks'])?>';
+    var GLOBAL_CARD_PENDING              = '<?= $this->dataOther['pendingCreditCardInQueue'] ?>';
+    var GLOBAL_CARD_PENDING_TEXT         = '<?= TextConstants::CARD_PENDING_TEXT?>';
+    var TRANSACTION_COLLECT              = <?=Booking\BankTransaction::BANK_TRANSACTION_TYPE_COLLECT?>;
+    var TRANSACTION_REFUND               = <?=Booking\BankTransaction::BANK_TRANSACTION_TYPE_REFUND?>;
+    var TRANSACTION_CASH                 = <?=Booking\BankTransaction::BANK_TRANSACTION_TYPE_CASH?>;
+    var TRANSACTION_CASH_REFUND          = <?=Booking\BankTransaction::BANK_TRANSACTION_TYPE_CASH_REFUND?>;
+    var TRANSACTION_CHARGEBACK_FRAUD     = <?=Booking\BankTransaction::BANK_TRANSACTION_TYPE_CHARGEBACK_FRAUD?>;
+    var TRANSACTION_CHARGEBACK_DISPUTE   = <?=Booking\BankTransaction::BANK_TRANSACTION_TYPE_CHARGEBACK_DISPUTE?>;
+    var TRANSACTION_CHARGEBACK_OTHER     = <?=Booking\BankTransaction::BANK_TRANSACTION_TYPE_CHARGEBACK_OTHER?>;
+    var TRANSACTION_VALIDATION           = <?=Booking\BankTransaction::BANK_TRANSACTION_TYPE_VALIDATION?>;
+    var TRANSACTION_PAY                  = <?=Booking\BankTransaction::BANK_TRANSACTION_TYPE_PAY?>;
+    var TRANSACTION_BANK_DEPOSIT         = <?=Booking\BankTransaction::BANK_TRANSACTION_TYPE_BANK_DEPOSIT?>;
+    var TRANSACTION_DEDUCTED_SALARY      = <?=Booking\BankTransaction::BANK_TRANSACTION_TYPE_DEDUCTED_SALARY?>;
+    var GLOBAL_NIGHT_DATA                = $.parseJSON('<?=json_encode($this->nightsData)?>');
+    var PARKING_SPOT_PRIORITY            = $.parseJSON('<?=json_encode($this->spotsPriority)?>');
+    var GLOBAL_NIGHTS_COUNT              = <?=count($this->nightsData)?>;
+    var GLOBAL_RATES_BY_DATE             = $.parseJSON('<?=json_encode($this->ratesByDate)?>');
+    var CHARGE_APARTMENT                 = <?=Booking\BookingAddon::ADDON_TYPE_ACC?>;
+    var CHARGE_NIGHT                     = <?=Booking\BookingAddon::ADDON_TYPE_NIGHT?>;
+    var CHARGE_PARKING                   = <?=Booking\BookingAddon::ADDON_TYPE_PARKING?>;
+    var CHARGE_PARKING_NIGHT             = <?=Booking\BookingAddon::ADDON_TYPE_PARKING_NIGHT?>;
+    var CHARGE_EXTRA_PERSON              = <?=Booking\BookingAddon::ADDON_TYPE_EXTRA_PERSON?>;
+    var CHARGE_DATE_LIST                 = $.parseJSON('<?=$this->dataOther['dateList']?>');
+    var CHARGE_DATES_CHECK_IN            = $.parseJSON('<?=$this->dataOther['dateForHighlightsCheckIn']?>');
+    var CHARGE_DATES_CHECK_OUT           = $.parseJSON('<?=$this->dataOther['dateForHighlightsCheckOut']?>');
+    var TASKS_COUNT                      = <?= $this->tasksCount ?>;
+    var TRANSACTION_STATUS_APPROVED      = <?=Booking\BankTransaction::BANK_TRANSACTION_STATUS_APPROVED?>;
+    var TRANSACTION_STATUS_DECLINED      = <?=Booking\BankTransaction::BANK_TRANSACTION_STATUS_DECLINED?>;
+    var TRANSACTION_STATUS_PENDING       = <?=Booking\BankTransaction::BANK_TRANSACTION_STATUS_PENDING?>;
+    var TRANSACTION_STATUS_VOIDED        = <?=Booking\BankTransaction::BANK_TRANSACTION_STATUS_VOIDED?>;
+    var GLOBAL_RESOLVE_COMMENT           = '<?= '//' . DomainConstants::BO_DOMAIN_NAME . '/ud/universal-dashboard/ajax-resolve-comment' ?>';
+    var GLOBAL_DEFAULT_TYPE              = <?=$this->dataOther['hasValidCard'] ? Booking\BankTransaction::BANK_TRANSACTION_TYPE_COLLECT : 0?>;
+    var RATE_OCCUPANCY                   = '<?= $data->getOccupancy() ?>';
+    var GLOBAL_DISCOUNT_VALUE            = <?= $data->getPartnerId() == BookingPartners::GINOSI_EMPLOYEE ? Booking\Charge::DISCOUNT_GINOSI_EMPLOYEE : Booking\Charge::DISCOUNT_GUEST ?>;
+    var SECONDARY_EMAIL                  = '<?= $data->getSecondaryEmail() ?>';
+
+    var BUSINESS_MODEL                             = <?= $data->getModel() ?>;
+    var BUSINESS_MODEL_GINOSI_COLLECT              = <?= \DDD\Service\Partners::BUSINESS_MODEL_GINOSI_COLLECT ?>;
+    var BUSINESS_MODEL_GINOSI_COLLECT_FROM_PARTNER = <?= \DDD\Service\Partners::BUSINESS_MODEL_GINOSI_COLLECT_PARTNER ?>;
+
+    var CHARGE_PARTNER_COLLECT           = <?= Booking\Charge::CHARGE_MONEY_DIRECTION_PARTNER_COLLECT ?>;
+    var MAKE_COMMENT_VISIBLE_TO_FRONTIER = '<?= $this->url('backoffice/default', ['controller' => 'booking', 'action' => 'ajax-make-comment-visible-to-frontier'])?>';
+
+    var EXPIDIA_EXPIDIA_COLLECT_PARTNER_ID           = <?= Constants::EXPIDIA_EXPIDIA_COLLECT_PARTNER_ID ?>;
+    var EXPIDIA_EXPIDIA_OR_GINOSI_COLLECT_PARTNER_ID = <?= Constants::EXPIDIA_EXPIDIA_OR_GINOSI_COLLECT_PARTNER_ID ?>;
+    var EXPIDIA_GINOSI_COLLECT_PARTNER_ID            = <?= Constants::EXPIDIA_GINOSI_COLLECT_PARTNER_ID ?>;
+
+    var POSSIBLE_EXTRA_PERSON = <?= $this->possibleExtraPerson ?>;
+    var GLOBAL_PARKING_NIGHT_DATA = $.parseJSON('<?=json_encode($this->parkingNights)?>');
+    var BOOKING_STATUS_BOOKED = <?= Booking::BOOKING_STATUS_BOOKED ?>;
+    var BOOKING_STATUS_FRAUDULATION = <?= Booking::BOOKING_STATUS_CANCELLED_FRAUDULANT ?>;
+    var BOOKING_STATUS_NOSHOW = <?= Booking::BOOKING_STATUS_CANCELLED_NOSHOW ?>;
+    var BOOKING_STATUS_UNWANTED = <?= Booking::BOOKING_STATUS_CANCELLED_UNWANTED ?>;
+    var CHANGE_APARTMENT_OCCUPANCY = '<?=$changeApartmentOccupancy?>';
+</script>

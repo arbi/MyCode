@@ -1,0 +1,126 @@
+<?php
+	$this->layout()->viewTitle = $this->pageTitle;
+    $this->headTitle()->setSeparator(' - ');
+    $this->headTitle($this->pageTitle);
+	$this->layout()->breadcrumb = $this->breadcrumb([
+		['Finance'],
+		['Purchase Order Categories', $this->url('finance/default', ['controller' => 'expense-item-categories'])],
+		[$this->pageTitle]
+	]);
+
+	$form = $this->form;
+
+    $this->InlineScript()
+        ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+        ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+        ->appendFile($this->basePath() . '/js/module/finance/purchase-order/category.js')
+        ->appendFile($this->basePath() . '/js/validation/expense.item.categories.js');
+
+    $this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css');
+?>
+<script>
+    var GLOBAL_CHECK_CATEGORY_NAME = '<?= $this->url('finance/default', ['controller' => 'expense-item-categories', 'action' => 'ajax-check-name'])?>';
+    var GLOBAL_GET_SUBCATEGORIES_URI = '<?= $this->url('finance/default', ['controller' => 'expense-item-categories', 'action' => 'ajax-get-subcategories'])?>';
+    var GLOBAL_ACTION_SUBCATEGORY_URI = '<?= $this->url('finance/default', ['controller' => 'expense-item-categories', 'action' => 'ajax-action-subcategory'])?>';
+    var GLOBAL_ADD_SUBCATEGORY_URI = '<?= $this->url('finance/default', ['controller' => 'expense-item-categories', 'action' => 'ajax-add-sub-category'])?>';
+</script>
+
+<div class="row">
+    <div class="col-sm-12">
+        <fieldset name="General">
+            <legend>General</legend>
+
+            <div class="col-sm-6">
+                <?php
+                echo $this->form()->openTag($form);
+                echo $this->formHidden($form->get('id'));
+                ?>
+
+                <div class="form-group">
+                    <label for="<?php echo $form->get('name')->getAttribute('id'); ?>" class="col-sm-4 control-label">
+                        <?php echo $form->get('name')->getLabel(); ?> <?php echo $this->required()?>
+                        <input type="hidden" name="category_id" id="category_id" value="<?=$this->categoryId; ?>">
+                    </label>
+                    <div class="col-sm-8">
+                        <?php echo $this->formInput($form->get('name')); ?>
+                    </div>
+                    <?php echo $this->formElementErrors($form->get('name'), ['class' => 'col-sm-3 text-danger list-unstyled']); ?>
+                </div>
+
+                <div class="form-group">
+                    <label for="<?php echo $form->get('description')->getAttribute('id'); ?>" class="col-sm-4 control-label">
+                        <?php echo $form->get('description')->getLabel(); ?>
+                    </label>
+                    <div class="col-sm-8">
+                        <?php echo $this->formTextarea($form->get('description')); ?>
+                    </div>
+                    <?php echo $this->formElementErrors($form->get('description'), ['class' => 'col-sm-3 text-danger list-unstyled']); ?>
+                </div>
+
+                <div class="container page-actions">
+                    <div class="row text-right">
+                        <?php echo $this->formSubmit($form->get('submit')); ?>
+                        <?php
+                        if ($this->categoryId) {
+                            $activationUrl = '/finance/expense-item-categories/activate/' . $this->categoryId . '?status=' . (int)!$this->isActive;
+                            $buttonClass = 'btn-success';
+                            $buttonName = 'Activate';
+
+                            if ($this->isActive) {
+                                $buttonClass = 'btn-danger';
+                                $buttonName = 'Deactivate';
+                            }
+                        ?>
+                            <a href="<?=$activationUrl?>" class="btn col-sm-2 col-xs-12 margin-left-10 pull-right <?=$buttonClass?>"><?=$buttonName?></a>
+                        <?php } ?>
+                    </div>
+                </div>
+                <?php echo $this->form()->closeTag(); ?>
+            </div>
+
+            <?php if ($this->categoryId > 0) { ?>
+            <div class="col-sm-6">
+                <div class="row">
+                    <div class="btn-group fn-buttons pull-right">
+                        <a href="#all" class="btn btn-sm btn-default" data-status-id="0">All</a>
+                        <a href="#active" class="btn btn-sm btn-default active" data-status-id="1">Active</a>
+                        <a href="#inactive" class="btn btn-sm btn-default" data-status-id="2">Inactive</a>
+                    </div>
+                    <input type="hidden" id="switch-subcat-status" value="1" />
+                </div>
+
+                <div class="row">
+                    <table id="subcategory-datatable" class="table table-striped table-bordered table-condensed table-hover">
+                        <thead>
+                            <tr>
+                                <th> Subcategory </th>
+                                <th> &nbsp; </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="row">
+                    <form method="post" name="venue-items-form" class="form-horizontal" id="venue-items-add-form">
+                        <table class="table table-striped table-bordered table-condensed" id="items_table_for_add">
+                            <tbody>
+                            <tr>
+                                <td class="venue-item-title">
+                                    <input type="text" name="new-subcategory-title" class="form-control" id="new-subcategory-title" placeholder="New Subcategory Title" value="">
+                                </td>
+                                <td style="width: 64px;" class="text-center">
+                                    <a href="javascript:void(0)" class="btn btn-sm btn-primary" id="add-new-subcategory" data-loading-text="Adding...">Add</a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+            </div>
+            <?php } ?>
+        </fieldset>
+    </div>
+</div>

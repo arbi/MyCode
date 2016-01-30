@@ -1,0 +1,84 @@
+<?php
+use Library\Constants\Constants;
+use \DDD\Service\MoneyAccount as MoneyAccountService;
+
+
+$managePermission = $this->permissionLevel & MoneyAccountService::PERMISSION_MANAGE_TRANSACTIONS;
+
+/**
+ * @var \Library\Authentication\BackofficeAuthenticationService $auth
+ * @var \Zend\Db\ResultSet\ResultSet|array[] $data
+ * @var \Zend\Form\Form $form
+ */
+$this->layout()->viewTitle = "{$this->accountName}'s Transactions";
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($this->layout()->viewTitle);
+$this->layout()->breadcrumb = $this->breadcrumb([
+    ['Finance'],
+    ['Money Account', $this->url('finance/money-account')],
+    [$this->accountName, $this->url('finance/money-account', ['action' => 'edit', 'id' => $this->accountId])],
+    [$this->layout()->viewTitle],
+]);
+
+$this->headLink()
+    ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css')
+    ->appendStylesheet($this->basePath() . '/css/pages/money.transactions.css');
+
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+    ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+    ->appendFile($this->basePath() . '/js/module/finance/money-account/transactions.js');
+?>
+<script>
+    var transactionsTableData = <?= json_encode($this->transactionsTableData); ?>;
+    var hasPoAndTransferManagerGlobalRole = <?= $this->hasPoAndTransferManagerGlobalRole ? 1 : 0; ?>;
+    var GLOBAL_CHANGE_VERIFY_STATUS = '<?= $this->url('finance/money-account-verify-status')?>';
+    var GLOBAL_VOID_URL = '<?= $this->url('finance/money-account-void')?>';
+    var GLOBAL_IS_VERIFIED = '<?= $this->isVerified ?>';
+    var GLOBAL_IS_NOT_VERIFIED = '<?= $this->isNotVerified ?>';
+    var managePermission = <?= intval($managePermission) ?>;
+</script>
+<div class="row">
+    <div class="col-sm-12">
+        <table class="table table-striped table-bordered table-condensed table-hover" id="datatable-transactions">
+            <thead>
+            <tr>
+                <th>&nbsp;</th>
+                <th>&nbsp;</th>
+                <th>Id</th>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Credits</th>
+                <th>Debits</th>
+                <th>&nbsp;</th>
+                <th>&nbsp;</th>
+                <th>&nbsp;</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<?php if ($this->hasPoAndTransferManagerGlobalRole) { ?>
+<div class="container page-actions">
+    <div class="row text-right">
+        <a href="#" class="btn btn-primary pull-right col-sm-2 col-xs-12 disabled" id="combine-transactions">Combine</a>
+    </div>
+</div>
+<?php } ?>
+
+<div id="status-switch-template">
+    <div class="btn-group fn-buttons pull-right">
+        <a href="#all" class="btn btn-sm btn-default" data-status="all">All</a>
+        <a href="#active" class="btn btn-sm btn-default active" data-status="active">Active</a>
+        <a href="#voided" class="btn btn-sm btn-default" data-status="voided">Voided</a>
+    </div>
+</div>
+
+<?= $this->confirmationDialog(
+    'Void Transaction <span id="void-transaction-id"></span>',
+    'transaction-void-modal',
+    'btn-void-confirm',
+    'Void'
+) ?>

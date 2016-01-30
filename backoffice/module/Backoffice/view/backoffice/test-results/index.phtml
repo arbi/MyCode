@@ -1,0 +1,63 @@
+<?php
+$this->layout()->viewTitle  = 'Test Results';
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($this->layout()->viewTitle);
+$this->layout()->breadcrumb = $this->breadcrumb([
+    ['Administration'],
+    ['System Configuration'],
+    ['Test Results'],
+]);
+$this->InlineScript()->prependFile('//code.highcharts.com/highcharts.js');
+
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/pages/test-results.js');
+
+$this->headLink()
+    ->appendStylesheet($this->basePath() . '/css/pages/test-results.css');
+
+?>
+<?php if($this->status == 'error') { ?>
+    <div class="alert alert-danger"><?php echo $this->msg?></div>
+<?php } else { ?>
+    <?php echo $this->form()->openTag($this->form); ?>
+        <div class="row">
+            <div class="col-sm-3 form-group">
+                <?php echo $this->formSelect($form->get('category')); ?>
+            </div>
+            <div class="col-sm-3 form-group">
+                <?php echo $this->formSelect($form->get('status')); ?>
+            </div>
+            <div class="col-sm-3 form-group">
+                <?php echo $this->formInput($form->get('test_name')); ?>
+            </div>
+            <div class="col-sm-3 form-group">
+                <button class="btn btn-block btn-primary" id="btn_search"><span class="glyphicon glyphicon-search"></span> Search</button>
+            </div>
+        </div>
+
+    <?=$this->form()->closeTag(); ?>
+    <div class="row">
+        <div class="col-sm-12 text-center" id="total-part">
+            <span class="label label-primary text-size-14 hidden">Total: <strong id="total-total">0</strong></span>
+            <span class="label label-success text-size-14 hidden">Passed: <strong id="total-pass">0</strong></span>
+            <span class="label label-pink  text-size-14 hidden">Failed: <strong id="total-fail">0</strong></span>
+            <span class="label label-danger text-size-14 hidden">Have Errors: <strong id="total-error">0</strong></span>
+            <span class="label label-warning text-size-14 hidden">Warning: <strong id="total-warning">0</strong></span>
+        </div>
+    </div>
+    <div class="row">&nbsp;</div>
+    <div class="row">
+        <div class="col-sm-8" id="tests-part">
+
+        </div>
+        <div class="col-sm-4">
+            <div id="chart">
+
+            </div>
+        </div>
+    </div>
+<?php } ?>
+
+
+
+

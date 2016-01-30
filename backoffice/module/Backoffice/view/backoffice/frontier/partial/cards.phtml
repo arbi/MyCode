@@ -1,0 +1,37 @@
+<?php
+    $dateFrom = isset($card['dateFrom']) ? new DateTime($card['dateFrom']) : 0 ;
+    $dateTo   = isset($card['dateTo']) ? new DateTime($card['dateTo']) : 0 ;
+    $now      = isset($card['now']) ? new DateTime($card['now']) : -1 ;
+    if ($now > $dateTo || !empty($card['departureDate'])) {
+        $doNotShowButtons = true;
+    }
+    else {
+        $doNotShowButtons = false;
+    }
+    echo $this->partial(
+        'backoffice/frontier/partial/reservation-card',
+        [
+            'entityType' => $entityType,
+            'card' => $card,
+            'booked' => $booked,
+            'now' => $now,
+            'dateTo' => $dateTo,
+            'dateFrom' => $dateFrom,
+            'doNotShowButtons' => $doNotShowButtons,
+            'creditCardsForAuthorization' => $this->creditCardsForAuthorization
+        ]
+    );
+    echo $this->partial(
+        'backoffice/frontier/partial/apartment-card',
+        [
+            'entityType' => $entityType,
+            'card'       => $card
+        ]
+    );
+    echo $this->partial(
+        'backoffice/frontier/partial/building-card',
+        [
+            'entityType' => $entityType,
+            'card' => $card,
+        ]
+    );

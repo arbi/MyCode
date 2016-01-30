@@ -1,0 +1,182 @@
+<?php
+use Library\Constants\Constants;
+use Library\Finance\Process\Expense\Helper as FinHelper;
+
+$data = $this->data;
+$isPO = !($this->itemization || $this->order);
+
+?>
+<div class="template item" data-date="<?php echo date('Y-m-d'); ?>">
+    <?php if ($isPO) { ?>
+    <div class="remove transition noselect remove-custom pull-right" title="Remove item">
+        <i class="glyphicon glyphicon-remove"></i>
+    </div>
+        <div class="clearfix"></div>
+    <?php } ?>
+
+    <?php if ($this->order) { ?>
+    <div class="row">
+        <div class="col-sm-12">
+            <select name="po_id" class="form-control required po-id" placeholder="Select PO">
+                <?php foreach ($this->userPOList as $po) {
+                    $validity = '';
+                    if (!is_null($po['expected_completion_date_start']) && !is_null($po['expected_completion_date_end'])) {
+                        $validity = date(Constants::GLOBAL_DATE_FORMAT, strtotime($po['expected_completion_date_start'])) . ' - ' .
+                            date(Constants::GLOBAL_DATE_FORMAT, strtotime($po['expected_completion_date_end']));
+                    }
+                    ?>
+                    <option value="<?= $po['id'] ?>"><?= $po['id'] . ' ' . $po['title'] . $validity ?></option>
+                <?php } ?>
+            </select>
+        </div>
+    </div>
+    <?php } ?>
+
+    <div class="row">
+        <div class="col-sm-7 account-base">
+            <?php echo $this->formSelect($form->get('account')->setAttributes([
+                'data-unique-id' => $data ? $data['unique_id'] : '',
+                'data-account-id' => $data ? $data['account_id'] : '',
+                'data-account-name' => $data ? $data['account_name'] : '',
+                'data-account-type' => $data ? $data['account_type'] : '',
+            ])); ?>
+        </div>
+        <div class="col-sm-5 margin-bottom-5">
+            <?php echo $this->formInput($form->get('supplier_reference')->setValue($data ? $data['reference'] : '')); ?>
+        </div>
+    </div>
+
+    <section class="row">
+        <div class="col-sm-12">
+            <?php echo $this->formSelect($form->get('cost_centers')->setAttributes([
+                'data-cost-centers' => $this->costCenters ? json_encode($this->costCenters, true) : '',
+            ])); ?>
+        </div>
+        <div class="col-sm-4"></div>
+    </section>
+
+    <?php if (!$this->order) { ?>
+    <div class="row">
+        <div class="col-sm-12">
+            <?php echo $this->formTextarea($form->get('item_comment')->setValue($data ? $data['comment'] : '')); ?>
+        </div>
+        <div class="col-sm-4"></div>
+    </div>
+    <?php } ?>
+
+    <hr class="simplified-disable">
+
+    <div class="row">
+        <div class="col-sm-6 margin-bottom-5">
+            <div class="input-group">
+                <?php echo $this->formInput($form->get('amount')->setValue($data ? $data['amount'] : '')); ?>
+                <div class="input-group-btn custom-select currency" data-value="<?php echo $data ? $data['currency_id'] : ''; ?>">
+                    <button type="button" class="btn btn-default dropdown-toggle <?= (!empty($data) && $data['status'] == FinHelper::ITEM_STATUS_APPROVED) ? 'disabled' : '' ?>" data-toggle="dropdown"><span class="display"></span> <span class="caret"></span></button>
+                    <ul class="dropdown-menu dropdown-menu-right" role="menu"></ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6">
+            <?php echo $this->formSelect($form->get('type')->setValue(
+                $data
+                    ? $data['type']
+                    : ($this->order
+                        ? \Library\Finance\Process\Expense\Helper::TYPE_ORDER_EXPENSE
+                        : ''
+                    )
+            )); ?>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-6 margin-bottom-5">
+            <div class="input-group">
+                <?php echo $this->formInput($form->get('period')->setValue($data ? $data['period'] : '')); ?>
+                <div class="input-group-addon">
+                    <i class="glyphicon glyphicon-calendar"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <?php echo $this->formSelect($form->get('category')); ?>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-4 col-sm-6 text-right">
+            <?php if (!$this->order) { ?>
+                <input type="file" name="items_attachments[]" class="form-control items-attachments hide">
+                <?php if ($data && $data['attachment_id'] && !$this->editable) { ?>
+                    <a href="<?php echo $this->url('finance/item/download-attachment', ['id' => $data['attachment_id']]); ?>" class="btn btn-success">
+                        <i class="glyphicon glyphicon-cloud-download"></i> Download
+                    </a>
+                <?php } elseif ($data && $data['attachment_id']) { ?>
+                <div class="btn-group">
+                    <a href="<?php echo $this->url('finance/item/download-attachment', ['id' => $data['attachment_id']]); ?>" class="btn btn-success">
+                        <i class="glyphicon glyphicon-cloud-download"></i> <span class="hidden-xs">Download</span>
+                    </a>
+                    <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="caret"></span>
+                        <span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a href="#" class="upload-item-attachment">Upload</a></li>
+                        <li><a href="#" class="delete-item-attachment" data-id="<?= $data['attachment_id'] ?>">Delete</a></li>
+                    </ul>
+                </div>
+                <?php } else { ?>
+                <a type="button" class="btn btn-success upload-item-attachment">
+                    <i class="glyphicon glyphicon-cloud-upload"></i> <span>Attach</span>
+                </a>
+                <?php } ?>
+            <?php } ?>
+        </div>
+        <div class="col-xs-8 col-sm-6">
+            <?php echo $this->formSelect($form->get('sub_category')->setAttributes([
+                'data-sub-category-id' => $data ? $data['sub_category_id'] : '',
+            ])); ?>
+        </div>
+    </div>
+
+    <?php if ($isPO || (isset($this->data['expense_id']) && $this->data['expense_id'] > 0 && $this->isFinance)) { ?>
+
+    <div class="footer noselect transition" id="item-statuses">
+        <div class="row">
+            <?php if ($isPO) { ?>
+            <div class="col-xs-3 col">
+                <div class="item-transaction-container">
+                    <select name="transaction_id" class="form-control new-item-transaction-id">
+                        <?php if (!empty($item['transaction_id'])) { ?>
+                            <option value="<?php echo $item['transaction_id']; ?>"><?php echo $item['transaction_id']; ?></option>
+                        <?php } ?>
+                    </select>
+                </div>
+            </div>
+            <?php } else { ?>
+            <div class="col-xs-3 col"></div>
+            <?php } ?>
+
+            <div class="col-xs-3 col">
+                <span class="expense-value text-muted text-bold"></span>
+            </div>
+
+            <div class="col-xs-2 col col-ch startup transition">
+                <label>
+                    <?php echo $this->formCheckbox($form->get('is_startup')->setValue(isset($data['is_startup']) ? $data['is_startup'] : 0)); ?> Startup
+                </label>
+            </div>
+            <div class="col-xs-2 col col-ch deposit transition">
+                <label>
+                    <?php echo $this->formCheckbox($form->get('is_deposit')->setValue(isset($data['is_deposit']) ? $data['is_deposit'] : 0)); ?> Deposit
+                </label>
+            </div>
+            <div class="col-xs-2 col col-ch refund transition">
+                <label>
+                    <?php echo $this->formCheckbox($form->get('is_refund')->setValue(isset($data['is_refund']) ? $data['is_refund'] : 0)); ?> Refund
+                </label>
+            </div>
+        </div>
+    </div>
+    <?php } ?>
+</div>

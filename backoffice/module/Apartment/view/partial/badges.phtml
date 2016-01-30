@@ -1,0 +1,17 @@
+<div class="row">
+    <div class="col-sm-12">
+        <?= $this->apartmentNameAndAddress($this->apartmentId)?>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12" id="apartment-badges">
+        <?= $this->apartmentStatusBadge($this->apartmentId) ?>
+        <?= $this->apartmentCubilisBadge($this->apartmentId) ?>
+        <?= $this->apartmentReviewScoreBadge($this->apartmentId) ?>
+        <?= $this->apartmentCurrencyBadge($this->apartmentId) ?>
+        <?= $this->apartmentReservationsLink($this->apartmentId) ?>
+        <?= $this->apartmentWebsiteLink($this->apartmentId) ?>
+        <?= $this->apartmentPrintLink($this->apartmentId) ?>
+        <?= $this->apartmentCurrentReservationLink($this->apartmentId) ?>
+    </div>
+</div>

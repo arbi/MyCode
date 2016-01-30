@@ -1,0 +1,106 @@
+<?php
+
+$this->headTitle()->setSeparator(' - ');
+$this->layout()->viewTitle = $this->textlineTitle;
+$this->headTitle($this->layout()->viewTitle);
+$this->layout()->breadcrumb = $this->breadcrumb([
+	['Content'],
+	['Textlines', $this->url('backoffice/default', ['controller' => 'translation'])],
+	[$this->paramAll]
+]);
+
+$form = $this->translationForm;
+
+if ($this->editMode) {
+    $this->InlineScript()->appendFile($this->basePath() . '/js/pages/translation.js');
+
+    $form->prepare();
+    $form->setAttribute('action', $this->url('backoffice/default', ['controller' => 'translation', 'action' => 'view']));
+    $form->setAttribute('method', 'post');
+    $form->setAttribute('id', 'translation_form');
+
+    echo "<script src='{$this->basePath()}/js/vendor/tinymce/tinymce.min.js' type='text/javascript'></script>";
+
+?>
+
+<script>
+    var GLOBAL_SAVE = '<?= $this->url('backoffice/default', ['controller' => 'translation', 'action' => 'ajaxsave'])?>';
+
+    $(function() {
+		tinymce.init({
+			selector: ".tinymce",
+            skin: "clean",
+			plugins: [
+                "code", "autoresize", "link"
+            ],
+            menu : {},
+            toolbar: "undo redo | styleselect | bold italic underline |  aligncenter alignjustify alignleft alignright | bullist numlist outdent indent | link | print | fontsizeselect | code | removeformat",
+            autoresize_min_height:280,
+            browser_spellcheck : true,
+            extended_valid_elements : "i[*]",
+            verify_html : false
+		});
+    });
+</script>
+<?php echo $this->form()->openTag($form); ?>
+	<?php if ($this->typeTranslataion == 'Universal') { ?>
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12">
+            <div class="form-group">
+				<?= $this->formSelect($form->get('textline-type')) ?>
+            </div>
+        </div>
+    </div>
+	<?php } ?>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <?php echo $this->formElement($form->get('content'));?>
+            </div>
+        </div>
+    </div>
+	<?php if ($this->typeTranslataion == 'Universal') { ?>
+
+	<div class="row">
+	    <div class="col-sm-12">
+	        <fieldset name="Description">
+	            <legend>Description</legend>
+	            <div class="form-group">
+					<?= $this->formElement($form->get('description'));?>
+	            </div>
+			</fieldset>
+		</div>
+	</div>
+	<?php } ?>
+
+<?php
+    echo $this->formInput($form->get('lang_code'));
+    echo $this->formInput($form->get('edit_id'));
+    echo $this->formInput($form->get('type_translation'));
+    echo $this->formInput($form->get('location_option'));
+    echo $this->formInput($form->get('locationType'));
+?>
+<div class="page-actions container">
+    <div class="row text-right">
+        <?php echo $this->formButton($form->get('publish_translation'));?>
+    </div>
+</div>
+<?php echo $this->form()->closeTag(); ?>
+
+<?php
+    // END OF EDIT MODE
+} else {
+    // START VIEW MODE
+    echo '<hr>';
+
+    if (empty($form->get('content')->getValue())) {
+?>
+    <div class="row col-sm-12">
+        <span class="h3 text-danger">Textline is empty :(</span>
+    </div>
+<?php
+    } else {
+        echo $form->get('content')->getValue();
+    }
+
+}

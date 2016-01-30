@@ -1,0 +1,31 @@
+<?php
+    $form = $this->form;
+	$lastRequestUrl = $this->lastRequestUrl;
+	$form->prepare();
+?>
+<div class="container">
+	<div class="row">
+		<div class="account-wall" data-version="<?= $this->backofficeVersion ?>">
+			<?php echo $this->form()->openTag($form); ?>
+				<h1><span class="brand">Ginosi</span>Backoffice</h1>
+				<p class="text-muted">version: <?= $this->backofficeVersion ?></p>
+
+				<?php if ($this->error != '') { ?>
+					<div class="alert alert-danger"><?= $this->error ?></div>
+				<?php } ?>
+
+				<?php echo $this->formInput($form->get('identity')); ?>
+				<?php echo $this->formInput($form->get('credential')); ?>
+
+				<?=$this->formElement($form->get('sign_in'))?>
+                <span class="divider">or</span>
+                <div class="social-wrapper">
+
+                    <a href="<?= $this->url('backoffice_google_auth', ['action' => 'googlesignin'], ['query' => ['request_url' => $lastRequestUrl]])?>">
+                        <img src=<?=$this->basePath() . '/img/google-signin.png'?>>
+                    </a>
+                </div>
+			<?php echo $this->form()->closeTag(); ?>
+		</div>
+	</div>
+</div>

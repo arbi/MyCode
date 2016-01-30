@@ -1,0 +1,81 @@
+#jobs-cover {
+    margin-top: -20px;
+    padding: 0;
+    position: relative;
+    background-size: cover;
+    background-position: center;
+}
+#jobs-cover>.carousel-inner>.item {
+    height: 500px;
+    background-size: cover;
+    background-position: center;
+}
+
+h2.jobs-subheader {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.row.job-city-row {
+    margin-top: 30px;
+}
+
+.row.job-city-row:last-child {
+    margin-bottom: 20px;
+}
+
+ul.jobs-list {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.media>.pull-left {
+    margin-right: 20px !important;
+}
+
+.city-img {
+    width: 100px;
+    height: 100px;
+    background-repeat: no-repeat;
+    background-size:cover;
+    background-position: center center;
+    border-radius: 50%;
+}
+
+ul.jobs-list a {
+    font-size: 18px;
+}
+
+.carousel-fade .carousel-inner .item {
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: 2s;
+}
+
+.carousel-fade .carousel-inner .item.active {
+    opacity: 1;
+}
+.carousel-fade .carousel-inner .item.active.left, .carousel-fade .carousel-inner .item.active.right {
+    left: 0;
+    opacity: 0;
+    z-index: 1;
+}
+
+.item:nth-child(1) {
+    background-image: url(../img/web/jobs-cover0.jpg);
+}
+
+.item:nth-child(2) {
+     background-image: url(../img/web/jobs-cover1.jpg);
+}
+
+.item:nth-child(3) {
+    background-image: url(../img/web/jobs-cover2.jpg);
+}
+
+@media (max-width:767px)
+{
+    .job-city-row .col-sm-6:nth-child(2) {
+        margin-top: 30px;
+    }
+}

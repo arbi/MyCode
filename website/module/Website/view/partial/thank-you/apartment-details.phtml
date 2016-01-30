@@ -1,0 +1,18 @@
+
+    <h2 class="margin-top-0"><?= $this->data['apartmentName'] ?></h2>
+    <p>
+        <i class="glyphicon glyphicon-map-marker"></i>
+        <strong><?=$this->textline(785)?></strong><span class="pull-right"><?= $this->data['apartmentFullAddress'] ?></span>
+    </p>
+    <p>
+        <i class="glyphicon glyphicon-bed"></i>
+        <strong><?=$this->textline(1176)?></strong><span class="pull-right"><?=($this->data['bedRoomCount'] > 0) ? $this->data['bedRoomCount'] : $this->textline(1190)?></span>
+    </p>
+    <p>
+        <i class="glyphicon glyphicon-log-in"></i>
+        <strong><?=$this->textline(599)?></strong><span class="pull-right"><?= $this->data['apartmentCheckinDateAndTime'] ?></span>
+    </p>
+    <p>
+        <i class="glyphicon glyphicon-log-out"></i>
+        <strong><?=$this->textline(601)?> </strong><span class="pull-right"><?= $this->data['apartmentCheckoutDateAndTime'] ?></span>
+    </p>

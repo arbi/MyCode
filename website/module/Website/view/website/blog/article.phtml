@@ -1,0 +1,108 @@
+<?php
+
+$blog = $this->blog;
+
+$this->headTitle($blog['title'].' - '.$this->textline(1370));
+
+$this->inlineScript()
+	->appendFile($this->basePath() . '/js/blog.search.js')
+	->appendFile($this->basePath() . '/js/blog.js');
+
+$this->headLink([
+    'rel' => 'canonical',
+    'href' => $this->url('blog/child', ['article' => $blog['slug']], ['force_canonical' => true])]);
+
+$blogContent = strip_tags($blog['content']);
+
+if (!empty($blogContent)) {
+	if (strlen($blogContent) > 140) {
+	    $blogContent = wordwrap($blogContent, 140);
+	    $blogContent = preg_replace('/&nbsp\;/', '', $blogContent);
+	    $blogContent = explode("\n", $blogContent);
+	    $blogContent = array_filter($blogContent, function($blogContent) {return !empty(trim($blogContent));});
+	}
+
+	if (is_array($blogContent)) {
+		$blogContent = array_values($blogContent);
+		$blogContent = $blogContent[0] . '...';
+	}
+
+	$this->headMeta()
+		->appendHttpEquiv('Content-Type', 'text/html;charset=utf-8')
+		->appendName('description', $blogContent);
+}
+
+?>
+<div class="col-sm-9">
+	<h1><?=$this->textline(1331)?></h1>
+
+	<div class="row">
+		<div class="col-sm-12">
+			<h1><a href="/blog/<?=$blog["slug"]?>"><?=$blog['title']?></a></h1>
+			<p class="text-muted"><i class="glyphicon glyphicon-calendar"></i> <?=$blog["date"]?></p>
+
+			<div class="blog-article row visible-xs">
+				<div class="socialButtons col-sm-12">
+					<div class="facebook">
+						<iframe src="https://www.facebook.com/plugins/like.php?href=<?=$this->liveServerUrl?>/<?=$blog["slug"]?>&amp;send=false&amp;layout=button_count&amp;width=100&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;font&amp;height=20" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:100px; height:20px;"allowTransparency="true"></iframe>
+					</div>
+					<div class="twitter">
+						<a href="https://twitter.com/share" class="twitter-share-button" data-url="<?=$this->liveServerUrl?>/<?=$blog["slug"]?>"></a>
+						<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+					</div>
+					<div class="google">
+						<script src="https://apis.google.com/js/platform.js" async defer></script>
+						<g:plusone size="medium" annotation="bubble" href="<?=$this->liveServerUrl?>/<?=$blog["slug"]?>"></g:plusone>
+					</div>
+				</div>
+				<div class="clearfix"></div>
+			</div>
+
+			<div class="row">
+				<div class="col-sm-12">
+					<?=Library\Utility\Helper::clearBlogTag($blog['content'])?>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="col-sm-3">
+	<div id="greybar">
+		<div class="subscribe">
+			<?=$this->textline(1651)?>
+			<div class="clearfix"></div>
+		</div>
+		<h4><?=$this->textline(1322)?></h4>
+		<form method="post" class="row search search-blog">
+			<div class="col-md-12 col grid-sep">
+				<div class="dropdown input-destination">
+					<input data-toggle="dropdown" type="text" class="form-control input-lg" placeholder="<?=$this->textline(1329)?>" value="" readonly>
+					<ul class="dropdown-menu" role="menu">
+						<?php foreach ($this->cities as $key => $city) { ?>
+							<li><a href="javascript:void(0)" data-url="<?=$city['city_url']?>"><span style="font-size:1.2em"><?=$this->cityname($city['id'])?></span> <small class="text-muted"><?=$this->countryname($city['country_id'])?></small></a></li>
+						<?php } ?>
+					</ul>
+				</div>
+				<i class="glyphicon glyphicon-map-marker text-muted"></i>
+			</div>
+
+			<div class="col-md-12 col grid-sep">
+				<input type="submit" name="search" value="<?=$this->textline(1322)?>" class="searchButton btn-block btn-lg">
+			</div>
+		</form>
+	</div>
+	<div id="socialButtonsFixBlock" class="hidden-xs">
+		<div class="twitter">
+			<a href="https://twitter.com/share" class="twitter-share-button" data-url="<?=$this->liveServerUrl?>/<?=$blog["slug"]?>"></a>
+			<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+		</div>
+		<div class="facebook">
+			<iframe src="https://www.facebook.com/plugins/like.php?href=<?=$this->liveServerUrl?>/<?=$blog["slug"]?>&amp;send=false&amp;layout=button_count&amp;width=100&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;font&amp;height=20" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:100px; height:20px;"allowTransparency="true"></iframe>
+		</div>
+		<div class="google">
+			<script src="https://apis.google.com/js/platform.js" async defer></script>
+			<g:plusone size="medium" annotation="bubble" href="<?=$this->liveServerUrl?>/<?=$blog["slug"]?>"></g:plusone>
+		</div>
+	</div>
+</div>

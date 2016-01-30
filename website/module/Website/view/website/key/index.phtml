@@ -1,0 +1,479 @@
+<?php
+
+use DDD\Service\Apartment\Details as ApartmentDetails;
+use Library\Constants\EmailAliases;
+use Library\Utility\Helper;
+use Library\Constants\Constants;
+use DDD\Service\ApartmentGroup\Usages\Building as BuildingService;
+use Library\Constants\DomainConstants;
+
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($this->textline(1225));
+
+$this->inlineScript()
+	->appendFile('https://maps.googleapis.com/maps/api/js?key=AIzaSyCLpdxX2wUp-KAxXwyB6ggmnkIkxi_eFwU&sensor=false')
+    ->appendFile($this->basePath() . '/js/vendor/jquery.validate.min.js')
+	->appendFile($this->basePath() . '/js/key-instructions.maps.js');
+
+$this->headMeta()
+    ->appendName('robots', 'noindex');
+
+/**
+ * @var bool|\DDD\Domain\Booking\KeyInstructionPage $keyData
+ */
+$keyData    = $this->keyData;
+$dateFrom   = new \DateTime($keyData->getDateFrom().' '.$keyData->getCheckInTime());
+$dateTo     = new \DateTime($keyData->getDateTo().' '.$keyData->getCheckOutTime());
+
+$block = '';
+$godModeOrKiTypeNotReception = false;
+
+if ($this->godMode || $keyData->getKiPageType() !== BuildingService::KI_PAGE_TYPE_RECEPTION ) {
+    $block = $keyData->getBlock();
+    $godModeOrKiTypeNotReception = true;
+
+    if (!empty($block)) {
+        $block = ', ' . $block . '';
+    }
+}
+
+$showOverlay = false;
+$isBooking = function($input) {
+    return preg_match('/@guest.booking.com$/i', $input);
+};
+
+if ($this->isGuest) {
+    if (
+            ($isBooking($keyData->getGuestEmail()) || $isBooking($keyData->getSecondaryEmail())) ||
+            (empty($keyData->getGuestEmail()) && empty($keyData->getSecondaryEmail()))
+    ) {
+        $showOverlay = true;
+    }
+}
+
+?>
+<div class="row hidden-print">
+    <!-- TITLE -->
+    <div class="col-xs-12 col-sm-12 col-md-7 col-lg-8 pull-left">
+        <div class="row">
+            <div class="col-sm-12">
+                <h1><?php echo $this->textline(1225); ?></h1>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT START -->
+    <div class="col-xs-12 col-sm-12 col-md-5 col-lg-4 pull-right">
+        <!-- PRINT BUTTON -->
+        <div class="row">
+            <div class="col-sm-12 hidden-sm hidden-xs hidden-print">
+                <button onclick="window.print();return false;"
+                        class="btn btn-block btn-info">
+                    <?php echo $this->textline(1246);?>
+                    <i class="glyphicon glyphicon-print"></i>
+                </button>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+
+        <?php ob_start(); ?>
+        <div class="borderer-div row">
+            <!-- APARTMENT DETAILS -->
+            <?php if ($godModeOrKiTypeNotReception) { ?>
+            <div class="col-sm-12">
+                <div>
+                    <h4><?php echo $this->textline(1232); ?></h4>
+                    <div class="row">
+                        <div class="col-sm-4 text-muted pull-left print-left">
+                            <?php echo $this->textline(1564); ?>
+                        </div>
+                        <div class="col-sm-8 text-right print-right">
+                            <?php echo $keyData->getAccAddress(); ?>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 text-muted pull-left print-left">
+                            <?php echo $this->textline(1565); ?>
+                        </div>
+                        <div class="col-sm-8 text-right print-right">
+                            <?php echo $keyData->getAccPostalCode(); ?>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 text-muted pull-left print-left">
+                            <?php echo $this->textline(1226); ?>
+                        </div>
+                        <div class="col-sm-8 text-right print-right">
+                            <?php echo (($keyData->getFloor() == 100) ? 'PH' : ($keyData->getFloor() > 0 ? $keyData->getFloor() : 'GF')); ?>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 text-muted pull-left print-left">
+                            <?php echo $this->textline(1227); ?>
+                        </div>
+                        <div class="col-sm-8 text-right print-right">
+                            <?php echo $keyData->getUnit() . $block; ?>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 text-muted pull-left print-left">
+                            <?php echo $this->textline(1228); ?>
+                        </div>
+                        <div class="col-sm-6 text-right print-right">
+                            <?php echo $keyData->getWifiNetwork(); ?>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 text-muted pull-left print-left">
+                            <?php echo $this->textline(1229); ?>
+                        </div>
+                        <div class="col-sm-6 text-right print-right">
+                            <?php echo $keyData->getWifiPassword(); ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php } elseif ($this->officeAddress) { ?>
+            <div class="col-sm-12">
+                <div>
+                    <h4><?php echo $this->textline(1612); ?></h4>
+                    <div class="row">
+                        <div class="col-sm-4 text-muted pull-left print-left">
+                            <?php echo $this->textline(1564); ?>
+                        </div>
+                        <div class="col-sm-8 text-right print-right">
+                            <?php echo $this->officeAddress; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php } ?>
+
+            <!-- RESERVATION DETAILS -->
+            <div class="col-sm-12">
+                <div>
+                    <h4><?php echo $this->textline(1566); ?></h4>
+                    <div class="row">
+                        <div class="col-sm-4 text-muted pull-left print-left">
+                            <?php echo $this->textline(1567); ?>
+                        </div>
+                        <div class="col-sm-8 text-right print-right reservation-number">
+                            <?php echo $this->keyData->getResNumber(); ?>
+                        </div>
+                        <div class="col-sm-8 text-right print-right partner-id hidden">
+                            <?php echo $this->keyData->getPartnerId(); ?>
+                        </div>
+                    </div>
+                    <?php if ($godModeOrKiTypeNotReception) { ?>
+                        <div class="row">
+                            <div class="col-sm-4 text-muted pull-left print-left">
+                                <?php echo $this->textline(1232); ?>
+                            </div>
+                            <div class="col-sm-8 text-right print-right">
+                                <?php echo $keyData->getApartmentName(); ?>
+                            </div>
+                        </div>
+                    <?php } ?>
+                    <div class="row">
+                        <div class="col-sm-6 text-muted pull-left print-left">
+                            <?php echo $this->textline(1233); ?>
+                        </div>
+                        <div class="col-sm-6 text-right print-right">
+                            <?php echo $keyData->getOccupancy(); ?>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 text-muted pull-left print-left">
+                            <?php echo $this->textline(1234); ?>
+                        </div>
+                        <div class="col-sm-8 text-right print-right">
+                            <?php
+                                echo Helper::getDaysFromTwoDate(
+                                    $keyData->getDateFrom(),
+                                    $keyData->getDateTo()
+                                );
+                            ?>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-5 text-muted pull-left print-left">
+                            <i class="glyphicon glyphicon-log-in"></i>
+                            <?php echo $this->textline(1235); ?>
+                        </div>
+                        <div class="col-sm-7 text-right print-right">
+                            <?php echo $dateFrom->format('d M Y - h:i A'); ?>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-5 text-muted pull-left print-left">
+                            <i class="glyphicon glyphicon-log-out"></i>
+                            <?php echo $this->textline(1236); ?>
+                        </div>
+                        <div class="col-sm-7 text-right print-right">
+                            <?php echo $dateTo->format('d M Y - h:i A'); ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTACT US -->
+            <div class="col-sm-12">
+                <div>
+                    <h4><?php echo $this->textline(1570); ?></h4>
+                    <?php if (!empty($keyData->getLocationPhone())) { ?>
+                        <div class="row">
+                            <div class="col-sm-6 text-muted pull-left print-left">
+                                <?php echo $this->textline(1571); ?>
+                            </div>
+                            <div class="col-sm-6 text-right print-right">
+                                <?php echo $keyData->getLocationPhone(); ?>
+                            </div>
+                        </div>
+                    <?php } ?>
+
+                    <?php if (!empty($keyData->getBuildingPhone())) { ?>
+                    <div class="row">
+                        <div class="col-sm-6 text-muted pull-left print-left">
+                            <?php echo $this->textline(1572); ?>
+                        </div>
+                        <div class="col-sm-6 text-right print-right">
+                            <?php echo $keyData->getBuildingPhone(); ?>
+                        </div>
+                    </div>
+                    <?php } ?>
+
+                    <?php
+                        if ($keyData->getKiPageType() == BuildingService::KI_PAGE_TYPE_RECEPTION && !empty($keyData->getOfficePhone())) {
+                    ?>
+                    <div class="row">
+                        <div class="col-sm-6 text-muted pull-left print-left">
+                            <?php echo $this->textline(1573); ?>
+                        </div>
+                        <div class="col-sm-6 text-right print-right">
+                            <?php echo $keyData->getOfficePhone(); ?>
+                        </div>
+                    </div>
+                    <?php } ?>
+
+                    <div class="row">
+                        <div class="col-sm-4 text-muted pull-left print-left">
+                            <?php echo $this->textline(1574); ?>
+                        </div>
+                        <div class="col-sm-8 text-right print-right">
+                            <?php echo EmailAliases::FROM_MAIN_MAIL; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <?php if ($showOverlay) { ?>
+            <div class="col-sm-12">
+                <hr>
+
+                <button type="button" class="btn btn-block btn-danger btn-lg hidden-print provide-email" data-toggle="modal" data-target="#emailOverlay">
+                    <?php echo $this->textline(1666); ?>
+                </button>
+            </div>
+            <?php } ?>
+        </div>
+        <?php
+            $rightColumnForPrint = ob_get_contents();
+            ob_end_flush();
+        ?>
+
+        <!-- MAP DESKTOP -->
+        <div class="row">
+            <div class="col-sm-12">
+                <?php if ($godModeOrKiTypeNotReception) { ?>
+                    <div class="grid-sep">
+                        <div id="map-desktop"
+                            class="hidden-xs"
+                            data-apartment-name="<?php echo $keyData->getApartmentName(); ?>"
+                            data-lattitude="<?=$keyData->getGeoLat()?>"
+                            data-longitude="<?=$keyData->getGeoLon()?>"
+                            style="width: 100%; height: 300px;">
+                        </div>
+                    </div>
+                <?php } ?>
+            </div>
+        </div>
+    </div>
+    <!-- RIGHT END -->
+
+    <!-- LEFT START -->
+    <div class="col-xs-12 col-sm-12 col-md-7 col-lg-8 pull-left">
+        <div class="row">
+        <?php ob_start(); ?>
+            <!-- NOTE -->
+            <div class="col-sm-12">
+                <p class="text-danger">
+                    <i class="glyphicon glyphicon-exclamation-sign"></i>
+                    <i><?php echo $this->textline(1247); ?></i>
+                </p>
+            </div>
+
+            <!-- ENTRY INSTRUCTION -->
+            <div class="col-sm-12">
+
+                <p class="text-key-entry">
+                    <?php
+                        if ($this->godMode) {
+                            echo $this->directEntryTextline;
+                        } elseif ($keyData->getKiPageType() !== BuildingService::KI_PAGE_TYPE_RECEPTION) {
+                            echo $this->directEntryTextline;
+                        } else {
+                            echo $this->receptionEntryTextline;
+                        }
+                    ?>
+                </p>
+
+                <?php
+                    if ($keyData->getYoutubeVideo()) {
+                        preg_match(
+                            '/v=([^&]+)/',
+                            $keyData->getYoutubeVideo(),
+                            $videoIdentity
+                        );
+                ?>
+
+                <iframe class="grid-sep hidden-print"
+                        width="100%" height="420"
+                        src="https://www.youtube.com/embed/<?php echo array_pop($videoIdentity); ?>?rel=0"
+                        frameborder="0"
+                        allowfullscreen>
+                </iframe>
+
+                <?php } ?>
+            </div>
+
+        <?php
+            $leftColumnForPrint = ob_get_contents();
+            ob_end_flush();
+        ?>
+
+            <!-- MAP MOBILE -->
+            <div class="col-sm-12">
+                <?php if ($godModeOrKiTypeNotReception) { ?>
+                    <div class="grid-sep">
+                        <div id="map-mobile"
+                            class="hidden-print visible-xs-block"
+                            data-apartment-name="<?php echo $keyData->getApartmentName(); ?>"
+                            data-lattitude="<?php echo $keyData->getGeoLat(); ?>"
+                            data-longitude="<?php echo $keyData->getGeoLon(); ?>"
+                            style="width: 100%; height: 300px;">
+                        </div>
+                    </div>
+                <?php } ?>
+            </div>
+        </div>
+    </div>
+    <!-- LEFT END -->
+</div>
+
+<!-- ADDITIONAL -->
+<div class="hidden-print">
+    <div class="row">
+        <div class="col-sm-12">
+            <hr>
+            <div>
+                <strong><?=$this->textline(1452);?></strong>
+            </div>
+
+            <?php echo $this->textline(1252);?>
+
+            <div>
+                <strong><?=$this->textline(1453);?></strong>
+            </div>
+
+            <?php echo $this->textline(1258);?>
+
+            <div class="margin-bottom-5">
+                <?php echo $this->textline(1171);?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PRINT ONLY IT -->
+<div class="visible-print-block ki-tbl-print row">
+    <div class="col-xs-7 col-sm-7">
+        <div class="row">
+            <?php echo $leftColumnForPrint; ?>
+        </div>
+    </div>
+    <div class="col-xs-5 col-sm-5 pull-right">
+        <div style="padding-left: 15px !important;">
+        <?php echo $rightColumnForPrint; ?></div>
+    </div>
+</div>
+<div class="row visible-print-block">
+    <div class="print-avoid-break text-center col-sm-12">
+        <?php if ($godModeOrKiTypeNotReception) {
+            $mapAttachment = $keyData->getMapAttachment();
+            $mapAttachmentUrl = '/building/' . $keyData->getBuildingId() . '/map/' . $mapAttachment;
+        } else {
+            $mapAttachment = $keyData->getOfficeMapAttachment();
+            $mapAttachmentUrl = '/office/' . $keyData->getOfficeId() . '/' . $mapAttachment;
+        } ?>
+        <div class="map-print">
+            <?php if ($mapAttachment) { ?>
+                <img src="//<?= DomainConstants::IMG_DOMAIN_NAME . $mapAttachmentUrl ?>" >
+            <?php } else { ?>
+                <img src="https://maps.googleapis.com/maps/api/staticmap?zoom=17&size=700x400&maptype=roadmap&markers=color:red%7C<?=$keyData->getGeoLat()?>,<?=$keyData->getGeoLon()?>&sensor=false">
+            <?php } ?>
+        </div>
+    </div>
+</div>
+
+<?php if ($showOverlay) { ?>
+<div class="modal-overlay modal fade" id="emailOverlay" tabindex="-1" role="dialog" aria-labelledby="emailOverlayLabel"
+    data-ki-viewed="<?php echo (int)$keyData->isKiViewed(); ?>">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary"></div>
+            <div class="modal-body">
+                <button type="button" class="close visible-xs" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <form name="additional-email" class="additional-email">
+                    <?php echo Helper::evaluateTextline($this->textline(1660), [
+                        '{{NAME}}' => $keyData->getGuestFirstName(),
+                        '{{CITY}}' => ucfirst($keyData->getGuestCityName()),
+                    ]); ?>
+
+                    <div class="row first-input">
+                        <div class="col-lg-6">
+                            <input type="email" name="primary_email" class="form-control input input-lg primary-email" placeholder="<?php echo htmlspecialchars($this->textline(1661)); ?>">
+                        </div>
+                    </div>
+
+                    <?php if (empty($keyData->getGuestTravelPhone())) { ?>
+                    <br>
+
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <input type="tel" name="travel_phone" class="form-control input input-lg travel-phone" placeholder="<?php echo htmlspecialchars($this->textline(1662)); ?>">
+                        </div>
+                    </div>
+                    <?php } ?>
+
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" name="subscribe" class="subscribe">
+                            <?php echo $this->textline(1663); ?><br>
+                            <div class="text-muted"><?php echo $this->textline(1664); ?></div>
+                        </label>
+                    </div>
+
+                    <input type="hidden" name="code" class="code" value="<?php echo $this->keyCode; ?>">
+
+                    <button class="btn btn-lg btn-danger confirm" data-url="<?php echo $this->url('key/update-email'); ?>">
+                        <?php echo htmlspecialchars($this->textline(1665)); ?>
+                    </button>
+                </form>
+            </div>
+            <div class="modal-footer"></div>
+        </div>
+    </div>
+</div>
+<?php } ?>

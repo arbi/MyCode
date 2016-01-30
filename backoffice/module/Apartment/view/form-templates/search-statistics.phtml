@@ -1,0 +1,42 @@
+<?php
+    //Form object
+    $form = $this->form;
+    $form->prepare();
+?>
+<?= $this->form()->openTag($form); ?><?= $this->form()->openTag($form); ?>
+
+<div class="row">
+    <div class="col-sm-4">
+        <div class="form-group">
+            <?= $this->formInput($form->get('apt_location')) ?>
+            <?= $this->formInput($form->get('apt_location_id')) ?>
+            <?php
+            if ($this->requestDate) { ?>
+                <input type="hidden" name="request_date" id="request_date" class="form-control" value="<?= $this->requestDate ?>">
+            <?php } else { ?>
+                <input type="hidden" name="request_date" id="request_date" class="form-control" value="">
+            <?php } ?>
+        </div>
+    </div>
+
+    <div class="col-sm-4">
+        <div class="form-group">
+            <?= $this->formInput($form->get('building')) ?>
+            <?= $this->formInput($form->get('building_id')) ?>
+        </div>
+    </div>
+
+    <div class="col-sm-2">
+        <div class="form-group">
+            <?= $this->formInput($form->get('bedroom_count')) ?>
+        </div>
+    </div>
+    <div class="col-sm-2">
+        <div class="form-group">
+            <?= $this->formSelect($form->get('starting_form')) ?>
+        </div>
+    </div>
+</div>
+
+<!-- Form close tag -->
+<?= $this->form()->closeTag() ?>

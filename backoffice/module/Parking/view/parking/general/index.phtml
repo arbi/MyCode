@@ -1,0 +1,259 @@
+<?php
+
+use \Library\Constants\DomainConstants;
+
+$this->headTitle()->setSeparator(' - ');
+
+if ($this->parkingLotId) {
+    echo $this->parkingPageTitle($this->parkingLotId);
+    $pageTitle = $this->layout()->parkingLotName . ' - Parking Lots';
+} else {
+    $pageTitle = 'Add Parking Lot';
+    $this->layout()->viewTitle = $pageTitle;
+}
+
+$this->headTitle($pageTitle);
+
+$this->layout()->breadcrumb = $this->breadcrumb([
+    ['Apartments'],
+    ['Parking Lots', $this->url('parking_lots')],
+    [$this->parkingLotId ? $this->layout()->parkingLotName : 'Add New']
+]);
+
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/module/parking/general.js')
+    ->appendFile($this->basePath() . '/js/validation/parking.general.js');
+
+$this->headLink()
+    ->appendStylesheet($this->basePath () . '/css/pages/parking.common.css');
+
+$form = $this->form;
+$form->prepare();
+?>
+<script>
+    var SAVE_DATA = '<?= $this->url("parking/general/save", ['parking_lot_id' => $this->parkingLotId]) ?>';
+    var CHANGE_STATUS_URL = '<?= $this->url("parking/general/change-parking-lot-status", ['parking_lot_id' => $this->parkingLotId]) ?>';
+    var UPLOAD_URL = '<?= $this->url("parking/general/upload-parking-permit", ['parking_lot_id' => $this->parkingLotId]) ?>';
+    var TMP_IMAGES_URL = '<?= DomainConstants::IMG_DOMAIN_NAME . '/tmp/'; ?>';
+    var getProvinceOptionsURL = '<?= $this->url('apartment/location/get-province-options', ['apartment_id' => 0]) ?>';
+    var getCityOptionsURL = '<?= $this->url('apartment/location/get-city-options', ['apartment_id' => 0]) ?>';
+</script>
+<?php if ($this->parkingLotId > 0) { ?>
+<div class="row">
+    <div class="col-sm-12">
+        <hr>
+        <?= $this->parkingNavigation($this->parkingLotId, 'parking/general')?>
+    </div>
+</div>
+<?php } ?>
+<?= $this->form()->openTag($form) ?>
+
+<div class="row">
+    <div class="col-sm-6">
+        <fieldset>
+            <legend>General</legend>
+            <?= $this->formInput($form->get('id'))?>
+
+            <div class="form-group">
+                <label class="col-xs-5 col-sm-4 control-label" for="<?= $form->get('name')->getAttribute('id') ?>">
+                    <?= $form->get('name')->getLabel() ?>
+                    <?= $this->required() ?>
+                </label>
+                <div class="col-xs-6">
+                    <?= $this->formInput($form->get('name')) ?>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-xs-5 col-sm-4 control-label" for="<?= $form->get('is_virtual')->getAttribute('id') ?>">
+                    <?= $this->info($form->get('is_virtual')->getLabel(), 'If marked, it means there is no outline for spots in this lot'); ?>
+                </label>
+                <div class="col-xs-6 checkbox">
+                    <?= $this->formCheckbox($form->get('is_virtual')) ?>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-xs-5 col-sm-4 control-label" for="<?= $form->get('country_id')->getAttribute('id') ?>">
+                    <?= $form->get('country_id')->getLabel() ?>
+                    <?= $this->required() ?>
+                </label>
+                <div class="col-xs-6">
+                    <?php if ($this->parkingLotId) { ?>
+                        <input type="hidden" name="country_id" value="<?= $form->get('country_id')->getValue()?>">
+                    <?php } ?>
+                    <?= $this->formSelect($form->get('country_id')) ?>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-xs-5 col-sm-4 control-label" for="<?= $form->get('province_id')->getAttribute('id') ?>">
+                    <?= $form->get('province_id')->getLabel() ?>
+                    <?= $this->required() ?>
+                </label>
+                <div class="col-xs-6">
+                    <?= $this->formSelect($form->get('province_id')) ?>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-xs-5 col-sm-4 control-label" for="<?= $form->get('city_id')->getAttribute('id') ?>">
+                    <?= $form->get('city_id')->getLabel() ?>
+                    <?= $this->required() ?>
+                </label>
+                <div class="col-xs-6">
+                    <?= $this->formSelect($form->get('city_id')) ?>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-xs-5 col-sm-4 control-label" for="<?= $form->get('address')->getAttribute('id') ?>">
+                    <?= $form->get('address')->getLabel() ?>
+                </label>
+                <div class="col-xs-6">
+                    <?= $this->formInput($form->get('address')) ?>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-xs-5 col-sm-4 control-label" for="<?= $form->get('lock_id')->getAttribute('id') ?>">
+                    <?= $form->get('lock_id')->getLabel() ?>
+                    <?= $this->required() ?>
+                </label>
+                <div class="col-xs-6">
+                    <?= $this->formSelect($form->get('lock_id')) ?>
+                </div>
+            </div>
+
+            <?php if ($this->textlineId) { ?>
+                <div class="form-group">
+                    <label class="col-xs-5 col-sm-4 control-label">
+                        Direction Textline
+                    </label>
+                    <div class="col-xs-6 checkbox">
+                        <a href=<?= "/translation/view/p-" . $this->textlineId . "-en"?> target="_blank">
+                            <span class="glyphicon glyphicon-share"></span>
+                            Direction Textline
+                        </a>
+                    </div>
+                </div>
+            <?php } ?>
+        </fieldset>
+    </div>
+    <div class="col-sm-6">
+        <fieldset>
+            <legend>Building Logo</legend>
+            <div class="row">
+                <div class="col-sm-12">
+                    <?php
+                    //
+                    // Progress id hidden field. Used to track upload progress.
+                    // *NOTE* The hidden element MUST be before the file elements.
+                    //
+                    echo $this->formFileSessionProgress();
+                    $elem = $this->uploadForm->get('file');
+                    ?>
+                    <div id="file-controls" class="form-group">
+                        <div class="col-sm-12">
+                            <?php echo $this->formFile($elem); ?>
+                            <?php echo $this->formHidden($form->get('parking_permit')); ?>
+
+                            <div id="file-errors" class="help-block soft-hide"></div>
+                        </div>
+                    </div>
+
+                    <div id="progress" class="help-block soft-hide">
+                        <div class="progress progress-info progress-striped active">
+                            <div class="progress-bar" role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em;"></div>
+                        </div>
+                    </div>
+                    <div id="permit-preview" class="preview<?php if (!$this->parkingPermit) { ?> soft-hide<?php } ?>">
+                        <?php if ($this->parkingPermit) { ?>
+                            <img src="//<?= DomainConstants::IMG_DOMAIN_NAME . '/bo/parking/attachments/' . $this->parkingLotId . '/' . $this->parkingPermit ?>">
+                        <?php } ?>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+</div>
+
+<div class="page-actions container">
+    <div class="row text-right">
+        <a class="btn btn-success pull-right col-sm-3 col-md-2 col-xs-12 pull-left" id="upload-button" data-toggle="tooltip" title="" data-original-title="This image will be used in parking permit as building logo">
+            <span class="glyphicon glyphicon-cloud-upload"></span>
+            Upload Logo
+        </a>
+        <?= $this->formInput($form->get('save_button')) ?>
+        <?php if ($this->parkingLotId) { ?>
+            <?php
+            $modal = $this->isActive ? 'deactivateModal' : 'activateModal';
+            $buttonClass = 'btn-success';
+            $buttonName = 'Activate';
+
+            if ($this->isActive) {
+                $buttonClass = 'btn-danger';
+                $buttonName = 'Deactivate';
+            }
+            ?>
+            <a data-toggle="modal" href="#<?= $modal ?>" class="btn col-sm-2 col-xs-12 margin-left-10 pull-right <?=$buttonClass?>">
+                <?=$buttonName?>
+            </a>
+        <?php } ?>
+    </div>
+</div>
+
+<?= $this->form()->closeTag() ?>
+
+<?php if ($this->isActive) { ?>
+    <div class="modal fade" id="deactivateModal" tabindex="-1" role="dialog" aria-labelledby="deactivateModalTitle" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-danger">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="deactivateModalTitle">
+                        Deactivate Parking Lot
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure?</p>
+
+                    <?php if (isset($this->usages) && count($this->usages)) { ?>
+                    <p> This spot is attached to the following apartments</p>
+                    <ul>
+                        <?php foreach ($this->usages as $usage) { ?>
+                            <li>
+                                <?php echo $this->hasAMM ? $usage['link'] : $usage['name']; ?>
+                            </li>
+                        <?php } ?>
+                    </ul>
+                    <?php } ?>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button class="btn btn-danger" id="parking-lot-deactivate-button">Deactivate</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php } else { ?>
+    <div id="activateModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="activateModalTitle" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-success">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="activateModalTitle">
+                        Activate Parking Lot
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                    <button class="btn btn-success" id="parking-lot-activate-button">Activate</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php } ?>

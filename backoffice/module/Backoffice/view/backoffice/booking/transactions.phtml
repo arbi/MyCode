@@ -1,0 +1,254 @@
+<?php
+	use Library\Constants\Objects;
+	use DDD\Service\Booking\BankTransaction;
+	use DDD\Service\Booking\Charge as ChargeService;
+
+    $chargebackList = [
+        BankTransaction::BANK_TRANSACTION_TYPE_CHARGEBACK_DISPUTE => Objects::getChargeType()[BankTransaction::BANK_TRANSACTION_TYPE_CHARGEBACK_DISPUTE],
+        BankTransaction::BANK_TRANSACTION_TYPE_CHARGEBACK_FRAUD => Objects::getChargeType()[BankTransaction::BANK_TRANSACTION_TYPE_CHARGEBACK_FRAUD],
+        BankTransaction::BANK_TRANSACTION_TYPE_CHARGEBACK_OTHER => Objects::getChargeType()[BankTransaction::BANK_TRANSACTION_TYPE_CHARGEBACK_OTHER],
+    ];
+?>
+<?php if ($this->transactions) { ?>
+		<fieldset>
+			<legend>
+                Transactions
+            </legend>
+			<table class="table table-bordered table-condensed transactions-tbl">
+				<thead>
+					<tr>
+						<th>Bank</th>
+						<th>ACC (<?= $this->apartmentCurrency ?>)</th>
+						<th>Type</th>
+                        <th class="hidden-xs">Date</th>
+						<th class="hidden-xs">Collection</th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php
+                        /**
+                         * @var \DDD\Domain\Booking\ChargeTransaction $transaction
+                         */
+						foreach ($this->transactions as $transaction) {
+							$type = $transaction->getType();
+                            $virtualityNotSupported = [BankTransaction::BANK_TRANSACTION_STATUS_DECLINED, BankTransaction::BANK_TRANSACTION_STATUS_VOIDED];
+
+                            if ($transaction->getStatus() == BankTransaction::BANK_TRANSACTION_STATUS_DECLINED) {
+                                $transactionRowColor = 'bg-danger';
+                            } elseif ($transaction->getStatus() == BankTransaction::BANK_TRANSACTION_STATUS_VOIDED) {
+                                $transactionRowColor = 'bg-void';
+                            } elseif ($transaction->getStatus() == BankTransaction::BANK_TRANSACTION_STATUS_PENDING) {
+                                $transactionRowColor = '';
+                            } else {
+                                $transactionRowColor = 'bg-success';
+                            }
+					?>
+						<tr class="chargedView <?=$transactionRowColor?>">
+                            <td class="text-right">
+                                <?php
+                                    if (in_array($type, [BankTransaction::BANK_TRANSACTION_TYPE_DEDUCTED_SALARY])) {
+                                        echo Objects::getChargeTypeForView()[$type];
+                                    } else {
+                                        echo $transaction->getBank_amount() . ' (' . $transaction->getMoneyAccountCurrency() . ')';
+                                    }
+                                ?>
+                            </td>
+                            <td class="text-right"><?=$transaction->getAcc_amount()?></td>
+                            <td><?=Objects::getChargeTypeForView()[$type]?></td>
+							<td class="hidden-xs"><?= $transaction->getDate() ?></td>
+							<td class="hidden-xs">
+                                <?= ChargeService::$moneyDirectionOptions[$transaction->getMoneyDirection()] ?>
+                            </td>
+                            <?php if ($transaction->getIsVirtual() && !in_array($transaction->getStatus(), $virtualityNotSupported)) { ?>
+                            <td class="virtual-transaction" data-toggle="tooltip" title="Is Virtual">
+                                 <i class="glyphicon glyphicon-star"></i>
+                            </td>
+                            <?php } ?>
+						</tr>
+                        <tr class="soft-hide sub-details">
+							<td colspan="5">
+		                     	<!-- Transaction details -->
+                                <table class="table table-condensed table-transaction-details">
+                                    <tbody>
+                                    <tr class="border-none">
+                                        <td width="20%" class="title">User:</td>
+                                        <td width="30%"><?= $transaction->getUser() ?></td>
+
+                                        <?php if ($transaction->getExactExpenseId() > 0) { ?>
+                                        <td class="title">Purchase Order:</td>
+                                        <td>
+                                            <a href="<?php echo $this->url('finance/purchase-order/edit', ['id' => $transaction->getExactExpenseId()]); ?>" target="_blank"><?= $transaction->getExactExpenseId() ?></a>
+                                        </td>
+                                        <?php } else { ?>
+                                        <td colspan="2"></td>
+                                        <?php } ?>
+                                    </tr>
+                                    <tr>
+                                        <td width="20%" class="title">PSP:</td>
+                                        <td width="30%"><?= ($transaction->getPspName() ? $transaction->getPspName() : 'Not set') ?></td>
+
+                                        <td width="20%" class="title">
+                                            <?php
+                                            switch ($type) {
+                                                case BankTransaction::BANK_TRANSACTION_TYPE_CASH:
+                                                    echo 'Received by:';
+                                                    break;
+                                                case BankTransaction::BANK_TRANSACTION_TYPE_CASH_REFUND:
+                                                    echo 'Returned by:';
+                                                    break;
+                                                case BankTransaction::BANK_TRANSACTION_TYPE_DEDUCTED_SALARY:
+                                                    echo 'From employee:';
+                                                    break;
+                                                default:
+                                                    echo 'Bank:';
+                                            }
+                                            ?>
+                                        </td>
+                                        <td width="30%">
+                                            <?php
+                                            switch ($type) {
+                                                case BankTransaction::BANK_TRANSACTION_TYPE_DEDUCTED_SALARY:
+                                                    echo $transaction->getCacheuser();
+                                                    break;
+                                                default:
+                                                    echo $transaction->getBank();
+                                            }
+                                            ?>
+                                        </td>
+                                    </tr>
+                                    <?php
+                                    if (
+                                        (	in_array($type, [
+                                            BankTransaction::BANK_TRANSACTION_TYPE_COLLECT,
+                                            BankTransaction::BANK_TRANSACTION_TYPE_REFUND,
+                                            BankTransaction::BANK_TRANSACTION_TYPE_VALIDATION
+                                        ])
+                                        ) AND $this->creditCardView
+                                    ) {
+                                        ?>
+                                        <?php if ($transaction->getRrn() || $transaction->getAuth_code()) { ?>
+                                            <tr>
+                                                <?php
+                                                $rrn = false;
+                                                $authCode = false;
+
+                                                if ($transaction->getRrn()) {
+                                                    $rrn = true;
+                                                ?>
+                                                    <td width="20%" class="title">RRN / ID:</td>
+                                                    <td width="30%"><?= $transaction->getRrn() ?></td>
+                                                <?php } else { ?>
+                                                    <td colspan="2"></td>
+                                                <?php }
+                                                if ($transaction->getAuth_code()) {
+                                                    $authCode = true;
+                                                ?>
+                                                    <td width="20%" class="title">AUTH:</td>
+                                                    <td width="30%"><?= $transaction->getAuth_code() ?></td>
+                                                <?php } else { ?>
+                                                    <td colspan="2"></td>
+                                                <?php } ?>
+                                            </tr>
+                                        <?php } ?>
+                                        <tr>
+                                            <td width="20%" class="title">CC:</td>
+                                            <td colspan="3"><?=($transaction->getCCId()) ? 'Card ID ' . $transaction->getCCId() : 'No data' ?></td>
+                                        </tr>
+                                        <?php
+                                            if ($transaction->getError_code()) {
+                                        ?>
+                                            <tr>
+                                                <td width="20%" class="title">Error Code:</td>
+                                                <td width="30%"><?= $transaction->getError_code() ?></td>
+                                                <td colspan="2"></td>
+                                            </tr>
+                                        <?php
+                                            }
+                                    }
+
+                                    if ($transaction->getComment()) {
+
+                                    ?>
+                                        <tr>
+                                            <td width="20%" class="title">Comment:</td>
+                                            <td colspan="3"><?= $transaction->getComment() ?></td>
+                                        </tr>
+                                    <?php }
+
+                                    if ($this->hasTransactionVerifierRole && $transaction->getStatus() != BankTransaction::BANK_TRANSACTION_STATUS_VOIDED) {
+
+                                    ?>
+                                        <tr>
+                                            <td colspan="4">
+                                                <div class="btn-group pull-right">
+                                                    <button type="button" class="btn btn-xs btn-success dropdown-toggle exist-transaction-status-button" data-toggle="dropdown" aria-expanded="false"
+                                                        <?php if ($transaction->getStatus() == BankTransaction::BANK_TRANSACTION_STATUS_PENDING && $transaction->getType() == BankTransaction::BANK_TRANSACTION_TYPE_CHARGEBACK_OTHER) echo 'disabled';?>>
+                                                        <?=BankTransaction::$transactionStatus[$transaction->getStatus()]?> <span class="caret"></span>
+                                                    </button>
+                                                    <ul class="dropdown-menu" role="menu">
+                                                        <?php
+                                                            if (in_array($transaction->getStatus(), [
+                                                                BankTransaction::BANK_TRANSACTION_STATUS_APPROVED,
+                                                                BankTransaction::BANK_TRANSACTION_STATUS_DECLINED])
+                                                            ) {
+                                                        ?>
+                                                        <li>
+                                                            <a href="javascript:void(0)" data-status="<?=BankTransaction::BANK_TRANSACTION_STATUS_VOIDED?>" data-id="<?=$transaction->getId()?>" class="exist-transaction-status">
+                                                                <?=BankTransaction::$transactionStatus[BankTransaction::BANK_TRANSACTION_STATUS_VOIDED]?>
+                                                            </a>
+                                                        </li>
+                                                        <?php } else {
+                                                                $transactionStatuses = BankTransaction::$transactionStatus;
+                                                                unset($transactionStatuses[$transaction->getStatus()]);
+                                                                foreach ($transactionStatuses as $key => $type) {
+                                                        ?>
+                                                        <li>
+                                                            <a href="javascript:void(0)" data-status="<?=$key?>" data-id="<?=$transaction->getId()?>" class="exist-transaction-status">
+                                                                <?=$type?>
+                                                            </a>
+                                                        </li>
+                                                        <?php   }
+                                                              }
+                                                        ?>
+                                                    </ul>
+                                                </div>
+                                                <?php
+                                                if ($transaction->getStatus() == BankTransaction::BANK_TRANSACTION_STATUS_PENDING
+                                                    && $transaction->getType() == BankTransaction::BANK_TRANSACTION_TYPE_CHARGEBACK_OTHER) {?>
+                                                <div class="btn-group pull-right margin-right-10 chb-transaction-type">
+                                                    <button type="button" class="btn btn-xs btn-success dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                        <span class="exist-transaction-type-button">Change Type</span> <span class="caret"></span>
+                                                    </button>
+                                                    <ul class="dropdown-menu" role="menu">
+                                                        <?php foreach ($chargebackList as $key => $value) { ?>
+                                                        <li>
+                                                            <a href="javascript:void(0)" class="exist-transaction-type"  data-type="<?=$key?>"><?=$value?></a>
+                                                        </li>
+                                                        <?php } ?>
+                                                    </ul>
+                                                </div>
+                                                <?php } ?>
+                                            </td>
+                                        </tr>
+                                        <?php } ?>
+                                    </tbody>
+                                </table>
+							</td>
+						</tr>
+					<?php
+						}
+					?>
+				</tbody>
+				<tfoot>
+					<tr>
+						<td>Total</td>
+                        <td class="text-right"><?= number_format($this->transactionSumAcc, 2, '.', '') ?></td>
+						<td></td>
+						<td class="hidden-xs"></td>
+						<td class="hidden-xs"></td>
+					</tr>
+				</tfoot>
+
+			</table>
+		</fieldset>
+<?php } ?>

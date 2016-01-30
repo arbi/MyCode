@@ -1,0 +1,105 @@
+<?php
+	$this->headTitle()->setSeparator(' - ');
+	$this->headTitle($this->layout()->apartmentName . ' - Apartment Rates');
+
+    $this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/apartment/common.css')
+        ->appendStylesheet($this->basePath() . '/css/apartment/rates.css');
+
+	$this->InlineScript()
+		->appendFile($this->basePath() . '/js/plugins/jquery.form.min.js')
+		->appendFile($this->basePath() . '/js/pages/apartment.rate.js')
+		->appendFile($this->basePath() . '/js/validation/apartment.rate.js');
+
+    $addRateURL       = $this->url('apartment/rate/add', ['apartment_id' => $this->apartmentId]);
+    $deleteRateURL    = $this->url('apartment/rate/delete', ['apartment_id' => $this->apartmentId, 'rate_id' => $this->selectedRateID]);
+    $checkRateNameUrl = $this->url('apartment/rate/check-name', ['apartment_id' => $this->apartmentId, 'rate_id' => $this->selectedRateID]);
+?>
+
+<style>
+    .page-actions .row {
+        padding: 0 !important;
+        border-top: none !important;
+    }
+    .page-actions .row .col-sm-9 {
+        padding: 5px 0 !important;
+        border-top: 1px solid #eee !important;
+    }
+	.radio {
+		height: 26px;
+	}
+</style>
+
+<script>
+    var GLOBAL_CHECK_RATE_NAME = '<?= $checkRateNameUrl ?>';
+</script>
+<div class="row">
+    <div class="col-sm-12">
+        <hr>
+        <?= $this->apartmentNavigation($this->apartmentId, $this->apartmentStatus, 'apartment/rate')?>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Rates navigation -->
+    <div class="col-sm-3">
+        <div class="row">
+            <div class="col-sm-12">
+                <?php
+                    if (count($this->rates)) {
+                        echo $this->rateNavigation($this->rates, $this->apartmentId, $this->selectedRateID);
+                    }
+                ?>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <a href="<?= $addRateURL ?>" class="btn btn-medium btn-success btn-block"><span class="glyphicon glyphicon-plus"></span>Add New Rate</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-9">
+        <?php
+        if (isset ( $this->formOutput )) {
+            echo $this->formOutput;
+        } else if (count($this->rates)) {
+        ?>
+        <div class="alert alert-info">
+            <span class="glyphicon glyphicon-info-sign"></span>
+            Please select rate from list
+        </div>
+        <?php
+        } else {
+        ?>
+        <div class="alert alert-warning">
+            <span class="glyphicon glyphicon-warning-sign"></span>
+            There are no rates on this apartment yet.
+        </div>
+        <?php
+        }
+        ?>
+    </div>
+
+</div>
+
+<!-- Delete rate modal -->
+<div id="delete-modal" class="modal fade" aria-labelledby="myModalLabel">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-danger">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true"><span class="sr-only">Close</span>&times;</span>
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Delete Rate <span id="delete_group"></span></h4>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <a class="btn btn-danger" id="rates_delete_button" href="<?= $deleteRateURL ?>">Delete Rate</a>
+            </div>
+        </div>
+    </div>
+</div>

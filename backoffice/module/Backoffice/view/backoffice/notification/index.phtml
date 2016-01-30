@@ -1,0 +1,81 @@
+<?php
+use DDD\Service\Notifications;
+
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle('Notifications');
+
+$layoutViewModel = $this->viewModel()->getRoot();
+$basePath = $layoutViewModel->basePathView;
+$this->layout()->breadcrumb = $this->breadcrumb([
+    ['Notifications']
+]);
+$this->layout()->viewTitle  = 'Notifications';
+
+$this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css')
+        ->appendStylesheet($this->basePath() . '/css/pages/notifications-search.css');
+
+$this->InlineScript()
+        ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+        ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+        ->appendFile($this->basePath() . '/js/pages/notifications.js');
+?>
+
+<script>
+    var SEARCH_URL      = '<?= $this->url('backoffice/default', ['controller' => 'notification', 'action' => 'get-notifications-json'])?>';
+    var ARCHIVE_URL      = '<?= $this->url('backoffice/default', ['controller' => 'notification', 'action' => 'archive'])?>';
+    var DELETE_URL      = '<?= $this->url('backoffice/default', ['controller' => 'notification', 'action' => 'delete'])?>';
+</script>
+
+<?php
+    $form = $this->search_form;
+    $form->setAttribute('class', 'form-horizontal');
+    $form->setAttribute('id', 'search-notifications');
+?>
+
+<?php
+    echo $this->form()->openTag($form);
+?>
+<div class="row form-group">
+    <div class="col-sm-6">
+        <?php
+        echo $this->formElement($form->get('sender'));
+        ?>
+    </div>
+
+    <div class="col-sm-6">
+        <?php
+            echo $this->formElement($form->get('active_archived'));
+        ?>
+        <div class="btn-group fn-buttons pull-right" id="notification-status-switcher">
+            <a href="#"  class="btn btn-sm btn-default active" data-status="<?= Notifications::STATUS_ACTIVE ?>">Active</a>
+            <a href="#" class="btn btn-sm btn-default" data-status="<?= Notifications::STATUS_ARCHIVED ?>">Archived</a>
+        </div>
+    </div>
+
+</div>
+
+
+<?php
+    echo $this->form()->closeTag($form);
+?>
+
+<hr>
+
+<div class="row">
+    <div class="col-sm-12">
+        <table id="datatable_notifications" class="table  table-bordered table-condensed table-hover hidden">
+            <thead>
+            <tr>
+                <th>Show Date</th>
+                <th>From</th>
+                <th>Message</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+

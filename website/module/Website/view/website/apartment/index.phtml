@@ -1,0 +1,342 @@
+<?php
+use Library\Utility\Helper;
+
+$general         = $this->general;
+$cityName        = $this->cityname($general['city_id']);
+$location        = $cityName  .', ' . $this->countryname($general['country_id']);
+
+$this->headTitle($general['name'].' Apartment ('.$location.')');
+
+$this->inlineScript()
+	->appendFile('https://maps.googleapis.com/maps/api/js?key=AIzaSyCLpdxX2wUp-KAxXwyB6ggmnkIkxi_eFwU&sensor=false')
+	->appendFile($this->basePath() . '/js/apartment.js');
+
+$this->headLink()
+	->appendStylesheet($this->basePath() . '/css/apartment.css')
+    ->appendStylesheet($this->basePath() . '/css/pagination.css');
+
+$bedroom = ($general['bedroom_count'] > 0) ? $general['bedroom_count'] . ' ' .$this->textline(1446) : $this->textline(1190);
+$bedType = '';
+foreach ($this->otherParams['furnitures'] as $key => $f) {
+    $bedType .= ($key != 0 ? ', ' : '') . $f['count'] . ' ' . $f['title'];
+}
+$this->headMeta(Helper::evaluateTextline($this->textline(1447),
+    [
+        '{{SQUARE_METERS}}' => $general['square_meters'],
+        '{{BEDROOM}}'       => $bedroom,
+        '{{CITY_NAME}}'     => $cityName,
+        '{{MAX_CAPACITY}}'  => $general['max_capacity'],
+        '{{BED_TYPE}}'      => $bedType
+    ]
+), 'description');
+if(!empty($this->otherParams['images'])) {
+    $this->headMeta()->setProperty('og:image', $this->otherParams['images'][0]['big']);
+}
+
+if (isset($this->otherParams['arrival']))
+{
+	$this->inlineScript()->captureStart();
+
+	echo <<<JS
+	$(function(){
+	    inbound.init('.search-inbound', {});
+
+	    inbound.sendRequest();
+	    inbound.firstPush = 1;
+
+	    $('.before-check').hide();
+
+	});
+JS;
+
+	$this->inlineScript()->captureEnd();
+}
+
+$this->headLink([
+    'rel' => 'canonical',
+    'href' => $this->url('apartment',
+        ['apartmentTitle' => Helper::urlForSite($general['name']).'--'.$general['city_slug']],
+        [
+            'force_canonical' => true,
+            'query' => ['show' => 'reviews']
+        ])]);
+
+?>
+<script>
+    var GLOBAL_APARTMENT_REVIEW = '<?= $this->url('apartment_review')?>';
+</script>
+<div itemscope itemtype="http://schema.org/LodgingBusiness">
+    <meta itemprop="name" content="<?=$general['name']?>">
+    <?php if(!empty($this->otherParams['images'])) { ?>
+        <meta itemprop="image" content="<?=$this->otherParams['images'][0]['big'];?>">
+    <?php } ?>
+    <div class="hidden">
+        <div itemprop="address" itemscope itemtype="http://schema.org/PostalAddress">
+            <span itemprop="streetAddress"><?=$general['address']?></span>
+            <span itemprop="addressLocality"><?=$cityName?></span>
+            <span itemprop="addressRegion"><?=$this->provinceName($general['province_id'])?></span>
+        </div>
+        <?php if($general['score'] > 0) {?>
+        <div itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">
+            <span itemprop="bestRating">5</span>
+            <span itemprop="ratingValue"><?=$general['score']; ?></span>
+            <span itemprop="reviewCount"><?=$this->reviewCount?></span>
+        </div>
+        <?php } ?>
+        <span itemprop="priceRange"><?=$general['symbol'].number_format($general['price_avg'], 2, '.', '')?> <?=$this->textline(1454)?></span>
+    </div>
+</div>
+<div class="col-xs-12">
+    <div class="row">
+        <div class="col-sm-7 col-md-8">
+            <?php if($this->reviewCount) {?>
+            <div class="row hidden-xs">
+                <div class="col-sm-12">
+                    <div class="alert alert-info need-help padding-10 grey-bg">
+                        <i class="glyphicon glyphicon-bell"></i>
+                        <?= Helper::evaluateTextline($this->textline(1173),
+                            [
+                                '{{CONTACT_PHONE}}' => $this->phoneNumber()
+                            ]) ?>
+                    </div>
+                </div>
+            </div>
+            <?php } ?>
+            <div class="row">
+                <div class="col-sm-12">
+                    <h1 class="margin-top-0">
+                        <?=$general['name']?> <?=$this->textline(1418)?>
+                    </h1>
+                    <h3 class="margin-0">
+                        <small class="help-block address">
+                            <i class="glyphicon glyphicon-map-marker text-primary"></i>
+                            <?= $general['address'] .', ' . $location ?>
+                        </small>
+                    </h3>
+                </div>
+            </div>
+
+            <div class="row fwImage">
+                <div class="col-sm-12">
+                    <div id="gallery-1" class="royalSlider rsDefault">
+                        <?php foreach ($this->otherParams['images'] as $img) { ?>
+                                <a class="rsImg" href="<?=$img['big']?>" data-rsTmb="<?=$img['small']?>" data-rsBigImg="<?=$img['orig']?>"></a>
+                        <?php } ?>
+
+                        <?php if (isset($this->otherParams['video'])) { ?>
+                            <a class="rsImg" href="<?=$this->otherParams['video']['video_screen']?>" data-rsTmb="<?=$this->basePath();?>/img/play.png" data-rsVideo="<?=$this->otherParams['video']['src']?>"></a>
+                        <?php } ?>
+                    </div>
+                </div>
+            </div>
+            <div class="row" id="anchor_overview">
+                <div class="col-sm-12 hidden-xs">
+                   <h2><?=$this->textline(1180)?></h2>
+                </div>
+                <div class="col-sm-8 col-md-9 hidden-xs">
+                        <div itemprop="description"><?=$general['general_description']?></div>
+                </div>
+                <br class="visible-xs-block" />
+               <div class="col-sm-4 col-md-3">
+                   <div class="row">
+                       <div class="col-sm-12">
+                           <span class="icon icon-bed text-primary"></span>
+                           <?=$this->textline(1175)?>: <span class="pull-right"><?=$general['max_capacity']?></span>
+                       </div>
+                       <div class="col-sm-12">
+                           <span class="icon icon-bed text-primary"></span>
+                           <?=$this->textline(1176)?>: <span class="pull-right"><?=($general['bedroom_count'] > 0) ? $general['bedroom_count'] : $this->textline(1190)?></span>
+                       </div>
+                       <div class="col-sm-12">
+                           <span class="glyphicon glyphicon-ok-circle text-primary"></span>
+                           <?=$this->textline(1177)?>: <span class="pull-right"><?=$general['bathroom_count']?></span>
+                       </div>
+                       <div class="col-sm-12">
+                           <span class="glyphicon glyphicon-ok-circle text-primary"></span>
+                           <?=$this->textline(1178)?>: <span class="pull-right"><?=$general['square_meters']?> m<sup>2</sup></span>
+                       </div>
+                   </div>
+               </div>
+            </div>
+
+        </div>
+
+
+
+        <div class="col-sm-5 col-md-4 sidebar" id="sidebar">
+            <?php if($this->reviewCount) {?>
+            <div class="alert alert-warning hidden-xs padding-10 grey-bg">
+                <?=$this->reviewCount?> <?=$this->textline(1201)?> <a href="#anchor_reviews" class="anchor">(<?=$this->textline(1202)?>)</a>
+            </div>
+            <?php } ?>
+            <form class="row search search-inbound alert-warning grey-bg" action="<?=$this->secure_url_booking?>" method="get" data-action="<?=$this->url('apartment_search', array('controller' => 'search', 'action' => 'apartment-search'))?>" data-for-link="<?=htmlspecialchars($this->textline(1443))?>" data-t-link="<?=$this->textline(1212)?>" id="search-inbound" data-today="<?=$this->otherParams['current']?>" data-min-stay="<?=$general['minstay']?>" data-max-stay="<?=$general['maxstay']?>" data-release-window-start="<?=$general['windowmin']?>" data-release-window-end="<?=$general['windowmax']?>">
+                <input type="hidden" value="<?=$this->otherParams['apartel']?>" name="apartment" id="apartment">
+                <input type="hidden" value="<?=$general['city_slug']?>" name="city" id="city">
+                <input type="hidden" value="<?=$general['aprtment_id']?>" name="apartment_id" id="apartment_id">
+                <input type="hidden" value="<?=$this->apartelId?>" name="apartel_id" id="apartel_id">
+                <input type="hidden" name="rate-for-booking" id="rate-for-booking">
+
+                <span class="input-daterange">
+                    <label for="date_from" class="col-xs-5">
+                        <span class="clearfix">
+                            <?=$this->textline(1203)?>
+                            <i class="glyphicon glyphicon-log-in"></i>
+                        </span>
+                        <input type="text" class="form-control text-center" id="date_from" name="arrival" value="<?php if (isset($this->otherParams['arrival'])) echo $this->otherParams['arrival']; ?>" readonly placeholder="dd/mm/yyyy">
+                    </label>
+                    <label for="date_to" class="col-xs-5">
+                        <span class="clearfix">
+                            <?=$this->textline(1204)?>
+                            <i class="glyphicon glyphicon-log-out"></i>
+                        </span>
+                        <input type="text" class="form-control text-center" id="date_to" name="departure" value="<?php if (isset($this->otherParams['departure'])) echo $this->otherParams['departure']; ?>" readonly placeholder="dd/mm/yyyy">
+                    </label>
+
+                    <label for="capacity" class="col-xs-2">
+                        <span class="clearfix"><?=$this->textline(1205)?></span>
+                        <select class="form-control" id="capacity" name="guest">
+                            <?php foreach ($this->otherParams['guestList'] as $key => $gl) { ?>
+                            <option value="<?=$key?>" <?php if ((isset($this->otherParams['guest']) && $this->otherParams['guest'] == $key) || (!$this->otherParams['guest'] && 2 == $key)) echo 'selected="selected"'?>><?=$gl?></option>
+                            <?php } ?>
+                        </select>
+                    </label>
+                </span>
+
+                <button type="submit" class="searchButton btn-block button-check-dates before-check">
+                    <?=$this->textline(1206)?>
+                </button>
+
+                <div id="review_list" class="row"></div>
+
+                <hr class="before-check">
+
+                <div class="text-center before-check">
+                    <p><?=Helper::evaluateTextline($this->textline(1207), ['{{PRICE}}' => '<sup>' . $general['symbol'] . '</sup>' . number_format($general['price_avg'], 2, '.', '')])?></p>
+                    <em class="clearfix"><?=$this->textline(1208)?></em>
+                </div>
+
+                <section class="template template-rate">
+                    <div class="col-xs-12 padding-0" style="height: 30px;">
+
+                    </div>
+
+                    <div class="col-xs-7 rate-name padding-left-0">
+                        <?php if(Helper::isBackofficeUser()) {?>
+                        <p>{{rate.name}}</p>
+                        <?php } ?>
+                        <p><strong>{{capacity}}</strong> <?=$this->textline(1209)?></p>
+                        <p class="avg-price"><sup>{{currency.sign}}</sup>{{price}} <em><small><?=$this->textline(1210)?></small></em></p>
+                        <p>
+                            <small class="cursor-pointer padding-0" data-container="body" data-toggle="popover" data-placement="top" data-content="{{policy.description}}">{{policy.name}} <i class="glyphicon glyphicon-info-sign text-small-90"></i></small>
+                        </p>
+                    </div>
+                    <div class="col-xs-5 rate-price padding-right-0">
+                        <p><em><small><?=$this->textline(1442)?></small></em> <span class="t-price"><sup>{{currency.sign}}</sup>{{total_price}}</span> </p>
+                        <p><span class="{{pointer.button}} searchButton rate-booking" onclick="{{rate.id}}"><?=$this->textline(1211)?></span></p>
+                    </div>
+                </section>
+
+                <div class="rate-storage clearfix"></div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="col-xs-12">
+    <div class="row">
+        <div class="col-sm-7 col-md-8">
+            <div class="row" id="anchor_facilities">
+                <div class="col-sm-12">
+                    <h2><?=$this->textline(1181)?></h2>
+                </div>
+
+                <?php if (isset($this->otherParams['internet'])) { ?>
+                    <div class="col-xs-6 col-sm-5 col-md-3"><i class="glyphicon glyphicon-signal text-primary"></i> <?=$this->textline(1182)?>:</div>
+                    <div class="col-xs-6 col-sm-7 col-md-9"><?=$this->textline(1183)?></div>
+                <?php } ?>
+                <?php if (isset($this->otherParams['parking'])) { ?>
+                    <div class="col-xs-6 col-sm-5 col-md-3"><i class="glyphicon glyphicon-registration-mark text-primary"></i> <?=$this->textline(1184)?>:</div>
+                    <div class="col-xs-6 col-sm-7 col-md-9"><?=$this->textline(1185)?></div>
+                <?php } ?>
+                <div class="col-xs-6 col-sm-5 col-md-3"><i class="glyphicon glyphicon-cutlery text-primary"></i> <?=$this->textline(1186)?>:</div>
+                <div class="col-xs-6 col-sm-7 col-md-9"><?=$this->textline(1187)?></div>
+
+                <div class="col-xs-6 col-sm-5 col-md-3"><i class="icon-bed text-primary"></i> <?=$this->textline(1188)?>:</div>
+                <div class="col-xs-6 col-sm-7 col-md-9"><?=$bedType?></div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12">
+                    <h2><?=$this->textline(1179)?></h2>
+                </div>
+                <?php $amenities_col_size = count($this->facilities) ? 6 : 3; ?>
+                <?php $amenities_container_size = count($this->facilities) ? 6 : 12; ?>
+                <div class="col-sm-<?= $amenities_container_size ?> col-xs-<?= $amenities_container_size ?>">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <p class="text-primary">
+                                <?=$this->textline(1418)?>
+                            </p>
+                        </div>
+                        <?php foreach ($this->amenities as $af) { ?>
+                            <div class="col-sm-12 col-xs-12 col-md-<?= $amenities_col_size ?> col-lg-<?= $amenities_col_size ?>"><i class="glyphicon glyphicon-ok-circle text-primary"></i> <?=$this->textline($af)?></div>
+                        <?php } ?>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-xs-6">
+                    <div class="row">
+                        <?php if(count($this->facilities)) { ?>
+                            <div class="col-sm-12">
+                                <p class="text-primary">
+                                    <?=$this->textline(1471)?>
+                                </p>
+                            </div>
+                            <?php foreach ($this->facilities as $af) { ?>
+                                <div class="col-sm-12 col-xs-12 col-md-6 col-lg-6"><i class="glyphicon glyphicon-ok-circle text-primary"></i> <?=$this->textline($af)?></div>
+                            <?php } ?>
+                        <?php } ?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" id="anchor_policies">
+                <div class="col-sm-12">
+                    <h2><?=$this->textline(1191)?></h2>
+                </div>
+
+                <div class="col-xs-6 col-sm-5 col-md-3"><i class="glyphicon glyphicon glyphicon-log-in"></i> <?=$this->textline(599)?>:</div>
+                <div class="col-xs-6 col-sm-7 col-md-9"><?=date("h:i A", strtotime($general['check_in']))?></div>
+                <div class="col-xs-6 col-sm-5 col-md-3"><i class="glyphicon glyphicon-log-out"></i> <?=$this->textline(601)?>:</div>
+                <div class="col-xs-6 col-sm-7 col-md-9"><?=date("h:i A", strtotime($general['check_out']))?></div>
+                <div class="col-xs-6 col-sm-5 col-md-3"><i class="glyphicon glyphicon-credit-card text-primary"></i> <?=$this->textline(1193)?>:</div>
+                <div class="col-xs-6 col-sm-7 col-md-9"><?=$this->textline(1192)?></div>
+
+                <div class="col-xs-6 col-sm-5 col-md-3"><i class="icon-child text-primary"></i> <?=$this->textline(1476)?>:</div>
+                <div class="col-xs-6 col-sm-7 col-md-9"><?=$this->textline(1477)?></div>
+                <div class="col-xs-6 col-sm-5 col-md-3"><i class="icon-pets text-danger"></i> <?=$this->textline(1194)?>:</div>
+                <div class="col-xs-6 col-sm-7 col-md-9"><?= $this->textline(1515)?></div>
+
+                <div class="col-xs-6 col-sm-5 col-md-3"><i class="icon-smoking text-danger"></i> <?=$this->textline(1196)?>:</div>
+                <div class="col-xs-6 col-sm-7 col-md-9"><?=$this->textline(1195)?></div>
+            </div>
+
+            <div class="row" id="anchor_map" data-apartment-name="<?=$general['name']?>" data-lattitude="<?=$general['x_pos']?>" data-longitude="<?=$general['y_pos']?>">
+                <div class="col-sm-12">
+                    <h2><?=$this->textline(1198)?></h2>
+                    <div id="map-canvas"></div>
+                </div>
+            </div>
+
+            <div class="review-main">
+                <div class="loading-part"><img src="<?=$this->basePath()?>/img/loader.gif" alt="loading..."></div>
+                <div class="row" id="review_part" data-reviews="<?=$this->show_reviews?>">
+                    <?php
+                        if ($this->show_reviews) {
+                            echo $this->partial('partial/review.phtml', array('reviewList' => $this->reviews, 'apartmentName' => $general['name'], 'schemaTag' => true));
+                        }
+                    ?>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

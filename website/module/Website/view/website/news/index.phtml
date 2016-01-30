@@ -1,0 +1,98 @@
+<?php
+use Library\Utility\Helper;
+
+$this->inlineScript()
+	->appendFile($this->basePath() . '/js/blog.search.js');
+
+$this->headTitle($this->textline(1417));
+$this->headMeta($this->textline(1464), 'description');
+$this->headLink([
+    'rel' => 'canonical',
+    'href' => $this->url('news', [], ['force_canonical' => true])]);
+
+?>
+<div class="col-md-7 col-lg-8">
+	<h1><?=$this->textline(1417)?></h1>
+
+	<div class="row">
+		<div class="col-sm-12">
+			<?php foreach ($this->paginator as $row) {
+                    $url = '/news/'.  Helper::urlForSite($row["url"]);
+                ?>
+				<h3><a href="<?=$url?>"><?=$row['title']?></a></h3>
+				<p class="text-muted"><i class="glyphicon glyphicon-calendar"></i> <?=$row["date"]?></p>
+
+				<div class="row">
+					<div class="col-sm-12">
+						<p><?=Helper::getBlogShort($row['content'])?></p>
+						<div class="text-right"><a href="<?=$url?>"><?=$this->textline(1332)?><i class="icon-angle-right"></i></a></div>
+					</div>
+				</div>
+			<?php } ?>
+		</div>
+	</div>
+    <div class="row">
+        <div class="col-sm-12">
+        <?php // add at the end of the file after the table
+        echo $this->paginationControl(
+            // the paginator object
+            $this->paginator,
+            // the scrolling style;
+            'sliding',
+            // the partial to use to render the control
+            array('partial/paginator.phtml', ''),
+            // the route to link to when a user clicks a control link
+            array(
+                'route' => 'news'
+            )
+        );
+        ?>
+       </div>
+    </div>
+</div>
+
+<div class="col-md-5 col-lg-4">
+	<h3><?=$this->textline(1328)?></h3>
+
+	<form method="post" class="row search search-blog">
+		<div class="col-md-6 col grid-sep">
+			<div class="dropdown input-destination">
+				<input data-toggle="dropdown" type="text" class="form-control input-lg" placeholder="<?=$this->textline(1329)?>" value="" readonly>
+				<ul class="dropdown-menu" role="menu">
+					<?php foreach ($this->cities as $key => $city) { ?>
+						<li><a href="javascript:void(0)" data-url="<?=$city['city_url']?>"><span style="font-size:1.2em"><?=$this->cityname($city['id'])?></span> <small class="text-muted"><?=$this->countryname($city['country_id'])?></small></a></li>
+					<?php } ?>
+				</ul>
+			</div>
+			<i class="glyphicon glyphicon-map-marker text-muted"></i>
+		</div>
+
+		<div class="col-md-6 col grid-sep">
+			<input type="submit" name="search" value="<?=$this->textline(1322)?>" class="searchButton btn-block btn-lg">
+		</div>
+	</form>
+
+	<h3><?=$this->textline(1319)?></h3>
+
+	<div class="row hidden-xs hidden-sm">
+		<div class="col-sm-12 text-center">
+			<ul class="list-inline social-mini hidden-print">
+				<li>
+					<a href="https://www.facebook.com/ginosi" target="_blank" class="bg-primary">
+						<i class="icon-facebook"></i>
+					</a>
+				</li>
+				<li>
+					<a href="https://twitter.com/ginosi" target="_blank" class="bg-primary">
+						<i class="icon-twitter"></i>
+					</a>
+				</li>
+				<li>
+					<a href="https://plus.google.com/+Ginosi" target="_blank" class="bg-primary">
+						<i class="icon-gplus"></i>
+					</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+</div>

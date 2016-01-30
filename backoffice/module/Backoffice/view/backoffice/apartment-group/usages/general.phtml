@@ -1,0 +1,314 @@
+<?php
+    $form        = $this->accGroupsManageForm;
+    $isActive    = $form->get('active')->getValue();
+    $actionTitle = ($this->id ? $form->get('name')->getValue() : 'Add Group');
+
+    $this->headTitle()->setSeparator(' - ');
+    $this->headTitle($actionTitle . ' | Product Groups');
+    $this->layout()->viewTitle = $actionTitle;
+    $this->layout()->breadcrumb = $this->breadcrumb([
+        ['Apartment'],
+        ['Apartment Groups', $this->url('backoffice/default', ['controller' => 'apartment-group', 'action' => 'index'])],
+        [$actionTitle]
+    ]);
+
+    $this->InlineScript()
+            ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+            ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+            ->appendFile($this->basePath() . '/js/validation/apartment-group-general.js')
+            ->appendFile($this->basePath() . '/js/pages/apartment-group-general.js');
+
+    $this->headLink()
+            ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css')
+            ->appendStylesheet($this->basePath() . '/css/pages/apartment.group.css');
+
+    $form->prepare();
+    $form->setAttribute('action', $this->url('backoffice/default', ['controller' => 'apartment-group-general', 'action' => 'edit']));
+    $form->setAttribute('method', 'post');
+    $form->setAttribute('class', 'form-horizontal');
+    $form->setAttribute('id', 'form_edit_apartment_group');
+?>
+<script>
+    var GLOBAL_USER_AUTOCOMPLATE          = '<?= $this->url('backoffice/default', ['controller' => 'apartment-group-general', 'action' => 'ajaxgetuser'])?>';
+    var GLOBAL_MANAGER_AUTOCOMPLATE       = '<?= $this->url('backoffice/default', ['controller' => 'apartment-group-general', 'action' => 'ajaxgetmeneger'])?>';
+    var GLOBAL_SAVE_DATA                  = '<?= $this->url('backoffice/default', ['controller' => 'apartment-group-general', 'action' => 'ajaxsave'])?>';
+    var GLOBAL_CHECK_GROUP_NAME           = '<?= $this->url('backoffice/default', ['controller' => 'apartment-group-general', 'action' => 'ajaxcheckname'])?>';
+    var GLOBAL_APARTMENTS_FOR_COUNTRY     = '<?= $this->url('backoffice/default', ['controller' => 'apartment-group-general', 'action' => 'ajaxgetapartmentsforcountry'])?>';
+    var GLOBAL_CREATE_APARTEL             = '<?= $this->url('backoffice/default', ['controller' => 'apartment-group-general', 'action' => 'ajax-create-apartel'])?>';
+    var GLOBAL_DEACTIVATE_APARTEL         = '<?= $this->url('backoffice/default', ['controller' => 'apartment-group-general', 'action' => 'ajax-deactivate-apartel'])?>';
+    var GLOBAL_DEACTIVATE_GROUP           = '<?= '/apartment-group/deactivate/' . $this->id ?>';
+    var GLOBAL_GROUP_ID                   = <?= $this->id ?>;
+    var IS_BUILDING                       = <?= ($form->get('usage_building_val')->getValue()) ? 'true' : 'false' ?>;
+</script>
+    <?php if ($this->id > 0) { ?>
+   <div class="row">
+    <div class="col-sm-12">
+        <hr>
+        <?= $this->apartmentGroupNavigation($this->id, 'apartment-group/general')?>
+    </div>
+</div>
+    <?php } ?>
+    <!-- Tabs : END -->
+    <div id="general">
+        <div class="row">
+            <?php echo $this->form()->openTag($form); ?>
+            <?php if($this->id) {?>
+            <div class="col-sm-8">
+                <fieldset name="general">
+                    <legend>General</legend>
+                </fieldset>
+            <?php } else { ?>
+            <div class="col-sm-12">
+                <fieldset name="general">
+                    <legend>General</legend>
+                </fieldset>
+            </div>
+            <div class="col-sm-8">
+            <?php } ?>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="name">Name <?php echo $this->required(); ?></label>
+                    <div class="col-sm-9">
+                        <?php echo $this->formInput($form->get('name')); ?>
+                        <input id="name_is_changed" type="hidden" value="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="timezone">Timezone <?php echo $this->required(); ?></label>
+                    <div class="col-sm-9">
+                        <?= $this->formElement($form->get('timezone')); ?>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="country_id">Country <?php echo $this->required(); ?></label>
+                    <div class="col-sm-9">
+                        <?= $this->formSelect($form->get('country_id')); ?>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="group_manager_id">
+                        <?= $this->info('Group Manager', 'Allows the editing of all options for this group.'); ?>
+                    </label>
+                    <div class="col-sm-5">
+                        <?= $this->formSelect($form->get('group_manager_id')); ?>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="accommodations">Apartments</label>
+                    <div class="col-sm-9 checkbox">
+                        <?php
+                        if ($form->get('usage_building_val')->getValue()) {
+                            $assignedApartments = $form->get('accommodations')->getValue();
+                            $allApartments      = $form->get('accommodations')->getOptions()['value_options'];
+                            if (!isset($assignedApartments[0])) {
+                                echo 'None';
+                            } else {
+                                foreach ($allApartments as $apartmentId => $apartmentName) {
+                                    if (in_array($apartmentId, $assignedApartments)) {
+                                    ?>
+                                        <a href="<?= $this->url('apartment', ['apartment_id' => $apartmentId]) . '/location' ?>" target="new" class="apartment-lablel margin-right-5">
+                                            <span class="label label-default labale-mid-size glyphicon glyphicon-home">
+                                                <?= $apartmentName ?>
+                                            </span>
+                                        </a>
+                                    <?php
+                                    }
+                                }
+                            }
+                        } else {
+                            echo $this->formElement($form->get('accommodations'));
+                        }
+                        ?>
+                    </div>
+                </div>
+            </div>
+            <?php if ($this->id) { ?>
+            <div class="col-sm-4">
+                <fieldset name="usage">
+                    <legend>Usage</legend>
+
+                    <div class="form-group">
+                        <label class="col-xs-10 col-sm-9 col-md-7 control-label" for="usage_cost_center">
+                            <?= $this->info('Cost Center', 'It is possible to add expenses for this group.'); ?>
+                        </label>
+                        <div class="col-xs-2 col-sm-3 col-md-5">
+                            <div class="checkbox">
+                                <?= $this->formElement($form->get('usage_cost_center')); ?>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-xs-10 col-sm-9 col-md-7 control-label" for="check_users">
+                            <?= $this->info('Concierge Dashboard', 'Has a concierge dashboard where will be visible all the check-ins of the group.'); ?>
+                        </label>
+                        <div class="col-xs-2 col-sm-3 col-md-5">
+                            <div class="checkbox">
+                                <?= $this->formElement($form->get('check_users')); ?>
+                            </div>
+                        </div>
+                    </div>
+
+                    <?php
+                    if (empty($form->get('usage_building_val')->getValue())) {
+                    ?>
+
+                    <div class="form-group">
+                        <label class="col-xs-10 col-sm-9 col-md-7 control-label" for="usage_building">
+                            <?= $this->info('Building', 'Making this group a building means the members of this group are physically in the same building. Hence, they cannot be in any other group which is also a building.'); ?>
+                        </label>
+                        <div class="col-xs-2 col-sm-3 col-md-5">
+                            <div class="checkbox">
+                                <?= $this->formElement($form->get('usage_building')); ?>
+                                <?= $this->formElement($form->get('usage_building_val')); ?>
+                            </div>
+                        </div>
+                    </div>
+                    <?php } ?>
+
+                    <div class="form-group">
+                        <label class="col-xs-10 col-sm-9 col-md-7 control-label" for="usage_performance_group">
+                            <?= $this->info('Performance', 'Creates a virtual group of apartments to calculate their performance as a unit'); ?>
+                        </label>
+                        <div class="col-xs-2 col-sm-3 col-md-5">
+                            <div class="checkbox">
+                                <?php echo $this->formElement($form->get('usage_performance_group')); ?>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <?php } ?>
+            <?= $this->formInput($form->get('apartment_group_id')) ?>
+        </div>
+        <?php echo $this->form()->closeTag() ?>
+        <?php if (!($this->id > 0) || $isActive) { ?>
+        <div class="page-actions container">
+            <div class="row text-right">
+                <?php if ($this->global && $this->id > 0) { ?>
+                    <?php if ($this->isApartel) {?>
+                        <a href="#deactivateApartelModal" data-toggle="modal" class="btn btn-danger col-sm-2 col-xs-12 pull-left is-apartel">Delete Apartel</a>
+                    <?php } else { ?>
+                        <a href="#createApartelModal" data-toggle="modal" class="btn btn-primary col-sm-2 col-xs-12 pull-left">Create Apartel</a>
+                    <?php }
+                }?>
+                <?php echo $this->formButton($form->get('save_button')) ?>
+                <?php if ($this->global && $this->id > 0) { ?>
+                    <a href="#deactivateModal" data-toggle="modal" class="btn btn-danger col-sm-2 col-xs-12 margin-left-10 pull-right">Deactivate Group</a>
+                <?php } ?>
+            </div>
+        </div>
+        <?php } ?>
+
+        <?php if ($this->global) { ?>
+            <div class="modal fade" id="deactivateModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-danger text-danger">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title" id="myModalLabel">Deactivate Group <span id="deactivate_group"></span></h4>
+                        </div>
+                        <div class="modal-body">
+                            <p><b>Deactivation of apartment group is not reversible.</b></p>
+                            <p>Are you sure you want to deactivate this apartment group?</p>
+                            <p>By deactivating apartment group following actions would happen:</p>
+                            <ul>
+                                <li>Clear concierge dashboard access (if someone has it)</li>
+                            </ul>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-default" data-dismiss="modal">Cancel</button>
+                            <button class="btn btn-danger" id="btn_deactivate_apartment_group">Deactivate Group</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <?php } ?>
+
+        <?php
+        if (empty($form->get('usage_building_val')->getValue())) {
+        ?>
+        <div class="modal fade" id="create-building-process" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning text-warning">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel">Create a Building?</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>This is an <b>irreversible process</b>, this action is not possible be undone.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <a href="javascript:void(0)" class="btn btn-warning" onclick="saveProcess()" id="save-warning">Yes, Create Building</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php
+        }
+        ?>
+
+        </div>
+    </div>
+<?php if ($this->global && $this->id > 0) { ?>
+    <div class="modal fade" id="createApartelModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-success">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Create a Apartel?</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure ?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <a href="javascript:void(0)" class="btn btn-primary" id="create-apartel">Create Apartel</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deactivateApartelModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-danger">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Delete Apartel?</h4>
+                </div>
+                <div class="modal-body">
+                    <p>By pressing Delete, you will Permanently Delete all current information of this apartel.</p>
+                    <p>Are you sure you want to do that?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <a href="javascript:void(0)" class="btn btn-danger" id="deactivate-apartel">Delete Apartel</a>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php } ?>
+
+<div id="renameModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="renameModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-danger">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="renameModalLabel">Rename Apartment Group</h4>
+            </div>
+            <div class="modal-body">
+                <p>If apartment group name is changed the apartel current URL will not be valid anymore. It will also cause negative SEO Impact.</p>
+
+                <p>Are you sure?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <button class="btn btn-primary" id="user_delete_button" onclick="saveProcess(false, true)">Save with Rename</button>
+            </div>
+        </div>
+    </div>
+</div>

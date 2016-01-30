@@ -1,0 +1,60 @@
+<?php
+use DDD\Service\Warehouse\Category;
+
+$current = 'Add Asset';
+$this->layout()->viewTitle = $current;
+$this->layout()->breadcrumb = $this->breadcrumb([
+	['Administration'],
+	['Asset Management', $this->url('warehouse/asset', ['controller' => 'asset'])],
+	[$current]
+]);
+
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($this->layout()->viewTitle);
+
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/warehouse/asset.add.js');
+?>
+<script>
+    var GLOBAL_TYPE_CONSUMABLE = <?php echo Category::CATEGORY_TYPE_CONSUMABLE;?>;
+    var GLOBAL_TYPE_VALUABLE   = <?php echo Category::CATEGORY_TYPE_VALUABLE;?>;
+    var GLOBAL_MAP_OF_CATEGORY_TYPES   = <?php echo json_encode($mapOfCategoryTypes);?>;
+</script>
+
+
+<form action="" method="post" name="asset-form" class="form-horizontal" id="asset-form">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="category_id" class="col-sm-2 control-label">Category <?php echo $this->required(); ?></label>
+                <div class="col-sm-4">
+                    <select name="category_id"  class="form-control selectize" id="category-id" required="required">
+                        <option  value="0">-- Please Choose --</option>
+                        <?php foreach ($mapOfCategories as $key => $value) { ?>
+                            <option value="<?php echo $key; ?>"><?php echo $value; ?></option>
+                        <?php } ?>
+                    </select>
+                </div>
+            </div>
+
+            <div id="category-type-based-part"></div>
+
+            <div class="form-group">
+                <label for="shipment" class="col-sm-2 control-label">
+                    <?= $this->info('Shipment', 'If checked, system will try to find a matching order and update it\'s status.') ?>
+                </label>
+                <div class="col-sm-4 checkbox">
+                    <input type="checkbox" name="shipment" id="shipment">
+                </div>
+            </div>
+        </div>
+
+    </div>
+     <div class="page-actions container">
+        <div class="row text-right">
+                    <button type="submit" class="btn btn-primary col-sm-2 col-xs-12 margin-left-10 pull-right">Save</button>
+        </div>
+    </div>
+</form>
+
+

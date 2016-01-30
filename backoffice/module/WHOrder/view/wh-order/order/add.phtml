@@ -1,0 +1,76 @@
+<?php
+use \Library\Constants\Constants;
+$current = 'Create New Order';
+$this->layout()->viewTitle = $current;
+$this->layout()->breadcrumb = $this->breadcrumb([
+    ['Administration'],
+    ['Order Management'],
+    [$current]
+]);
+
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($this->layout()->viewTitle);
+
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/module/wh-orders/order-add.js');
+$this->headLink()
+    ->appendStylesheet($this->basePath() . '/css/pages/finance.expense.css');
+?>
+
+<script>
+    var GLOBAL_GET_LOCATIONS_URL  = '<?= $this->url('orders/ajax-get-order-locations'); ?>';
+    var CATEGORY_TYPE_VALUABLE    = <?= DDD\Service\Warehouse\Category::CATEGORY_TYPE_VALUABLE ?>;
+    var EDITABLE = 1;
+</script>
+<div class="row">
+    <div class="col-sm-12">
+        <span class="label label-default"><?= date(Constants::GLOBAL_DATE_FORMAT) ?></span>
+        <span class="label label-primary"><?= $this->loggedInUserFullName ?></span>
+    </div>
+</div>
+<br><br>
+<?= $this->form()->openTag($form); ?>
+    <div class="row">
+        <div class="col-sm-8">
+            <div class="template" id="name-quantity-pairs-container">
+                <div class="row margin-bottom-15">
+                    <div class="col-sm-1">
+                        <a href="#" class="btn btn-primary btn-sm glyphicon glyphicon-plus disabled" id="add-name-quantity-pair"  title="You can also press 'Enter' on one of the fields"></a>
+                    </div>
+                    <div class="col-sm-3 controls">
+                        <?php echo $this->formInput($form->get('title_template')); ?>
+                    </div>
+                    <div class="col-sm-2 controls">
+                        <?php echo $this->formInput($form->get('quantity_template')); ?>
+                    </div>
+                    <div class="col-sm-3 controls">
+                        <?php echo $this->formSelect($form->get('quantity_type_template')); ?>
+                    </div>
+                    <div class="col-sm-3 controls">
+                        <?php echo $this->formInput($form->get('url_template')); ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="template">
+                <div class="row">
+                    <div class="col-sm-12 controls">
+                        <?php echo $this->formSelect($form->get('location_target')); ?>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 controls">
+                        <?php echo $this->formTextarea($form->get('description')); ?>
+                    </div>
+                </div>
+                <div class="row">&nbsp;</div>
+            </div>
+        </div>
+    </div>
+    <div class="page-actions container">
+        <div class="row text-right">
+            <?php echo $this->formButton($form->get('save_button')); ?>
+        </div>
+    </div>
+<?php echo $this->form()->closeTag(); ?>

@@ -1,0 +1,58 @@
+<?php
+$this->headTitle()->setSeparator(' - ');
+
+$this->headTitle('Apartment');
+
+$this->InlineScript()
+	->appendFile($this->basePath() . '/js/pages/apartment.rate.js')
+	->appendFile($this->basePath() . '/js/validation/apartment.rate.js');
+
+$this->headLink()->appendStylesheet($this->basePath() . '/css/apartment/common.css');
+$checkRateNameUrl = $this->url('apartment/rate/check-name', ['apartment_id' => $this->apartmentId, 'rate_id' => 0]);
+
+?>
+<script>
+    var MAX_CAPACITY           = '<?php echo $this->maxCapacity; ?>';
+    var GLOBAL_CHECK_RATE_NAME = '<?= $checkRateNameUrl ?>';
+</script>
+
+<style scoped="scoped">
+
+    .page-actions .row{
+        padding: 0!important;
+        border-top: none !important;
+    }
+    .page-actions .row .col-sm-9 {
+        padding: 5px 0 !important;
+        border-top: 1px solid #eee !important;
+    }
+	.radio {
+		height: 26px;
+	}
+</style>
+
+<div class="col-sm-12">
+	<hr>
+	<?= $this->apartmentNavigation($this->apartmentId, $this->apartmentStatus, 'apartment/rate')?>
+</div>
+
+<div class="col-sm-12">
+
+	<div class="row">
+
+		<!-- Rates navigation -->
+		<div class="col-sm-3">
+
+			<?= $this->rateNavigation($this->rates, $this->apartmentId, $this->selectedRateID)?>
+
+		</div>
+
+		<div class="col-sm-9">
+			<?php
+				echo $this->formOutput;
+			?>
+		</div>
+
+	</div>
+
+</div>

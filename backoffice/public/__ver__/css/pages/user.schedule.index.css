@@ -1,0 +1,237 @@
+#schedule-table-container {
+    margin-top: 20px;
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: visible;
+    padding-left: 220px;
+}
+
+#schedule-table-container .table {
+    margin-bottom: 1px;
+}
+
+#schedule-table-container .table>thead:first-child>tr:first-child>th:first-child {
+    border-top: 1px solid #DDD !important;
+    border-bottom-width: 2px;
+    height: 33px;
+    background-color: #EFEFEF;
+    margin-top: -1px !important;
+    min-width: 221px !important;
+    text-align: left;
+    cursor: auto !important;
+}
+
+#schedule-table-container .table>thead:first-child>tr:first-child>th {
+    min-width: 120px;
+    text-align: center;
+    cursor: pointer;
+}
+
+#schedule-table-container .table>tfoot:last-child>tr:first-child>th {
+    min-height: 20px;
+}
+
+#schedule-table-container th:first-child {
+    position: absolute;
+    overflow: auto;
+    height: 54px;
+    min-width: 221px;
+    margin-left: -221px;
+    z-index: 100;
+    background: #fff;
+}
+
+#schedule-table thead th {
+    background-color: #EFEFEF;
+}
+
+#schedule-table tfoot th {
+    background-color: #EFEFEF;
+    height: 30px !important;
+}
+
+#schedule-table tfoot th:first-child {
+    background-color: #EFEFEF;
+    height: 32px !important;
+}
+
+#schedule-table {
+    max-width: 10000px;
+}
+
+#schedule-table th {
+    min-width: 100px;
+}
+
+#schedule-table td {
+    height: 36px;
+    text-align: center;
+    position: relative;
+    font-size: 0.9em;
+    line-height: 1.2em;
+    padding: 2px 2px 0 2px;
+    min-width: 140px;
+}
+
+#schedule-table tr:hover>th:first-child {
+    background: #f5f5f5;
+}
+
+.schedule-timebox {
+    position: relative;
+    display: inline-block;
+    padding: 2px 10px;
+    margin-bottom: 2px;
+    border-radius: 1px;
+    border: 1px solid #A9AAA9;
+    width: 100%;
+    font-size: 14px;
+}
+
+.schedule-timebox.on-edge {
+    position: inherit;
+    right: -70px;
+    z-index: 99;
+}
+
+.schedule-timebox:first-child:not(:last-child) {
+    margin-right: 10px;
+}
+
+.schedule-timebox.timebox-working {
+
+}
+
+.schedule-timebox.timebox-working.active {
+    background: #ecd999;
+}
+
+.schedule-timebox.timebox-not-working {
+    background: #BDBDBD;
+    display: none;
+}
+
+.schedule-timebox.timebox-vacation {
+    background: #F44336;
+    color: #FFFFFF;
+}
+
+.schedule-timebox.timebox-vacation.active {
+
+}
+
+.schedule-timebox.timebox-partday {
+    background: #F6902A;
+    color: #FFFFFF;
+}
+.schedule-timebox.timebox-partday.active {
+
+}
+.schedule-timebox.single {
+    height: 100%;
+    line-height: 36px;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+.schedule-timebox.single.large {
+    line-height: 42px;
+}
+.schedule-timebox.single.preview-on-edge {
+    height: auto;
+    line-height: normal;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+.schedule-timebox span[data-toggle="popover"] {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+}
+.schedule-timebox span[data-toggle="popover"] .glyphicon {
+    position: absolute;
+    right: 3px;
+    top: 50%;
+    margin-top: -6px;
+    color: #333;
+    height: 12px;
+    font-size: 12px;
+}
+
+
+.modal-content textarea {
+    float: none;
+    width: 100%;
+    resize:vertical;
+}
+
+td:hover {
+    cursor: pointer;
+    background: #E0E0E0;
+}
+
+td .schedule-timebox:hover {
+    margin-left: -1px;
+    box-shadow: 1px 1px 3px #78909C;
+}
+
+.schedule-timebox > div {
+
+}
+
+.schedule-timebox hr {
+    margin: 0;
+    color: #fff;
+}
+
+.schedule-name {
+    font-weight: normal !important;
+}
+
+#show-btn {
+    width: 100%;
+}
+
+#clear-btn {
+    width: 100%;
+}
+
+.color-box {
+    display: block;
+    width: 30px;
+    height: 30px;
+    background: #00ACEE;
+    border: 1px solid #CCCCCC;
+    cursor: pointer;
+    float: left;
+    margin-right: 2px;
+}
+
+.timebox-color-0 {
+    background: #EFEFEF;
+}
+.timebox-color-1 {
+    background: #89E4C3;
+}
+.timebox-color-2 {
+    background: #48C0CE;
+}
+.timebox-color-3 {
+    background: #7490D2;
+}
+.timebox-color-4 {
+    background: #C592EA;
+}
+.timebox-color-5 {
+    background: #D472B5;
+}
+
+.scrollable {
+    overflow-x: scroll !important;
+}
+
+@media print {
+    a:link:after, a:visited:after {
+        content:'' !important;
+    }
+}

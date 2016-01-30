@@ -1,0 +1,23 @@
+.passed-tests{
+    background: #5cb85c;
+}
+
+.error-tests{
+    background: #f0ad4e;
+}
+
+.fail-tests{
+    background:  #d9534f;
+}
+
+.link-status{
+    color: #FFF!important;
+    text-decoration: none;
+    width:100%;
+    display:inline-block;
+    font-size: 20px;
+}
+
+.results-description-container{
+    color: #FFF;
+}

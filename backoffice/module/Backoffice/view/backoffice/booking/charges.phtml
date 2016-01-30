@@ -1,0 +1,171 @@
+<?php
+	use DDD\Service\Booking\Charge as ChargeService;
+	use DDD\Service\Taxes;
+    use DDD\Service\Booking\BookingAddon;
+    use \Library\Constants\Constants;
+?>
+<?php if (count($this->charges) > 0) { ?>
+	<fieldset>
+		<legend class="padding-bottom-5">
+			Charges
+            <div class="btn-group pull-right btn-group-sm">
+                <span class="total-charges-view btn btn-default" data-toggle="button"><i class="glyphicon glyphicon-th"></i> Nights</span>
+                <?php if ($this->hasReversedCharges) {?>
+                <span class="revers-charges btn btn-default" data-toggle="button"><i class="glyphicon glyphicon-trash"></i> Reversed</span>
+                <?php } ?>
+            </div>
+		</legend>
+
+		<table class="table table-bordered table-condensed charges-tbl">
+			<thead>
+				<tr>
+					<th width="1%">Type</th>
+                    <th width="13%" class="hidden-xs">Date</th>
+                    <th width="15%" class="hidden-xs">Value</th>
+					<th width="1%">Price (<?= $this->apartmentCurrency ?>)</th>
+					<th width="1%" class="hidden-xs">Coll.</th>
+					<th width="6%">%</th>
+				</tr>
+			</thead>
+			<tbody>
+        <?php foreach ($this->totalChargesView as $row) {?>
+			<?php if(isset($row['name'])) { ?>
+					<tr class="tr-total">
+						<td><?=$row['name']?></td>
+						<td class="text-center">
+							<?= date(Constants::GLOBAL_DATE_WO_YEAR, strtotime($row['dateMin']))?>
+							-
+							<?= date(Constants::GLOBAL_DATE_WO_YEAR, strtotime($row['dateMax']))?>
+						</td>
+						<td class="hidden-xs text-right"><?=$row['value']?></td>
+						<td class="text-right"><?=number_format($row['price'], 2, '.', '')?></td>
+						<td class="hidden-xs"><?=$row['collection']?></td>
+						<td class="text-right"><?=$row['commission']?> %</td>
+					</tr>
+				<?php }  else { ?>
+					<?php foreach($row as $parking) {
+					if(!isset($parking['name'])) continue;?>
+					<tr class="tr-total">
+						<td><?=$parking['name']?></td>
+						<td class="text-center"><?=$parking['date']?></td>
+						<td class="hidden-xs text-right"><?=$parking['value']?></td>
+						<td class="text-right"><?=number_format($parking['price'], 2, '.', '')?></td>
+						<td class="hidden-xs"><?=$parking['collection']?></td>
+						<td class="text-right"><?=$parking['commission']?> %</td>
+					</tr>
+				    <?php } ?>
+				<?php } ?>
+        <?php
+            }
+
+			foreach ($this->charges as $key => $charge) {
+				/* @var $charge \DDD\Domain\Booking\Charge */
+                if ($charge->getStatus() == ChargeService::CHARGE_STATUS_DELETED) {
+                    $trClass = 'deleted soft-hide warning';
+                } elseif (in_array($charge->getAddons_type(), $this->totalChargesType) && $charge->getReservationNightlyId()) {
+                    $trClass = 'total-charges-item soft-hide last-row';
+                } else {
+                    $trClass = '';
+                }
+                ?>
+				<tr class="chargedView <?=$trClass?>">
+                    <td>
+                    <?php
+                        if ($charge->getAddon()) {
+                            echo $charge->getAddon();
+                        } elseif ($charge->getType() == 'p') {
+                             echo 'Penalty';
+                        } elseif ($charge->getType() == 'g') {
+                            echo 'Penalty Ginosi';
+                        } else {
+                            echo 'Other';
+                        }
+                    ?>
+                    </td>
+
+					<?php
+					$chargeDate = '';
+						if (!is_null($charge->getReservationNightlyDate())) {
+							$chargeDate = date(Constants::GLOBAL_DATE_WO_YEAR, strtotime($charge->getReservationNightlyDate()));
+						}
+					?>
+
+                    <td class="text-center"><?=$chargeDate?></td>
+					<td class="hidden-xs text-right">
+                    <?php
+                        if (($charge->getAddons_type() == BookingAddon::ADDON_TYPE_ACC || $charge->getAddons_type() == BookingAddon::ADDON_TYPE_PARKING)&& $charge->getRateName()) {
+                            echo $charge->getRateName();
+                        } elseif($charge->getAddons_value() > 0) {
+                            echo $charge->getAddons_value();
+                            if($charge->getTaxType() == Taxes::TAXES_TYPE_PERCENT) {
+                                echo ' %';
+                            } elseif($charge->getTaxType() == Taxes::TAXES_TYPE_PER_NIGHT) {
+                                echo ' p/n';
+                            } elseif($charge->getTaxType() == Taxes::TAXES_TYPE_PER_PERSON) {
+                                echo ' p/p';
+                            }
+                        }
+                    ?>
+                    </td>
+                    <td class="text-right"><?= $charge->getAcc_amount()?></td>
+					<td class="hidden-xs"><?= ChargeService::$moneyDirectionOptions[$charge->getMoneyDirection()] ?></td>
+                    <td class="text-right"><?= $charge->getCommission() ?> %</td>
+				</tr>
+                <tr class="soft-hide sub-details">
+					<td colspan="6">
+						<table class="table table-condensed table-charge-details margin-0">
+							<tbody class="no-border">
+
+								<tr>
+									<td width="15%" class="title">User:</td>
+									<td width="35%"><?= ($charge->getUser()) ? $charge->getUser() : 'System' ?></td>
+									<td width="15%" class="title">Date:</td>
+									<td width="35%"><?= $charge->getDate() ?></td>
+								</tr>
+
+							<?php if ($charge->getComment()) { ?>
+								<tr>
+									<td width="15%" class="title">Comment:</td>
+									<td colspan="3"><?= $charge->getComment() ?></td>
+								</tr>
+							<?php } ?>
+							</tbody>
+						</table>
+
+					<?php if ($charge->getStatus() == ChargeService::CHARGE_STATUS_DELETED) { ?>
+						<table class="table table-condensed table-charge-details margin-0">
+							<tbody>
+								<tr>
+									<td class="title" colspan="4">Deleted</td>
+								</tr>
+								<tr>
+									<td width="15%" class="title">User:</td>
+									<td width="35%"><?= $charge->getUser_delete() ?></td>
+									<td width="15%" class="title">Date:</td>
+									<td width="35%"><?= $charge->getDate_delete() ?></td>
+								</tr>
+
+							<?php if ($charge->getComment_delete() != '') { ?>
+								<tr>
+									<td width="15%" class="title">Comment:</td>
+									<td colspan="3"><?= $charge->getComment_delete() ?></td>
+								</tr>
+							<?php } ?>
+							</tbody>
+						</table>
+					<?php } ?>
+
+					</td>
+				</tr>
+		<?php } ?>
+			</tbody>
+			<tfoot>
+				<tr>
+					<td colspan="3"><strong>Total</strong></td>
+                    <td class="text-right"><strong><?= number_format($this->chargesSummaryInApartmentCurrency, 2, '.', '')?></strong></td>
+                    <td colspan="2" class="hidden-xs"></td>
+				</tr>
+			</tfoot>
+		</table>
+	</fieldset>
+<?php } ?>

@@ -1,0 +1,76 @@
+<?= $this->parkingPageTitle($this->parkingLotId) ?>
+<?php
+$this->headTitle()->setSeparator(' - ');
+
+$pageTitle = $this->layout()->parkingLotName . ' - Parking Lots';
+$this->headTitle($pageTitle);
+
+$this->layout()->breadcrumb = $this->breadcrumb([
+    ['Apartments'],
+    ['Parking Lots', $this->url('parking_lots')],
+    [$this->layout()->parkingLotName]
+]);
+
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+    ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+    ->appendFile($this->basePath() . '/js/module/parking/spot.js')
+    ->appendFile($this->basePath() . '/js/validation/parking.spot.js');
+
+$this->headLink()
+    ->appendStylesheet($this->basePath () . '/css/pages/parking.common.css');
+
+$addSpotUrl = $this->url('parking/spots/edit', ['parking_lot_id' => $this->parkingLotId]);
+
+?>
+
+<script>
+    var SAVE_DATA = '<?= $this->url("parking/spots/save", array('parking_lot_id' => $this->parkingLotId)) ?>';
+    var SAVE_PERMIT_ID = '<?= $this->url("parking/spots/save-permit-id", array('parking_lot_id' => $this->parkingLotId)) ?>';
+    var aaData = <?= $aaData; ?>;
+</script>
+
+<div class="row">
+    <div class="col-sm-12">
+        <hr>
+        <?= $this->parkingNavigation($this->parkingLotId, 'parking/spots')?>
+    </div>
+</div>
+<?php
+if ($this->selectedSpotId) {
+    $form = $this->form;
+    $form->prepare();
+    echo $this->form()->openTag($form);
+}
+?>
+<div class="col-sm-12">
+    <div class="row">
+        <div class="col-sm-12">
+            <table id="datatable_spots" class="table table-striped table-bordered table-condensed table-hover">
+                <thead>
+                <tr>
+                    <th> Unit </th>
+                    <th> Price </th>
+                    <th> Permit Id </th>
+                    <th> &nbsp; </th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+`<div class="page-actions container">
+    <div class="row text-right">
+    <?php if ($this->selectedSpotId) {
+        echo $this->formInput($form->get('save_button')) ;
+     } ?>
+        <a href="<?= $addSpotUrl ?>" class="btn  btn-success col-sm-2 col-xs-12 margin-left-10 pull-right"><span class="glyphicon glyphicon-plus"></span>Add New Spot</a>
+    </div>
+</div>
+<!-- Form close tag -->
+<?= $this->form()->closeTag() ?>
+
+

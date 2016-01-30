@@ -1,0 +1,78 @@
+<?php
+
+use Library\Constants\DomainConstants;
+
+$this->headTitle($this->textline(1353))->setSeparator(' - ');
+$this->headMeta($this->textline(1460), 'description');
+$this->headLink()
+	->prependStylesheet($this->basePath() . '/css/contact-us.css');
+
+$this->inlineScript()
+	->appendFile($this->basePath() . '/js/contactus.js');
+
+$this->headLink([
+    'rel' => 'canonical',
+    'href' => $this->url('contact-us', [], ['force_canonical' => true])]);
+
+?>
+
+<div class="col-sm-12">
+	<h1><?php echo $this->textline(1353);?></h1>
+</div>
+
+<div class="col-sm-6 grid-sep" itemscope itemtype="http://schema.org/ContactPoint">
+    <div class="row">
+        <div class="col-lg-11">
+            <div class="row col-sm-12">
+                <h2><?php echo $this->textline(1354);?></h2>
+                <p><?php echo $this->textline(1355);?></p>
+
+                <div class="row">
+                    <div class="col-xs-6"><strong><?php echo $this->countryname(213);?>:</strong></div>
+                    <div class="col-xs-6"><strong><?php echo $this->countryname(188);?>:</strong></div>
+
+                    <div class="col-xs-6 grid-sep" itemprop="telephone"><?php echo $this->textline(1356);?></div>
+                    <div class="col-xs-6 grid-sep" itemprop="telephone"><?php echo $this->textline(1357);?></div>
+
+                    <div class="col-xs-6"><strong><?php echo $this->countryname(4);?>:</strong></div>
+                    <div class="col-xs-6"><strong><?php echo $this->countryname(2);?>:</strong></div>
+
+                    <div class="col-xs-6 grid-sep" itemprop="telephone"><?php echo $this->textline(1358);?></div>
+                    <div class="col-xs-6 grid-sep" itemprop="telephone"><?php echo $this->textline(1359);?></div>
+                </div>
+            </div>
+
+            <!-- Chat -->
+            <div class="hidden-xs row col-sm-12 margin-top-50">
+                <div class="row col-sm-6 row col-xs-6 padding-0 margin-0">
+                    <h2 class="pull-left padding-0 margin-0">
+                        <?php echo $this->textline(1420);?>
+                    </h2>
+                </div>
+                <div class="row col-sm-6 row col-xs-6 grid-sep">
+                    <div class="row pull-right">
+                        <?php echo $this->textline(1421);?> <i class="blink"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="hidden-xs row col-sm-12">
+                <div class="row col-sm-6 row col-xs-6 padding-0 margin-0">
+                    <div class=""><?php echo $this->textline(1422);?></div>
+                </div>
+                <div class="row col-sm-6 row col-xs-6 grid-sep">
+                    <div class="row pull-right">
+                        <a href="#liveChat" class="col-xs-12 buttonBlue btn-lg text-center open-chat-window" data-url="<?php echo '//'. DomainConstants::WS_DOMAIN_NAME . $this->url('chat'); ?>"><?php echo $this->textline(1423);?></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-sm-6 contact-us-photo">
+    <div class="row">
+        <div class="col-lg-offset-1 col-lg-11">
+            <img src="<?php echo $this->basePath();?>/img/web/contact-us.jpg" alt="<?=$this->textline(1378)?>" class="full-with">
+        </div>
+    </div>
+</div>

@@ -1,0 +1,10 @@
+#new-tag-text-color, #new-tag-background-color {
+    width:45px;
+}
+.add-tag-container {
+    padding-top:6px;
+}
+
+.add-tag-label {
+    text-align:left !important;
+}

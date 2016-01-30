@@ -1,0 +1,272 @@
+<?php
+	$form = $this->teamForm;
+	$pageTitle = ($this->id > 0 ? 'Edit' : 'Add') . ' Team';
+	$clearTitle = $pageTitle . ($this->id ? ' (' . $form->get('name')->getValue() . ')' : '');
+	$this->headTitle()->setSeparator(' - ');
+	$this->headTitle($clearTitle . ' | Product Teams');
+	$this->layout()->viewTitle = $pageTitle . ($this->id ? ' <small>(' . $form->get('name')->getValue() . ')</small>' : '');
+	$this->layout()->breadcrumb = $this->breadcrumb([
+		['Administration'],
+		['People Teams', $this->url('backoffice/default', ['controller' => 'team', 'action' => 'index'])],
+		[$clearTitle]
+	]);
+
+    $this->InlineScript()
+        ->appendFile($this->basePath() . '/js/validation/team.js')
+        ->appendFile($this->basePath() . '/js/pages/team.edit.js');
+
+    $form->prepare();
+    $form->setAttribute('action', $this->url('backoffice/default', ['controller' => 'team', 'action' => 'edit']));
+    $form->setAttribute('method', 'post');
+    $form->setAttribute('class', 'form-horizontal');
+    $form->setAttribute('id', 'team_manage_table');
+?>
+<script>
+    var GLOBAL_SAVE_DATA            = '<?= $this->url('backoffice/default', array('controller' => 'team', 'action' => 'ajaxsave'))?>';
+    var GLOBAL_CHANGE_ACTIVE_STATUS = '<?= $this->url('backoffice/default', array('controller' => 'team', 'action' => 'ajax-change-active-status'))?>';
+    var GLOBAL_CHECK_TEAM_NAME      = '<?= $this->url('backoffice/default', array('controller' => 'team', 'action' => 'ajaxcheckname'))?>';
+    var IS_ASSOCIATED_TEAM          = '<?= $this->isAssociatedTeam ?>';
+    var TASK_NAME                   = '<?= $this->taskName ?>';
+    var APARTMENTS_ALREADY_ASSIGNED_TO_ANOTHER_TEAM = <?= json_encode(array_keys($this->apartmentsThatAreAlreadyAssignedToAnotherTeam)) ?>;
+</script>
+	<div class="row">
+        <?php echo $this->form()->openTag($form); ?>
+		<div class="col-sm-8">
+			<fieldset name="general">
+				<legend>General</legend>
+
+				<div class="form-group">
+					<label class="col-sm-3 control-label" for="name">Name <?php echo $this->required(); ?></label>
+					<div class="col-sm-9">
+                        <input type="hidden" name="userId" value="<?=$this->userId; ?>">
+                        <input type="hidden" id="team_id" name="team_id" value="<?=$this->id; ?>">
+
+						<?php echo $this->formInput($form->get('name')); ?>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-sm-3 control-label" for="description">Description <?php echo $this->required(); ?></label>
+					<div class="col-sm-9">
+						<?php echo $this->formInput($form->get('description')); ?>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-sm-3 control-label"
+                    for="director">Team Director <?php echo $this->required();
+                    ?></label>
+					<div class="col-sm-5">
+						<?php echo $this->formSelect($form->get('director')); ?>
+					</div>
+				</div>
+            </fieldset>
+            <fieldset name="staff">
+                <legend>Staff</legend>
+				<div class="form-group">
+					<label class="col-sm-3 control-label"
+                    for="managers">Team Managers <?php echo $this->required();
+                    ?></label>
+					<div class="col-sm-9">
+						<?php echo $this->formSelect($form->get('managers')); ?>
+					</div>
+				</div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="officers">Team Officers</label>
+                    <div class="col-sm-9">
+                        <?php echo $this->formSelect($form->get('officers')); ?>
+                    </div>
+                </div>
+
+				<div class="form-group">
+					<label class="col-sm-3 control-label" for="members">Team Members</label>
+					<div class="col-sm-9">
+						<?php echo $this->formElement($form->get('members')); ?>
+					</div>
+				</div>
+			</fieldset>
+            <fieldset class="<?= (($form->get('usage_frontier')->getAttribute("checked") == "checked") ? '': ' soft-hide') ?>" id="frontier-options">
+                <legend>Frontier Options</legend>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="frontier_apartments">
+                        <?= $this->info('Apartments', '<p>Shows on which apartments this team will be working.</p>
+                        <p><span class="text-warning">There is no need of adding apartment to this list, if it\'s building
+                        is already linked to this team.</span></p>
+                        ', 'Frontier Team Buildings'); ?>
+                    </label>
+                    <div class="col-sm-9">
+                        <?php echo $this->formSelect($form->get('frontier_apartments')); ?>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="frontier_buildings">
+                        <?= $this->info('Buildings', '<p>Shows on which buildings this team will be working.</p>
+                        <p>Then linking a building, all of it\'s apartments are also considered linked to this team.</p>
+                        ', 'Frontier Team Buildings'); ?>
+                    </label>
+                    <div class="col-sm-9">
+                        <?php echo $this->formSelect($form->get('frontier_buildings')); ?>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="timezone">
+                        <?= $this->info('Timezone', 'Timezone in which is the user.'); ?>
+                        <?= $this->required(); ?>
+                    </label>
+                    <div class="col-sm-9">
+                        <?=$this->formElement($form->get('timezone'))?>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="extra_inspection">
+                        <?= $this->info('Extra Inspection', 'Add extra inspection task if apartments do not have reservation till 4 days from theirs last reservations.'); ?>
+                    </label>
+                    <div class="col-sm-9 checkbox">
+                        <?php echo $this->formElement($form->get('extra_inspection')); ?>
+                    </div>
+                </div>
+
+            </fieldset>
+		</div>
+
+		<div class="col-sm-4">
+			<fieldset name="usage">
+				<legend>Usage</legend>
+				<div class="form-group">
+					<label class="col-xs-10 col-sm-9 col-md-7 control-label" for="usage_department">
+                        <?= $this->info('Department', 'This team will functions as a company department.') ?>
+                    </label>
+					<div class="col-xs-2 col-sm-3 col-md-5">
+						<div class="checkbox">
+							<input type="hidden" id='department' data-department="<?=$this->isDepartment?>">
+							<?= $this->formElement($form->get('usage_department')); ?>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-10 col-sm-9 col-md-7 control-label" for="usage_notifiable">
+                        <?= $this->info('Notifiable', 'This team can receive notifications throughout the software which will appear on their Universal Dashboard.'); ?>
+                    </label>
+					<div class="col-xs-2 col-sm-3 col-md-5">
+						<div class="checkbox">
+							<?= $this->formElement($form->get('usage_notifiable')); ?>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-10 col-sm-9 col-md-7 control-label" for="usage_frontier">
+                        <?= $this->info('Frontier', 'This team is at the Frontier. The team will receive additional automatic functions required for Frontier tasks. Do not select this option for any Yerevan teams.'); ?>
+                    </label>
+					<div class="col-xs-2 col-sm-3 col-md-5">
+						<div class="checkbox">
+							<?= $this->formElement($form->get('usage_frontier')); ?>
+						</div>
+					</div>
+				</div>
+                <div class="form-group">
+                    <label class="col-xs-10 col-sm-9 col-md-7 control-label" for="usage_security">
+                        <?= $this->info('Security', 'This team will act as a security team throughout the software allowing for permission selections.'); ?>
+                    </label>
+                    <div class="col-xs-2 col-sm-3 col-md-5">
+                        <div class="checkbox">
+                            <?= $this->formElement($form->get('usage_security')); ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-10 col-sm-9 col-md-7 control-label" for="usage_taskable">
+                        <?= $this->info('Taskable', 'Tasks can be assigned to this team.'); ?>
+                    </label>
+                    <div class="col-xs-2 col-sm-3 col-md-5">
+                        <div class="checkbox">
+                            <?= $this->formCheckbox($form->get('usage_taskable')); ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-10 col-sm-9 col-md-7 control-label" for="usage_hiring">
+                        <?= $this->info('Hiring', 'This team will be used in Job Management and Applicant Management as hiring team'); ?>
+                    </label>
+                    <div class="col-xs-2 col-sm-3 col-md-5">
+                        <div class="checkbox">
+                            <?= $this->formElement($form->get('usage_hiring')); ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-10 col-sm-9 col-md-7 control-label" for="usage_storage">
+                        <?= $this->info('Storage', ''); ?>
+                    </label>
+                    <div class="col-xs-2 col-sm-3 col-md-5">
+                        <div class="checkbox">
+                            <?= $this->formElement($form->get('usage_storage')); ?>
+                        </div>
+                    </div>
+                </div>
+			</fieldset>
+		</div>
+	</div>
+    <?php echo $this->form()->closeTag() ?>
+    <div class="page-actions container">
+	    <div class="row text-right">
+
+            <?php echo $this->formButton($form->get('save_button')) ?>
+            <?php
+            if ($this->global && $this->id > 0) {
+                if (!$this->isPermanent && !$this->status) { ?>
+                    <button id="deactivate" data-toggle="modal" class="btn btn-danger
+                    col-sm-2 col-xs-12 margin-left-10 pull-right">Deactivate Team</button>
+
+            <?php } elseif ($this->status) { ?>
+                    <a href="#activateModal" data-toggle="modal" class="btn btn-success
+                    col-sm-2 col-xs-12 margin-left-10 pull-right">Activate Team</a>
+
+            <?php }
+            } ?>
+
+	    </div>
+    </div>
+
+<?php if ($this->global) {
+    if (!$this->status) { ?>
+        <div class="modal fade" id="deactivateModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-danger">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel">
+                            Deactivate Team <span id="deactivate_group"></span>
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button class="btn btn-danger" id="change_active_status">Deactivate</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php } else { ?>
+        <div id="activateModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-success">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title" id="myModalLabel2">Activate Team</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                        <button class="btn btn-success" id="change_active_status">Activate</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <?php }
+    } ?>

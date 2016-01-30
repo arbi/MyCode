@@ -1,0 +1,32 @@
+<?php
+    $this->layout()->viewTitle  = 'Housekeeping Dashboard';
+    $this->headTitle()->setSeparator(' - ');
+    $this->headTitle('Housekeeping Dashboard | Available Product Groups');
+    $this->layout()->breadcrumb = $this->breadcrumb([
+        ['Dashboards'],
+        ['Housekeeping Tasks Dashboard']
+    ]);
+
+?>
+<div class="row">
+    <div class="col-sm-12">
+        <table class="table dataTable table-striped table-condensed table-bordered table-responsive table-hover" id="acc_group_manage_table">
+            <thead>
+                <tr>
+                    <th>Available Apartment Groups</th>
+                    <th style="width: 1px;" class="nosort">&nbsp;</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php foreach($this->teams as $team) { ?>
+                <tr>
+                    <td><?= $team->getName() ?></td>
+                    <td>
+                        <a href="<?= $this->url('backoffice/default', ['controller' => 'housekeeping-tasks', 'action' => 'view', 'id' => $team->getId()])?>" class="btn btn-xs btn-primary pull-right" target="_blank" data-html-content="Open Dashboard"></a>
+                    </td>
+                </tr>
+            <?php } ?>
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,19 @@
+<?php
+    $layoutViewModel = $this->viewModel()->getRoot();
+    $apartelId = $layoutViewModel->apartelId;
+?>
+<?php echo $this->apartelHeader($apartelId); ?>
+<?php
+    $this->headTitle('Room Type / Rate')->setSeparator(' - ');
+    $this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/apartel/common.css');
+?>
+<div class="row">
+    <div class="col-sm-3">
+        <?php echo $this->typeRateNavigation($this->typeRates, $apartelId);?>
+    </div>
+    <div class="col-sm-9">
+        <div class="alert alert-info text-center">Welcome to Room Type / Rate management</div>
+    </div>
+
+</div>

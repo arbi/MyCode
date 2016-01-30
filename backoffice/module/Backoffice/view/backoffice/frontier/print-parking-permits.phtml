@@ -1,0 +1,197 @@
+<?php
+
+$itemName = 'Print Parking Permits';
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($itemName);
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/pages/print.parking.permit.js');
+$this->headLink()
+    ->appendStylesheet($this->basePath() . '/css/pages/print-parking-permits.css')
+    ->appendStylesheet($this->basePath() . '/css/pages/print-parking-permits.print.css', 'print');
+
+?>
+<script>
+    var SHOW_GUEST_BALANCE_IS_NEGATIVE_WARNING_MESSAGE = <?= $showWarning ?>;
+</script>
+<div class="row">
+    <div class="col-md-2">&nbsp;</div>
+
+    <div class="col-md-8">
+
+
+    <div class="row">
+        <div class="col-sm-12 col-md-12">
+
+
+            <table class="table table1">
+                <thead></thead>
+                <tbody>
+                <tr>
+                    <td width="70%"  class="parking-permit-text-td" >PARKING PERMIT</td>
+                    <td style="text-align: right" <?= $permitId != '' ? 'rowspan="2"' : ''?>>
+                        <?php if ($permitImage != '') { ?>
+                        <img class="building-logo" src="https://<?= $permitImage ?>">
+                        <?php } else { ?>
+                            &nbsp;
+                        <?php } ?>
+                    </td>
+                </tr>
+
+                <?php if ($permitId != '') { ?>
+                <tr>
+                    <td class="permit-id">
+                        <?= $permitId ?>
+                    </td>
+                </tr>
+                <?php } ?>
+                </tbody>
+                <tfoot></tfoot>
+            </table>
+
+
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12 col-md-12">
+            <table class="table table3">
+                <thead></thead>
+                <tbody>
+                <tr>
+                    <td class="explanation-text">
+                        <span class="asterisk-container">*</span>
+                        Keep the permit visible on your dashboard when parked in the lot
+                    </td>
+                </tr>
+                </tbody>
+                <tfoot></tfoot>
+            </table>
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12 col-md-12">
+            <table class="table table4">
+                <thead></thead>
+                <tbody>
+                <tr>
+                    <td width="50%" class="spot-text">
+                       <?php if($isLotVirtual == 0) { ?>
+                           <p class="spot-number-text">
+                               Spot Number
+                           </p>
+                           <p class="spot-number">
+                               <?= $spotName ?>
+                           </p>
+                       <?php } else { ?>
+                           <p class="lot-number-text">
+                               Parking Lot
+                           </p>
+                           <p class="lot-number">
+                               <?= $lotName ?>
+                           </p>
+                           <p class="lot-number-text">
+                               <b>Single Spots Only</b>
+                           </p>
+                       <?php } ?>
+                    </td>
+
+                    <td class="lot-text">
+                        <?php if ($isLotVirtual == 0) { ?>
+                        <p class="lot-number-text">
+                            Parking Lot
+                        </p>
+                        <p class="lot-number">
+                            <?= $lotName ?>
+                        </p>
+                        <?php } ?>
+                        <p class="lot-number-text">
+                            Resident ID
+                        </p>
+                        <p class="lot-number">
+                            Ginosi
+                        </p>
+                    </td>
+                </tr>
+                </tbody>
+                <tfoot></tfoot>
+            </table>
+        </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12 col-md-12">
+                <table class="table table5">
+                    <thead></thead>
+                    <tbody>
+                    <tr>
+                        <td class="dates-td" width="50%">
+                            <p class="dates-text">FROM</p>
+                            <p>
+                                <span class="dates"><?= $fromDate ?></span>
+                                <span class="times">14:30</span>
+                            </p>
+                        </td>
+                        <td class="dates-td">
+                            <p class="dates-text">TO</p>
+                            <p>
+                                <span class="dates"><?= $toDate ?></span>
+                                <span class="times">11:30</span>
+                            </p>
+                        </td>
+                    </tr>
+                    </tbody>
+                    <tfoot></tfoot>
+                </table>
+            </div>
+
+       </div>
+
+    <div class="row">
+        <div class="col-sm-12 col-md-12">
+            <table class="table table6">
+                <thead></thead>
+                <tbody>
+                <tr>
+                    <td class="logo-td" width="160px">
+                        <img src="<?=$this->basePath()?>/img/logo.png">
+                    </td>
+                    <td>
+                        <p class="footer-info"><span class="footer-info-text">Reservation</span><span class="phone-number">+1 (818) 6411564</span></p>
+                        <?php if ($this->officePhoneNumber) { ?>
+                        <p class="footer-info"><span class="footer-info-text">Parking Issues</span><span class="phone-number"><?= $this->officePhoneNumber ?></span></p>
+                        <?php } ?>
+                    </td>
+                </tr>
+                </tbody>
+                <tfoot></tfoot>
+            </table>
+        </div>
+
+    </div>
+
+</div>
+</div>
+
+<div class="container page-actions">
+    <div class="row text-right">
+        <div class="col-md-2 hidden-print">
+            <?php if ($this->permitCount > 1) { ?>
+                <a href="<?= $prevUrl ?>" class="btn btn-primary col-xs-12" <?php if ($prevUrl == false) { echo 'style="display: none;"'; }?>><i class="glyphicon glyphicon-chevron-left"></i>Previous</a>
+            <?php } ?>
+        </div>
+
+        <div class="col-md-8 hidden-print">
+            <a href="#" class="btn btn-success col-xs-12" id="print-permit">Print Parking Permit</a>
+        </div>
+
+        <div class="col-md-2 hidden-print">
+            <?php if ($this->permitCount > 1) { ?>
+                <a href="<?= $nextUrl ?>" class="btn btn-primary col-xs-12" <?php if ($nextUrl == false) { echo 'style="display: none;"'; }?>>Next<i class="glyphicon glyphicon-chevron-right"></i></a>
+            <?php } ?>
+        </div>
+    </div>
+</div>
+
+
+

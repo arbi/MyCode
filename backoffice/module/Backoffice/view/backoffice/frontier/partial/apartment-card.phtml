@@ -1,0 +1,168 @@
+<?php
+use \DDD\Service\Frontier;
+use \DDD\Service\Booking;
+?>
+
+    <div id="apartment-card" class="bs-callout bs-callout-success<?= $entityType != Frontier::CARD_APARTMENT ? ' soft-hide' : ''?>">
+        <h4>
+                    <span id="apartment-name">
+                        <?= (!empty($card['name']) ? $card['name'] : '')?>
+                    </span>
+            <input type="hidden" id="apartment-id" value="<?= (!empty($card['id']) ? $card['id'] : '')?>">
+        </h4>
+        <table class="table table-condensed">
+            <tr>
+                <td>Building</td>
+                <td>
+                    <a
+
+                        class="card-entity-link"
+                        href="javascript:void(0);"
+                        id="apartment-building"
+                        data-entity-type="<?= Frontier::CARD_BUILDING ?>"
+                        data-entity-id="<?= (!empty($card['buildingId']) ? $card['buildingId'] : '')?>"
+                        >
+                        <?= (!empty($card['building']) ? $card['building'] : '')?>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td>Address</td>
+                <td>
+                            <span id="apartment-address">
+                                <?= (!empty($card['address']) ? $card['address'] : '')?>
+                            </span>
+                </td>
+            </tr>
+            <tr>
+                <td>Unit</td>
+                <td>
+                            <span id="apartment-unit-number">
+                                <?= (!empty($card['unitNumber']) ? $card['unitNumber'] : '')?>
+                            </span>
+                </td>
+            </tr>
+            <tr>
+                <td>Bedrooms</td>
+                <td>
+                            <span id="apartment-bedroom">
+                                <?= isset($card['bedroomCount']) ? $card['bedroomCount'] : ''?>
+                            </span>
+                </td>
+            </tr>
+            <tr<?= (empty($card['primaryWiFiNetwork']) ? ' class="soft-hide"' : '')?>>
+                <td>Primary WiFi</td>
+                <td>
+                    <div>
+                        <span class="glyphicon glyphicon-signal"></span>
+                                <span id="primary-wifi-network">
+                                    <?= (!empty($card['primaryWiFiNetwork']) ? $card['primaryWiFiNetwork'] : '')?>
+                                </span>
+                        <br>
+                        <span class="glyphicon glyphicon-asterisk"></span>
+                                <span id="primary-wifi-password">
+                                    <?= (!empty($card['primaryWiFiPass']) ? $card['primaryWiFiPass'] : '')?>
+                                </span>
+                    </div>
+                </td>
+            </tr>
+            <tr<?= (empty($card['secondaryWiFiNetwork']) ? ' class="soft-hide"' : '')?>>
+                <td>Secondary WiFi</td>
+                <td>
+                    <div>
+                        <span class="glyphicon glyphicon-signal"></span>
+                                <span id="secondary-wifi-network">
+                                    <?= (!empty($card['secondaryWiFiNetwork']) ? $card['secondaryWiFiNetwork'] : '')?>
+                                </span>
+                        <br>
+                        <span class="glyphicon glyphicon-asterisk"></span>
+                                <span id="secondary-wifi-password">
+                                    <?= (!empty($card['secondaryWiFiPass']) ? $card['secondaryWiFiPass'] : '')?>
+                                </span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>Current Reservation</td>
+                <td>
+                    <div id="apartment-cur-res"<?= (empty($card['curResId']) ? ' class="soft-hide"' : '')?>>
+                        <span class="glyphicon glyphicon-flag"></span>
+                        <a
+                            class="card-entity-link"
+                            href="javascript:void(0);"
+                            id="apartment-cur-res-num"
+                            data-entity-type="<?= Frontier::CARD_RESERVATION ?>"
+                            data-entity-id="<?= (!empty($card['curResId']) ? $card['curResId'] : '')?>"
+                            >
+                            <?= (!empty($card['curResNum']) ? $card['curResNum'] : '')?>
+                        </a>
+                        <br>
+                        <span class="glyphicon glyphicon-user"></span>
+                                <span id="apartment-cur-res-guest">
+                                    <?= (!empty($card['curResGuest']) ? $card['curResGuest'] : '')?>
+                                </span>
+                    </div>
+                    <div id="apartment-no-cur-res"<?= (!empty($card['curResId']) ? ' class="soft-hide"' : '')?>>
+                        -
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>Previous Reservation</td>
+                <td>
+                    <div id="apartment-cur-res"<?= (empty($card['preResId']) ? ' class="soft-hide"' : '')?>>
+                        <span class="glyphicon glyphicon-flag"></span>
+                        <a
+                            class="card-entity-link"
+                            href="javascript:void(0);"
+                            id="apartment-cur-res-num"
+                            data-entity-type="<?= Frontier::CARD_RESERVATION ?>"
+                            data-entity-id="<?= (!empty($card['preResId']) ? $card['preResId'] : '')?>"
+                            >
+                            <?= (!empty($card['preResNum']) ? $card['preResNum'] : '')?>
+                        </a>
+                        <br>
+                        <span class="glyphicon glyphicon-user"></span>
+                                <span id="apartment-cur-res-guest">
+                                    <?= (!empty($card['preResGuest']) ? $card['preResGuest'] : '')?>
+                                </span>
+                    </div>
+                    <div id="apartment-no-cur-res"<?= (!empty($card['preResId']) ? ' class="soft-hide"' : '')?>>
+                        -
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <div class="card-actions" id="reservation-actions">
+            <?php if ($entityType == Frontier::CARD_APARTMENT) { ?>
+                <a class="btn btn-sm btn-primary" target="_blank" href="//<?= \Library\Constants\DomainConstants::BO_DOMAIN_NAME . '/apartment/' . $card['id'] . '/welcome-note' ?>">
+                    <span>Print Welcome Note</span>
+                </a>
+            <?php } ?>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+
+<?php if ($entityType == Frontier::CARD_APARTMENT) { ?>
+    <div id="documents" class="bs-callout bs-callout-success<?= empty($card) ? ' soft-hide' : '' ?>">
+        <h4>
+            Documents for
+            <b id="documents-entity-name"><?= $card['name'] ?></b>
+        </h4>
+        <ul id="documents-list"<?= (empty($card['documents']) ? ' class="soft-hide"' : '') ?>>
+            <?php if (!empty($card['documents'])) { ?>
+                <?php foreach ($card['documents'] as $document) { ?>
+                    <li><?= $document['typeName'] . ' (Valid till ' . $document['validTo'].' )' ?></li>
+                <?php } ?>
+            <?php } ?>
+        </ul>
+        <div id="no-documents"<?= (!empty($card['documents']) ? ' class="soft-hide"' : '') ?>>
+            <em class="text-info">
+                <span class="glyphicon glyphicon-info-sign"></span>
+                There are no documents on this entity.
+            </em>
+        </div>
+
+    </div>
+<?php } ?>

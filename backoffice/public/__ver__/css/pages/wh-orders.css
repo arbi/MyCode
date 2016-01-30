@@ -1,0 +1,30 @@
+.top-order-status span { font-size: 14px; margin-left: 10px}
+
+.account-to-container .selectize-control.single .selectize-input:after,
+.account-base .selectize-control.single .selectize-input:after {
+	display: none !important;
+}
+.account-to-container .selectize-input,
+.account-base .selectize-input {
+	border: 1px solid #428bca;
+}
+.label a,
+.label a:hover {
+	color: #fff;
+	text-decoration: underline;
+}
+.label a:hover {
+	text-decoration: none;
+}
+
+div.account-from {
+	padding-top: 7px;
+	font-style: italic;
+	color: gray;
+}
+
+div.account-to {
+	padding-top: 7px;
+	font-style: italic;
+	color: gray;
+}

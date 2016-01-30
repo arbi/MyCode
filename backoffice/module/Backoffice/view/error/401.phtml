@@ -1,0 +1,9 @@
+<h1>401 Forbidden</h1>
+<p>
+   
+    <?php if ($error == 'error-session-expired') : ?>
+        Your session was expired please login reason: <?php echo $reason; ?>.
+    <?php else : ?>
+    An unknown error occurred.
+    <?php endif;?>
+</p>

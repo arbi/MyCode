@@ -1,0 +1,154 @@
+<?php
+    use \DDD\Service\Taxes;
+    use \Library\Constants\TextConstants;
+    use \DDD\Service\Booking\BankTransaction;
+    $reservation    = $this->data['reservation'];
+    $charges        = $this->data['charges'];
+    $transactions   = $this->data['transactions'];
+    $apartmentCurrencySymbol   = $reservation['symbol'];
+?>
+<table width="100%" class="receipt-print">
+    <tr>
+        <td class="text-left"><img src="<?=$this->basePath()?>/img/logo.png"></td>
+        <td class="text-right"><span class="pull-right" style="font-size: 30px;">Receipt</span></td>
+    </tr>
+    <tr>
+        <td colspan="2"><hr style="margin: 4px 0 8px 0; border: 1px solid #e5e5e5"></td>
+    </tr>
+    <tr>
+        <td width="50%"  class="text-left">
+            <p><b>Customer</b> <?=$reservation['guest_first_name'] . ' ' . $reservation['guest_last_name']?> (<?=$reservation['guest_address']?>)</p>
+            <p><b>Receipt</b> <?=$reservation['res_number']?></p>
+            <p><b>Issue Date</b> <?=$this->data['today']?></p>
+            <p><b>Date</b> <?=date("d M Y", strtotime($reservation['date_from']))?> - <?=date("d M Y", strtotime($reservation['date_to']))?></p>
+            <p><b>Location</b> <?=$reservation['apartment_name']?> (<?=$reservation['apartment_address']?>)</p>
+        </td>
+        <td width="50%" class="text-right">
+            <p><b>Ginosi Apartment</b></p>
+            <p>Karapet Ulnetsi 31 (Yerevan, 0037)</p>
+            <p>+374 (0) 10 209 807</p>
+            <p>reservations@ginosi.com</p>
+            <p>www.ginosi.com</p>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">&nbsp;</td>
+    </tr>
+    <tr>
+        <td><b style="font-size: 18px">Charges</b></td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td colspan="2"><hr style="margin: 4px 0 8px 0; border: 1px solid #e5e5e5"></td>
+    </tr>
+    <?php
+    $totalAmountToPay = 0;
+    if ($charges && count($charges)) {
+        foreach ($charges as $charge) {
+            ?>
+            <tr>
+                <td width="50%"  class="text-left"><p><b>
+                    <?php
+                    if ($charge['addon']) {
+                        echo  ($charge['addons_type'] == 1) ? sprintf(TextConstants::TOTAL_PRICE_FOR_NIGHT, $charge['reservation_nighly_date']) : $charge['addon'];
+                    } elseif ($charge['type'] == 'p') {
+                        echo 'Penalty';
+                    } elseif ($charge['type'] == 'g') {
+                        echo 'Penalty Ginosi';
+                    } else {
+                        echo 'Other';
+                    }
+
+                    if($charge['addons_value'] > 0 && $charge['location_join'] != '') {
+                        echo ' ' . $charge['addons_value'];
+                        if($charge['tax_type'] == Taxes::TAXES_TYPE_PERCENT) {
+                            echo ' %';
+                        } elseif($charge['tax_type'] == Taxes::TAXES_TYPE_PER_NIGHT) {
+                            echo ' p/n';
+                        } elseif($charge['tax_type'] == Taxes::TAXES_TYPE_PER_PERSON) {
+                            echo ' p/p';
+                        }
+                    }
+                    ?>
+                </b></p></td>
+                <?php
+                    if ($charge['tax_type'] == 'Discount') {
+                        $minusSign = '-';
+                    } else {
+                        $minusSign = '';
+                    }
+                ?>
+                <td class="text-right"><p><?=$minusSign . $apartmentCurrencySymbol . ' ' . number_format(abs($charge['acc_amount']), 2, '.', '') ?></p></td>
+            </tr>
+            <?php
+            $totalAmountToPay += $charge['acc_amount'];
+        }
+    }
+    ?>
+    <tr>
+        <td>&nbsp;</td>
+        <td class="text-right"><p><b>Total Charges <?=$apartmentCurrencySymbol . ' ' . number_format($totalAmountToPay, 2, '.', '');?></b></p></td>
+    </tr>
+    <tr>
+        <td colspan="2">&nbsp;</td>
+    </tr>
+    <tr>
+        <td><b style="font-size: 18px">Transactions</b></td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td colspan="2"><hr style="margin: 4px 0 8px 0; border: 1px solid #e5e5e5"></td>
+    </tr>
+    <?php
+
+    $totalAmountToPaid = 0;
+    if ($transactions && $transactions->count()) {
+        foreach ($transactions as $key => $transaction) {
+            // $weekDay = in_array($transaction['psp_id'], BankTransaction::$converseBankData['testimony'])
+            //     ? '-' . BankTransaction::$converseBankData['days'] .  ' Weekday'
+            //     : '';
+            $isChargeBack = (in_array($transaction['type'], [
+                                                                BankTransaction::BANK_TRANSACTION_TYPE_CHARGEBACK_DISPUTE,
+                                                                BankTransaction::BANK_TRANSACTION_TYPE_CHARGEBACK_FRAUD,
+                                                                BankTransaction::BANK_TRANSACTION_TYPE_CHARGEBACK_OTHER,
+                                                            ]) ? true :false);
+            ?>
+            <tr <?=$isChargeBack ? 'style="color:#848484"' : ''?>>
+                <td width="50%"  class="text-left">
+                    <p><span style="font-size: 14px"><?= date('d M Y', strtotime($transaction['date']))?></span></p>
+                </td>
+                <td class="text-right"><p><?=$apartmentCurrencySymbol . ' ' .  number_format($transaction['acc_amount'], 2, '.', '')?></p></td>
+            </tr>
+            <?php
+            $totalAmountToPaid += $transaction['acc_amount'];
+        }
+    }
+    ?>
+    <tr>
+        <td>&nbsp;</td>
+        <td class="text-right"><p><b>Total Paid <?=$apartmentCurrencySymbol . ' ' . $totalAmountToPaid?></b></p></td>
+    </tr>
+    <tr>
+        <td colspan="2"><hr class="receipt-border"></td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td class="text-right"><p><b>Balance <?=$apartmentCurrencySymbol . ' ' . number_format(($totalAmountToPay - $totalAmountToPaid), 2, '.', '')?></b></p></td>
+    </tr>
+
+    <?php if ($reservation['secondary_email']) { ?>
+    <tr>
+        <td colspan="2"><hr class="receipt-border hidden-print"></td>
+    </tr>
+    <tr class="hidden-print">
+        <td><b>Select Email</b></td>
+        <td>
+            <select class="form-control" id="receipt-email-options">
+                <option value="1"><?= $reservation['guest_email']?></option>
+                <option value="2"><?= $reservation['secondary_email']?></option>
+            </select>
+        </td>
+    </tr>
+    <?php } ?>
+
+</table>

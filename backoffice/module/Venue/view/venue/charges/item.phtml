@@ -1,0 +1,140 @@
+<?php
+
+$isEditCharge = (isset($this->chargeData));
+
+$venueTitle = ($isEditCharge)
+    ? 'Edit charge for "' . $this->chargeData->getVenueName() . '"'
+    : 'Add charge for "' . $this->venueData->getName() . '"';
+
+$this->layout()->viewTitle = $venueTitle;
+$this->layout()->breadcrumb = $this->breadcrumb([
+    ['Administration'],
+    ['Venue Management', $this->url('venue', ['controller' => 'venue'])]
+]);
+
+$this->headTitle()->setSeparator(' - ');
+$headTitle = ($isEditCharge) ? 'Edit Venue Charge' : 'Add Venue Charge';
+$this->headTitle($headTitle);
+
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/module/venue/charge-edit.js');
+
+?>
+
+<script>
+    var GLOBAL_VENUE_CHARGE_SAVE_URI = '<?=$this->url('venue-charges', ['action' => 'ajax-save']) ?>';
+</script>
+
+<?php echo $this->form()->openTag($this->form); ?>
+
+<?= $this->formInput($this->form->get('venue_id'));?>
+<?= $this->formInput($this->form->get('id')->setValue(
+    $isEditCharge ? $this->chargeData->getId() : 0
+));?>
+
+<div class="row">
+    <div class="col-md-7">
+        <fieldset>
+            <legend>General</legend>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="status_id">
+                            <?= $this->form->get('status_id')->getOption('label') . ' ' . $this->required() ?>
+                        </label>
+                        <div class="col-sm-8">
+                            <?= $this->formSelect($this->form->get('status_id'))?>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="order_status_id">
+                            <?= $this->form->get('order_status_id')->getOption('label') . ' ' . $this->required() ?>
+                        </label>
+                        <div class="col-sm-8">
+                            <?= $this->formSelect($this->form->get('order_status_id'))?>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="amount">
+                            <?= $this->form->get('amount')->getOption('label') . ' ' . $this->required() ?>
+                        </label>
+                        <div class="col-sm-8">
+                            <?= $this->formInput($this->form->get('amount'));?>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="charged_user_id">
+                            <?= $this->form->get('charged_user_id')->getOption('label') . ' ' . $this->required() ?>
+                        </label>
+                        <div class="col-sm-8">
+                            <?= $this->formSelect($this->form->get('charged_user_id'))?>
+                        </div>
+                    </div>
+                    <?= $this->formCheckbox($this->form->get('is_archived'));?>
+                </div>
+
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label" for="description">
+                            <?= $this->form->get('description')->getOption('label') ?>
+                        </label>
+                        <div class="col-sm-10">
+                            <?= $this->formTextarea($this->form->get('description'));?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+
+    <?php if (isset($itemData) && $itemData != false) { ?>
+        <div class="col-md-5">
+            <fieldset>
+                <legend>Items</legend>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <table  class="table table-striped table-bordered table-condensed table-hover">
+                            <thead>
+                            <tr>
+                                <th> Item </th>
+                                <th> Quantity </th>
+                                <th> Price (For each) </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($itemData as $item) { ?>
+                                    <tr>
+                                        <td><?php echo $item['item_name']?></td>
+                                        <td><?php echo $item['item_quantity']?></td>
+                                        <td><?php echo $item['item_price']?></td>
+                                    </tr>
+                                <?php } ?>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+            </fieldset>
+        </div>
+    <?php } ?>
+</div>
+
+<div class="col-sm-12">
+    <div class="page-actions container">
+        <div class="row">
+            <div class="col-xs-12">
+                <a href="javascript:void(0)" class="btn btn-primary pull-right margin-left-10" id="save_charge" data-loading-text="Saving..."><?php echo ($isEditCharge) ? 'Save Changes' : 'Add Charge'; ?></a>
+                <a href="javascript:void(0)" class="btn btn-primary pull-right margin-left-10" id="archive-unarchive" data-loading-text="Saving..."><?php echo ($this->form->get('is_archived')->getValue()) ? 'Unarchive' : 'Archive'; ?></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?= $this->form()->closeTag(); ?>

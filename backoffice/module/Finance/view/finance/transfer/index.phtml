@@ -1,0 +1,379 @@
+<?php
+
+$data = $this->data;
+$form = $this->form;
+$form->setAttribute('action', $this->url('finance/default', ['controller' => 'transfer', 'action' => 'ajax-save']));
+$identity = $this->identity();
+
+$actionTitle = 'Transfer Money';
+$this->headTitle($actionTitle);
+$this->layout()->viewTitle = $actionTitle;
+$this->layout()->breadcrumb = $this->breadcrumb([
+    ['Finance'],
+    [$actionTitle]
+]);
+
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/validation/transfer.js')
+    ->appendFile($this->basePath() . '/js/pages/transfer.js');
+
+?>
+<style scoped>
+    .supplier-from.selectize-control.single .selectize-input:after {
+        display: none !important;
+    }
+</style>
+<div class="row transfer-container"
+     data-money-accounts='<?php echo str_replace("'", '’', json_encode($this->moneyAccounts)); ?>'
+     data-reservations='<?php echo str_replace("'", '’', json_encode($this->reservations)); ?>'
+     data-account-url="<?php echo $this->url('finance/purchase-order/get-accounts'); ?>"
+     data-distribution-list-url="<?php echo $this->url('finance/transfer/get-distribution-list'); ?>"
+     data-distribution-reservations-url="<?php echo $this->url('finance/transfer/get-partner-payment-reservations'); ?>"
+     data-expense-item-balance-url="<?php echo $this->url('finance/transfer/get-expense-item-balance'); ?>"
+     data-transactions-to-collect-url="<?php echo $this->url('finance/transfer/get-transactions-to-collect'); ?>"
+     data-pending-transfer-id="<?php echo ($data) ? $data['id'] : 0; ?>">
+<?php echo $this->form()->openTag($form); ?>
+    <?php echo $this->formInput($form->get('account_type')); ?>
+
+    <div class="col-sm-6 direction">
+        <legend>From</legend>
+
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="dropdown tab-controller active">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    <span>Transfer</span> <b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a href="#tab-transfer" data-toggle="tab" data-class="tab-transfer">Transfer</a></li>
+                    <li><a href="#tab-pay" data-toggle="tab" data-class="tab-pay">Debit</a></li>
+                    <li><a href="#tab-receive" data-toggle="tab" data-class="tab-receive">Credit</a></li>
+                    <li><a href="#tab-partner-collection" data-toggle="tab" data-class="tab-partner-collection">Partner Collection</a></li>
+                    <li><a href="#tab-partner-payment" data-toggle="tab" data-class="tab-partner-payment">Partner Payment</a></li>
+                    <li><a href="#tab-psp" data-toggle="tab" data-class="tab-psp">PSP</a></li>
+                </ul>
+            </li>
+        </ul>
+
+        <ul class="nav nav-tabs hide" role="tablist" id="tab-form">
+            <li class="tab-transfer"><a href="#transfer" role="tab" data-toggle="tab">Transfer</a></li>
+            <li class="tab-pay"><a href="#pay" role="tab" data-toggle="tab">Debit</a></li>
+            <li class="tab-receive"><a href="#receive" role="tab" data-toggle="tab">Credit</a></li>
+            <li class="tab-partner-collection"><a href="#partner-collection" role="tab" data-toggle="tab">Partner Collection</a></li>
+            <li class="tab-partner-payment"><a href="#partner-payment" role="tab" data-toggle="tab">Partner Payment</a></li>
+            <li class="tab-psp"><a href="#psp" role="tab" data-toggle="tab">PSP</a></li>
+        </ul>
+
+        <hr>
+
+        <div class="tab-content hide">
+            <div class="tab-pane active" id="transfer">
+                <div class="form-group">
+                    <div class="col-sm-12"<?php echo (($data && $data['money_account_from']) ? ' data-id="' . $data['money_account_from'] . '"' : ''); ?>>
+                        <?php echo $this->formSelect($form->get('money_account_from')); ?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane" id="receive">
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <?php echo $this->formSelect($form->get('supplier_from')); ?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane" id="partner-collection">
+                <div class="form-group">
+                    <div class="col-sm-6">
+                        <?php echo $this->formSelect($form->get('partners_from')); ?>
+                    </div>
+                    <div class="col-sm-6 text-extra-big text-muted text-right">
+                        Total <span class="total text-primary">0.00</span> <span class="total-currency"></span>
+                    </div>
+                    <div class="col-sm-12">
+                        <?php echo $this->formSelect($form->get('res_numbers')); ?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane" id="psp">
+                <div class="form-group">
+                    <div class="col-sm-6">
+                        <?php echo $this->formSelect($form->get('psp')); ?>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="input-group">
+                            <?php echo $this->formInput($form->get('collection_period')); ?>
+                            <div class="input-group-addon">
+                                <i class="glyphicon glyphicon-calendar"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <a class="btn btn-primary btn-block collection-choose">Scrabble</a>
+                    </div>
+                </div>
+
+                <hr>
+
+                <table class="table table-condensed table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Res. Number</th>
+                            <th>Transaction</th>
+                            <th>Departure</th>
+                            <th>Amount</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody class="collection-transaction-list">
+                        <tr>
+                            <td colspan="5">No Data</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th class="text-right" colspan="3">Total</th>
+                            <th colspan="2">
+                                <span class="collection-total">0.00</span>
+                                <span class="collection-total-currency"></span>
+                            </th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="dynamic-expense-addition hide">
+                <table class="table table-bordered table-condensed">
+                    <thead>
+                        <tr>
+                            <th width="50%">Purchase Order Number</th>
+                            <th>Amount</th>
+                            <th class="w1">&nbsp;</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr class="template hide">
+                            <td class="form-group">
+                                <div class="input-group">
+                                    <?php echo $this->formInput($form->get('expense_id_list[]')); ?>
+                                    <div class="input-group-addon">
+                                        <span class="commented-text expense-amount-currency-addon" data-toggle="popover" data-content="Purchase order balance" data-container="body"></span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="form-group">
+                                <div class="input-group">
+                                    <?php echo $this->formInput($form->get('expense_amount_list[]')); ?>
+                                    <div class="input-group-addon amount-addon"><?php echo str_repeat('&nbsp;', 6); ?></div>
+                                </div>
+                            </td>
+                            <td>
+                                <a href="#" class="btn btn-danger btn-small btn-block dynamic-expense-remove">Remove</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-right">Total</td>
+                            <td class="text-bold">
+                                <span class="total">0.00</span> <span class="amount-addon"></span>
+                            </td>
+                            <td>
+                                <a href="#" class="btn btn-default btn-small dynamic-expense-add">Add New</a>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="amount" class="col-md-4 control-label">Amount <?php echo $this->required(); ?></label>
+            <div class="col-md-5">
+                <div class="input-group">
+                    <?php echo $this->formInput($form->get('amount_from')); ?>
+                    <div class="input-group-addon amount-addon"><?php echo str_repeat('&nbsp;', 6); ?></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="date" class="col-md-4 control-label">Transaction <?php echo $this->required(); ?></label>
+            <div class="col-md-5">
+                <div class="input-group">
+                    <?php echo $this->formInput($form->get('date_from')); ?>
+                    <div class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 direction">
+        <legend>To</legend>
+
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="to-tabs tab-money-account active"><a href="#money_account_to" role="tab" data-toggle="tab">Money Account</a></li>
+            <li class="to-tabs tab-account"><a href="#account_to" role="tab" data-toggle="tab">Account</a></li>
+            <li class="to-tabs tab-partner-payment-to"><a href="#partner_payment_to" role="tab" data-toggle="tab">Reservations</a></li>
+        </ul>
+
+        <hr>
+
+        <div class="tab-content hide">
+            <div class="tab-pane active" id="money_account_to">
+                <div class="form-group">
+                    <div class="col-sm-12"<?php echo (($data && $data['money_account_to']) ? ' data-id="' . $data['money_account_to'] . '"' : ''); ?>>
+                        <?php echo $this->formSelect($form->get('money_account_to')); ?>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="account_to">
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <?php echo $this->formSelect($form->get('supplier_to')); ?>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="partner_payment_to">
+                <div class="form-group">
+                    <label for="amount_to" class="col-md-4 control-label">Partner <?php echo $this->required(); ?></label>
+                    <div class="col-md-8">
+                        <?php echo $this->formSelect($form->get('partners_to')); ?>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="amount_to" class="col-md-4 control-label">Departure Date <?php echo $this->required(); ?></label>
+                    <div class="col-sm-4">
+                        <div class="input-group">
+                            <?php echo $this->formInput($form->get('date_to_from')); ?>
+                            <div class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="input-group">
+                            <?php echo $this->formInput($form->get('date_to_to')); ?>
+                            <div class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-9">
+                        <?php echo $this->formSelect($form->get('apartments_and_apartels')); ?>
+                    </div>
+                    <div class="col-sm-3">
+                        <a class="btn btn-primary btn-block choose">Scrabble</a>
+                    </div>
+                </div>
+                <hr>
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <table class="table table-bordered table-condensed table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Res. Number</th>
+                                    <th>Apartment</th>
+                                    <th>Departure</th>
+                                    <th>Partner Balance</th>
+                                    <th>&nbsp;</th>
+                                </tr>
+                            </thead>
+
+                            <tbody class="dist-res-number-list">
+                                <tr>
+                                    <td colspan="5">No Data</td>
+                                </tr>
+                            </tbody>
+
+                            <tfoot>
+                                <tr>
+                                    <th colspan="2">
+                                        <div class="row">
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control input-sm" placeholder="Reservation Number">
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <a class="btn btn-primary btn-sm btn-block add-reservation">Add</a>
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <th class="text-right">Total</th>
+                                    <th class="text-right">
+                                        <?php echo $this->formInput($form->get('dist_total_amount')); ?>
+                                        <span class="dist-total">0.00</span> <span class="dist-total-currency"></span>
+                                    </th>
+                                    <th>&nbsp;</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="amount_to" class="col-md-4 control-label">Amount <?php echo $this->required(); ?></label>
+            <div class="col-md-5">
+                <div class="input-group">
+                    <?php echo $this->formInput($form->get('amount_to')); ?>
+                    <div class="input-group-addon amount-addon"><?php echo str_repeat('&nbsp;', 6); ?></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="date" class="col-md-4 control-label">Transaction <?php echo $this->required(); ?></label>
+            <div class="col-md-5">
+                <div class="input-group">
+                    <?php echo $this->formInput($form->get('date_to')); ?>
+                    <div class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-12">
+        <legend>General</legend>
+
+        <div class="form-group">
+            <label for="description" class="col-sm-4 col-md-3 col-lg-2 control-label">Description</label>
+            <div class="col-sm-8 col-md-9 col-lg-10">
+                <?php echo $this->formTextarea($form->get('description')); ?>
+            </div>
+        </div>
+
+        <div class="pull-right">
+            <span class="label label-default"><?php echo date(\Library\Constants\Constants::GLOBAL_DATE_FORMAT); ?></span>
+            <span class="label label-primary"><?php echo $identity->firstname . ' ' . $identity->lastname; ?></span>
+        </div>
+    </div>
+
+    <div class="page-actions container text-right">
+        <div class="col-xs-12">
+            <?php echo $this->formSubmit($form->get('add')) ?>
+        </div>
+    </div>
+
+<?php echo $this->form()->closeTag() ?>
+</div>
+
+<div class="modal fade" id="pending-transfer-modal" tabindex="-1" data-url="<?php echo $this->url('finance/transfer/save-pending'); ?>">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Create pending transfer</h4>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to create pending transfer.</p>
+                <p>This transfer will appear in UD dashboard and there will be an option to complete transfer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary add-pending-transfer">Create pending transfer</button>
+            </div>
+        </div>
+    </div>
+</div>

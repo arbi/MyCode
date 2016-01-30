@@ -1,0 +1,141 @@
+<?php
+    //Form object
+    $form = $this->form;
+    $form->prepare();
+
+?>
+<?= $this->form()->openTag($form); ?>
+
+<div class="row">
+    <div class="col-sm-3">
+        <div class="form-group">
+            <?= $this->formInput($form->get('title')) ?>
+        </div>
+    </div>
+
+    <div class="col-sm-3">
+        <div class="form-group">
+            <div class="input-group">
+                <?= $this->formInput($form->get('property')) ?>
+                <label class="input-group-btn" for="property">
+                    <a href="javascript:void(0)" class="btn btn-default apt-filter-btn">
+                        <span class="glyphicon glyphicon-filter" data-toggle="popover" data-container="body" title="Filter is ON" data-content="Autocomplete will search among <b>active</b> apartments only."></span>
+                        <span class="glyphicon glyphicon-asterisk hide" data-toggle="popover" data-container="body" title="Filter is OFF" data-content="Autocomplete will search among all apartments."></span>
+                    </a>
+                </label>
+            </div>
+            <?= $this->formInput($form->get('property_id')); ?>
+            <?= $this->formHidden($form->get('property_type')); ?>
+        </div>
+    </div>
+
+    <div class="col-sm-3">
+        <div class="form-group">
+            <?= $this->formInput($form->get('building')) ?>
+        </div>
+    </div>
+
+    <div class="col-sm-3">
+        <div class="form-group">
+            <?= $this->formInput($form->get('tags')) ?>
+        </div>
+    </div>
+
+</div>
+
+<div class="row">
+    <div class="col-sm-3">
+        <div class="form-group">
+            <?= $this->formSelect($form->get('status')) ?>
+        </div>
+    </div>
+
+    <div class="col-sm-3">
+        <div class="form-group">
+            <?= $this->formSelect($form->get('priority')) ?>
+        </div>
+    </div>
+
+    <div class="col-sm-3">
+        <div class="form-group">
+            <?= $this->formSelect($form->get('type')) ?>
+        </div>
+    </div>
+    <div class="col-sm-3">
+        <div class="form-group">
+            <?= $this->formSelect($form->get('team_id')) ?>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-3 hidden-xs">
+        <div class="form-group">
+            <?= $this->formSelect($form->get('creator_id')) ?>
+        </div>
+    </div>
+    <div class="col-sm-3">
+        <div class="form-group">
+            <?= $this->formSelect($form->get('responsible_id')) ?>
+        </div>
+    </div>
+
+    <div class="col-sm-3 hidden-xs">
+        <div class="form-group">
+            <?= $this->formSelect($form->get('verifier_id')) ?>
+        </div>
+        <div class="hidden">
+            <?= $this->formSelect($form->get('helper_id')) ?>
+        </div>
+    </div>
+
+    <div class="col-sm-3 hidden-xs">
+        <div class="form-group">
+            <?= $this->formSelect($form->get('follower_id')) ?>
+        </div>
+    </div>
+</div>
+
+
+<div class="row hidden-xs">
+
+    <div class="col-sm-3">
+        <div class="form-group">
+            <div class="input-group">
+                <label class="input-group-addon" for="creation_date">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                </label>
+                <?= $this->formInput($form->get('creation_date')) ?>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-3">
+        <div class="form-group">
+            <div class="input-group">
+                <label class="input-group-addon" for="end_date">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                </label>
+                <?= $this->formInput($form->get('end_date')) ?>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-3">
+        <div class="form-group">
+            <div class="input-group">
+                <label class="input-group-addon" for="done_date">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                </label>
+                <?= $this->formInput($form->get('done_date')) ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php
+    echo $this->formInput($form->get('quick_task_id'));
+    echo $this->formInput($form->get('building_id'));
+?>
+<!-- Form close tag -->
+<?= $this->form()->closeTag() ?>

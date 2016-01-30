@@ -1,0 +1,114 @@
+<?php
+
+$this->layout()->viewTitle = 'Purchase Order Management';
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($this->layout()->viewTitle);
+$this->layout()->breadcrumb = $this->breadcrumb([
+    ['Finance'],
+    [$this->layout()->viewTitle],
+]);
+
+$form = $this->form;
+$isFinance = $this->isFinance;
+$isBudgetHolder = $this->isBudgetHolder;
+$userId = $this->userId;
+
+$this->headLink()
+    ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css')
+    ->appendStylesheet($this->basePath() . '/css/plugins/selectize.bootstrap3.css');
+
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/plugins/selectize/selectize.min.js')
+    ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+    ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+    ->appendFile($this->basePath() . '/js/pages/expense.management.js');
+
+?>
+
+<script>
+    GLOBAL_CHECK_DOWNLOAD_CSV_URL   = '<?php echo $this->url('finance/purchase-order/validate-download-csv'); ?>';
+    GLOBAL_DOWNLOAD_CSV_URL         = '<?php echo $this->url('finance/purchase-order/download'); ?>';
+</script>
+
+<section class="data"
+    data-is-finance='<?php echo intval($isFinance); ?>'
+    data-is-budget-holder='<?php echo intval($isBudgetHolder); ?>'
+    data-user-id='<?php echo $userId; ?>'
+    data-accounts-url="<?php echo $this->url('finance/purchase-order/get-accounts'); ?>"
+    data-cost-center-url="<?php echo $this->url('finance/purchase-order/get-cost-centers'); ?>">
+    <?php echo $this->form()->openTag($form); ?>
+        <div class="row">
+            <div class="col-sm-1 form-group"><?php echo $this->formText($form->get('id')); ?></div>
+            <div class="col-sm-2 form-group"><?php echo $this->formSelect($form->get('currency_id')); ?></div>
+            <div class="col-sm-3 form-group"><?php echo $this->formSelect($form->get('manager_id')); ?></div>
+            <div class="col-sm-3 form-group"><?php echo $this->formSelect($form->get('creator_id')); ?></div>
+            <div class="col-sm-3 form-group"><?php echo $this->formInput($form->get('title')); ?></div>
+        </div>
+        <div class="row">
+            <div class="col-sm-3 form-group">
+                <div class="input-group">
+                    <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                    <?php echo $this->formText($form->get('creation_date')); ?>
+                </div>
+            </div>
+
+            <div class="col-sm-3 form-group">
+                <div class="input-group">
+                    <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                    <?php echo $this->formText($form->get('expected_completion_date')); ?>
+                </div>
+            </div>
+
+            <div class="col-sm-3 form-group"><?php echo $this->formSelect($form->get('status')); ?></div>
+            <div class="col-sm-3 form-group"><?php echo $this->formSelect($form->get('finance_status')); ?></div>
+
+
+        </div>
+
+        <div class="row">
+            <div class="col-sm-2">
+                <a href="<?php echo $this->url('finance/purchase-order/download'); ?>" class="btn btn-info btn-block download disabled">
+                    <span class="glyphicon glyphicon-download"></span>
+                    Download
+                </a>
+            </div>
+            <div class="col-sm-8">
+                <a href="#search" class="btn btn-primary btn-block search disabled" data-url="<?php echo $this->url('finance/purchase-order/get-expenses'); ?>">
+                    <i class="glyphicon glyphicon-search"></i> Search
+                </a>
+            </div>
+            <div class="col-sm-2"><a href="#clear" class="btn btn-default btn-block clear">Clear Filter</a></div>
+        </div>
+    <?php echo $this->form()->closeTag($form); ?>
+</section>
+
+<hr>
+
+<div class="row hidden expense-table-container">
+    <div class="col-sm-12">
+        <table class="expense-datatable table table-striped table-bordered table-condensed table-hover">
+            <thead>
+                <tr>
+                    <th>PO ID</th>
+                    <th>Created</th>
+                    <th>Validity</th>
+                    <th>Approval</th>
+                    <th>Status</th>
+                    <th><div class="text-left">Balance</div></th>
+                    <th><div class="text-left">Limit</div></th>
+                    <th>CUR</th>
+                    <th>Purpose</th>
+                    <th>&nbsp;</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+<?php if ($isFinance || $hasPOCreatorRole) { ?>
+    <div class="page-actions container">
+        <div class="row text-right">
+            <a href="<?php echo $this->url('finance/purchase-order/add'); ?>" class="btn btn-primary state pull-right col-sm-2 col-xs-12">Add Purchase Order</a>
+        </div>
+    </div>
+<?php } ?>

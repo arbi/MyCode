@@ -1,0 +1,334 @@
+<?php
+use \Library\Constants\Constants;
+use \Library\Utility\Helper;
+
+$this->layout()->viewTitle = "Transaction Details";
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($this->layout()->viewTitle);
+$this->layout()->breadcrumb = $this->breadcrumb([
+    ['Finance'],
+    ['Money Account', $this->url('finance/money-account')],
+    ['Money Transaction', $this->url('finance/money-account', ['action' => 'edit', 'id' => $this->accountId])],
+    [$this->layout()->viewTitle],
+]);
+
+$this->InlineScript()
+     ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+     ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+     ->appendFile($this->basePath() . '/js/module/finance/money-account/transaction.details.js');
+
+$transactions = $this->transactions;
+$moneyTransactions = $transactions['moneyTransaction']->current();
+$transferTransactions = $transactions['transferTransaction'];
+$expenseTransactions = $transactions['expenseTransaction'];
+$reservationTransactions = $transactions['reservationTransaction'];
+
+?>
+<script>
+    var dataTableData = <?= $this->logData ? json_encode($this->logData) : '[]' ?>;
+</script>
+<ul id="page-tabs" class="nav nav-tabs tabs-general" role="tablist">
+    <li role="presentation" class="active">
+        <a href="#general-tab" aria-controls="general-tab" data-toggle="tab" role="tab">
+            <span class="glyphicon glyphicon-cog"></span>
+            Details
+        </a>
+    </li>
+    <li role="presentation" class="pull-right">
+        <a href="#history-tab" aria-controls="history-tab" data-toggle="tab" role="tab">
+            <span class="glyphicon glyphicon-list-alt"></span>
+            History
+        </a>
+    </li>
+</ul>
+<div id="page-tabs-content" class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="general-tab">
+        <div class="row">
+            <div class="col-md-12 col-lg-6">
+                <div class="bs-callout bs-callout-primary">
+                    <h4>Money Transaction</h4>
+                    <table class="table table-condensed">
+                        <tr>
+                            <td>ID</td>
+                            <td><?= $moneyTransactions['id'] ?></td>
+                        </tr>
+                        <tr>
+                            <td>Date</td>
+                            <td>
+                                <?= date(Constants::GLOBAL_DATE_FORMAT, strtotime($moneyTransactions['date'])) ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Account</td>
+                            <td>
+                                <?php $accountPath = Helper::getEntityEditPath($moneyTransactions['account_type'], $moneyTransactions['account_entity_id']); ?>
+                                <?php if ($accountPath != '/') { ?>
+                                    <a href="<?= $accountPath ?>" target="_blank">
+                                        <?= $moneyTransactions['account'] ?>
+                                    </a>
+                                <?php } else { ?>
+                                    <?= $moneyTransactions['account'] ?>
+                                <?php } ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Amount</td>
+                            <td>
+                                <?= number_format($moneyTransactions['amount'], 2) ?>
+                                <?= $moneyTransactions['currency'] ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Verified</td>
+                            <td>
+                                <?php if ($moneyTransactions['is_verified']) { ?>
+                                <span class="text-success"> Yes </span>
+                                <?php } else { ?>
+                                <span class="text-danger"> No </span>
+                                <?php } ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Voided</td>
+                            <td>
+                                <?php if ($moneyTransactions['is_voided']) { ?>
+                                <span class="text-danger"> Yes </span>
+                                <?php } else { ?>
+                                <span class="text-success"> No </span>
+                                <?php } ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Description</td>
+                            <td>
+                                <?= date($moneyTransactions['description']) ?>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <?php if ($transferTransactions->count()) { ?>
+        <div class="row">
+            <?php foreach ($transferTransactions as $transferTransaction) { ?>
+            <div class="col-md-12 col-lg-6">
+                <div class="bs-callout bs-callout-warning">
+                    <h4>Transfer Transaction</h4>
+                    <table class="table table-condensed">
+                        <tr>
+                            <td>ID</td>
+                            <td><?= $transferTransaction['id'] ?></td>
+                        </tr>
+                        <tr>
+                            <td>Creator</td>
+                            <td>
+                                <a href="/profile/<?= $transferTransaction['creator_id'] ?>" target="_blank">
+                                    <?= $transferTransaction['creator'] ?>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>From&nbsp;Account</td>
+                            <td>
+                                <?php $accountFromPath = Helper::getEntityEditPath($transferTransaction['account_from_type'], $transferTransaction['account_from_entity_id']); ?>
+                                <?php if ($accountFromPath != '/') { ?>
+                                <a href="<?= $accountFromPath ?>" target="_blank">
+                                    <?= $transferTransaction['account_from'] ?>
+                                </a>
+                                <?php } else { ?>
+                                    <?= $transferTransaction['account_from'] ?>
+                                <?php } ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>To&nbsp;Account</td>
+                            <td>
+                                <?php $accountToPath = Helper::getEntityEditPath($transferTransaction['account_to_type'], $transferTransaction['account_to_entity_id']); ?>
+                                <?php if ($accountToPath != '/') { ?>
+                                    <a href="<?= $accountToPath ?>" target="_blank">
+                                        <?= $transferTransaction['account_to'] ?>
+                                    </a>
+                                <?php } else { ?>
+                                    <?= $transferTransaction['account_to'] ?>
+                                <?php } ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Amount&nbsp;(From)</td>
+                            <td>
+                                <?= number_format($transferTransaction['amount_from'], 2) ?>
+                                <?= $transferTransaction['currency_from'] ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Amount&nbsp;(To)</td>
+                            <td>
+                                <?= number_format($transferTransaction['amount_to'], 2) ?>
+                                <?= $transferTransaction['currency_to'] ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Transaction&nbsp;Date&nbsp;(From)</td>
+                            <td>
+                                <?= date(Constants::GLOBAL_DATE_FORMAT, strtotime($transferTransaction['transaction_date_from'])) ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Transaction&nbsp;Date&nbsp;(To)</td>
+                            <td>
+                                <?= date(Constants::GLOBAL_DATE_FORMAT, strtotime($transferTransaction['transaction_date_to'])) ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Description</td>
+                            <td>
+                                <?= date($transferTransaction['description']) ?>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <?php } ?>
+        </div>
+        <?php } ?>
+
+        <?php if ($expenseTransactions->count()) { ?>
+        <div class="row">
+            <?php foreach ($expenseTransactions as $expenseTransaction) { ?>
+            <div class="col-md-12 col-lg-6">
+                <div class="bs-callout bs-callout-warning">
+                    <h4>Purchase Order Transaction</h4>
+                    <table class="table table-condensed">
+                        <tr>
+                            <td>ID</td>
+                            <td>
+                                <a target="_blank" href="/finance/purchase-order/ticket/<?= $expenseTransaction['purchase_order_id']?>?transaction_id=<?= $expenseTransaction['id'] ?>">
+                                    <?= $expenseTransaction['id'] ?>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Transaction&nbsp;Date</td>
+                            <td>
+                                <?= date(Constants::GLOBAL_DATE_FORMAT, strtotime($expenseTransaction['transaction_date'])) ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>From&nbsp;Account</td>
+                            <td>
+                                <?php // In case of PO transactions, account from type is always money account ?>
+                                <a href="/finance/money-account/edit/<?= $expenseTransaction['account_from_entity_id'] ?>" target="_blank">
+                                    <?= $expenseTransaction['account_from'] ?>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>To&nbsp;Supplier</td>
+                            <td>
+                                <?php $accountToPath = Helper::getEntityEditPath($expenseTransaction['account_to_type'], $expenseTransaction['account_to_entity_id']); ?>
+                                <?php if ($accountToPath != '/') { ?>
+                                    <a href="<?= $accountToPath ?>" target="_blank">
+                                        <?= $expenseTransaction['account_to'] ?>
+                                    </a>
+                                <?php } else { ?>
+                                    <?= $expenseTransaction['account_to'] ?>
+                                <?php } ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Amount</td>
+                            <td>
+                                <?= number_format($expenseTransaction['amount'], 2) ?>
+                                <?= $expenseTransaction['currency'] ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Refund</td>
+                            <td>
+                                <?= ($expenseTransaction['is_refund']) ? 'Yes' : 'No' ?>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <?php } ?>
+        </div>
+        <?php } ?>
+
+        <?php if ($reservationTransactions->count()) { ?>
+        <div class="row">
+            <?php foreach ($reservationTransactions as $reservationTransaction) { ?>
+            <div class="col-md-12 col-lg-6">
+                <div class="bs-callout bs-callout-warning">
+                    <h4>Reservation Transaction</h4>
+                    <table class="table table-condensed">
+                        <tr>
+                            <td>ID</td>
+                            <td><?= $reservationTransaction['id'] ?></td>
+                        </tr>
+                        <tr>
+                            <td>Reservation Number</td>
+                            <td>
+                                <a href="/booking/edit/<?= $reservationTransaction['reservation_id'] ?>" target="_blank">
+                                    <?= $reservationTransaction['res_number'] ?>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Money&nbsp;Account</td>
+                            <td>
+                                <a href="/finance/money-account/edit/<?= $reservationTransaction['money_account_entity_id'] ?>" target="_blank">
+                                    <?= $reservationTransaction['money_account'] ?>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Amount</td>
+                            <td>
+                                <?= number_format($reservationTransaction['amount'], 2) ?>
+                                <?= $reservationTransaction['currency'] ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>User</td>
+                            <td>
+                                <a href="/profile/<?= $reservationTransaction['user_id'] ?>" target="_blank">
+                                    <?= $reservationTransaction['user'] ?>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Description</td>
+                            <td>
+                                <?= date($reservationTransaction['description']) ?>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <?php } ?>
+        </div>
+        <?php } ?>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="history-tab">
+        <?php if ($this->logData) { ?>
+        <table id="history-datatable" class="table table-striped table-bordered table-condensed table-hover">
+            <thead>
+            <tr>
+                <th> Date </th>
+                <th> Employee </th>
+                <th> Message </th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <?php } else { ?>
+        <div class="alert alert-info">
+            <span class="glyphicon glyphicon-info-sign"></span>
+            There are no logs on this transaction.
+        </div>
+        <?php } ?>
+    </div>
+</div>

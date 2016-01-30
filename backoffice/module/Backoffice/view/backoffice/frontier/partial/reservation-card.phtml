@@ -1,0 +1,283 @@
+<?php
+use DDD\Service\Booking\BookingTicket;
+use DDD\Service\Frontier;
+use DDD\Service\Booking\BookingTicket as ReservationTicketService;
+?>
+
+<div id="reservation-card" class="bs-callout bs-callout-primary<?= $entityType != Frontier::CARD_RESERVATION ? ' soft-hide' : ''?>">
+
+    <?php if(!empty($card['parking'])) { ?>
+    <span class="label label-primary pull-right" data-toggle="tooltip" title="This reservation has a parking">P</span>
+    <?php } ?>
+    <?php if (!empty($card['key_task'])) { ?>
+        <span class="label label-danger pull-right" data-toggle="tooltip" title="This reservation has an open Keys & Fobs task on it">K</span>
+    <?php } ?>
+    <div id="reservation-cancelled" class="pull-right label label-danger<?= ($booked) ? ' soft-hide' : '' ?>">Cancelled</div>
+    <h4>
+        <span id="res-number"><?= (!empty($card['resNumber']) ? $card['resNumber'] : '')?></span>
+        <input type="hidden" id="res-id" value="<?= (!empty($card['id']) ? $card['id'] : '')?>">
+        <input type="hidden" id="res-email" value="<?= (isset($card['guestEmail']) ? $card['guestEmail'] : '')?>">
+    </h4>
+    <p id="reservation-card-notifications">
+        <em id="guest-standing-success" class="text-success<?= (!$booked || (!isset($card['guestBalance']) || $card['guestBalance'] < 0)) ? ' soft-hide' : '' ?>">
+            <span class="glyphicon glyphicon-ok-circle"></span>
+            Guest is in good standing
+        </em>
+        <em id="guest-standing-warning" class="text-danger<?= (!$booked || (!isset($card['guestBalance']) || $card['guestBalance'] >= 0)) ? ' soft-hide' : '' ?>">
+            <span class="glyphicon glyphicon-warning-sign"></span>
+            Please call the Contact Center before admitting this guest.
+        </em>
+        <em id="guest-standing-cancelled" class="text-warning<?= ($booked) ? ' soft-hide' : '' ?>">
+            <span class="glyphicon glyphicon-warning-sign"></span>
+            This is a cancelled reservation.
+        </em>
+        <em id="guest-ccca_verified" class="text-success<?= (!$booked || (!isset($card['cccaVerified']) || $card['cccaVerified'] == 0)) ? ' soft-hide' : '' ?>">
+            <br>
+            <span class="glyphicon glyphicon-ok-circle"></span>
+            This guest has been CCCA verified.
+        </em>
+    </p>
+    <table class="table table-condensed">
+        <tr>
+            <td>
+                Guest (Occupancy)
+            </td>
+            <td>
+                <span class="glyphicon glyphicon-user"></span>
+                            <span id="res-guest">
+                                <?= (!empty($card['guest']) ? $card['guest'] : '')?>
+                            </span>
+                (<span id="occupancy">
+                                <?= (!empty($card['occupancy']) ? $card['occupancy'] : '')?>
+                            </span>)
+                <br>
+                <span class="glyphicon glyphicon-earphone"></span>
+                            <span id="res-telephone">
+                                <?= (!empty($card['guest_phone']) ? $card['guest_phone'] : '')?>
+                            </span>
+                <?= (!empty($card['travelPhone']) ? '<br>' : '') ?>
+                <span id="res-travel-phone">
+                                <?php if (!empty($card['travelPhone'])) { ?>
+                                    <span class="glyphicon glyphicon-phone"></span>
+                                    <?= $card['travelPhone'] ?>
+                                <?php } ?>
+                            </span>
+            </td>
+        </tr>
+        <tr>
+            <td>Apartment</td>
+            <td>
+                <a
+                    class="card-entity-link"
+                    href="javascript:void(0);"
+                    id="res-apartment-assigned"
+                    data-entity-type="<?= Frontier::CARD_APARTMENT?>"
+                    <?= (!empty($card['apartmentAssignedId']) ? 'data-entity-id="' . $card['apartmentAssignedId'] . '"' : '')?>
+                    >
+                    <?= (!empty($card['apartmentAssignedId']) ? $card['apartmentAssigned'] : '')?>
+                </a>
+                <?= (!empty($card['unitNumber']) ? '<br>' : '') ?>
+                <span id="res-unit-number">
+                                <?= (!empty($card['unitNumber']) ? 'Unit ' . $card['unitNumber'] : '')?>
+                            </span>
+            </td>
+        </tr>
+        <tr>
+            <td>Building</td>
+            <td>
+                <a
+                    class="card-entity-link"
+                    href="javascript:void(0);"
+                    id="res-building"
+                    data-entity-type="<?= Frontier::CARD_BUILDING ?>"
+                    <?= (!empty($card['buildingId']) ? 'data-entity-id="' . $card['buildingId'] . '"' : '')?>
+                    >
+                    <?= (!empty($card['buildingId']) ? $card['building'] : '-')?>
+                </a>
+            </td>
+        </tr>
+        <tr>
+            <td>Arrival</td>
+            <td>
+                <span class="glyphicon glyphicon-calendar"></span>
+                            <span id="date-from">
+                                <?= (!empty($card['dateFrom']) ? $card['dateFrom'] : '')?>
+                            </span>
+                <span class="glyphicon glyphicon-time"></span>
+                            <span id="arrival-time">
+                                <?= (!empty($card['arrivalTime']) ? $card['arrivalTime'] : '')?>
+                            </span>
+                <?= (!empty($card['arrivalDate']) ? '<br>' : '') ?>
+                <em id="arrival-date" class="text-muted">
+                    <?php if (!empty($card['arrivalDate'])) { ?>
+                        (Actual Check-in: <?= $card['arrivalDate'] ?>)
+                    <?php } ?>
+                </em>
+            </td>
+        </tr>
+        <tr>
+            <td>Departure</td>
+            <td>
+                <span class="glyphicon glyphicon-calendar"></span>
+                            <span id="date-to">
+                                <?= (!empty($card['dateTo']) ? $card['dateTo'] : '')?>
+                            </span>
+                <?= (!empty($card['departureDate']) ? '<br>' : '') ?>
+                <em id="departure-date" class="text-muted">
+                    <?php if (!empty($card['departureDate'])) { ?>
+                        (Actual Check-out: <?= $card['departureDate'] ?>)
+                    <?php } ?>
+                </em>
+            </td>
+        </tr>
+        <?php
+            if (isset($card['creditCardsForAuthorization']) && count($card['creditCardsForAuthorization'])) {
+        ?>
+                <tr>
+                    <td>CCCA Form</td>
+                    <td>
+                        <?php
+                            if (!empty($card['cccaPageLink'])) {
+                                foreach ($card['cccaPageLink'] as $row) {
+
+                        ?>
+                                <a href="<?= $row['link'] ?>" target="_blank">Open Authorization Page for (<?= $row['lastDigit'] ?>)</a><br>
+                        <?php
+                                }
+                            }
+                        ?>
+                    </td>
+                </tr>
+                <?php
+            }
+        ?>
+    </table>
+    <div class="row">
+        <div class="col-sm-12">
+            <div id="res-housekeeping-comments">
+                <?php if (!empty($card['housekeepingComments'])) { ?>
+                    <br>
+                    <?= $card['housekeepingComments'] ?>
+                <?php } ?>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <?php $dateFrom = isset($card['dateFrom']) ? new DateTime($card['dateFrom']) : 0 ?>
+        <?php $dateTo   = isset($card['dateTo']) ? new DateTime($card['dateTo']) : 0 ?>
+        <?php $now      = isset($card['now']) ? new DateTime($card['now']) : -1 ?>
+
+        <div class="col-sm-12 card-actions" id="reservation-actions">
+            <div class="btn-group pull-left">
+
+                <!-- for large displays - button with text -->
+                <button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown">
+                    <span>Actions</span>
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a
+                            href="javascript:void(0)"
+                            data-toggle="modal"
+                            data-target="#comment-modal"
+                            class="add-comment-btn">
+                            Add Comment
+                        </a>
+                    </li>
+                    <?php if (isset($card['frontierCharge'])) { ?>
+                        <li>
+                            <a href="<?=$card['frontierCharge']?>" class="remove-before-view">Charge</a>
+                        </li>
+                    <?php } ?>
+                    <?php if(isset($card['keyUrl'])) {?>
+                        <li>
+                            <a target="_blank" href="<?= $card['keyUrl'] ?>" class="remove-before-view">Entry Instructions</a>
+                        </li>
+                    <?php } ?>
+                    <?php if(isset($card['parking']) && $card['parking']) {?>
+                        <li>
+                            <a target="_blank" href="<?= $card['parking_url'] ?>" class="remove-before-view">Print Parking Permit</a>
+                        </li>
+                    <?php } ?>
+                    <?php if ($booked && $dateFrom <= $now) { ?>
+                        <?php if (isset($card['arrivalStatus']) && $card['arrivalStatus'] == BookingTicket::BOOKING_ARRIVAL_STATUS_EXPECTED) { ?>
+                            <li>
+                                <a
+                                    href="javascript:void(0)"
+                                    class="change-status-button"
+                                    data-status="<?php echo ReservationTicketService::BOOKING_ARRIVAL_STATUS_NO_SHOW ?>"
+                                    >
+                                    No Show
+                                </a>
+                            </li>
+                        <?php }
+                    } if (isset($card['hasMoreCards']) && $card['hasMoreCards'] && $dateTo > $now) { ?>
+                        <li>
+                            <a
+                                href="javascript:void(0)"
+                                id="generate-ccca-page"
+                            >
+                                Generate CCCA Form
+                            </a>
+                        </li>
+                    <?php } ?>
+                </ul>
+            </div>
+
+            <?php if ($booked && $dateFrom <= $now) { ?>
+                <?php if (isset($card['arrivalStatus']) && $card['arrivalStatus'] == BookingTicket::BOOKING_ARRIVAL_STATUS_EXPECTED && !$doNotShowButtons) { ?>
+                    <button class="change-status-button btn btn-success btn-sm check-in-button"
+                            data-status="<?php echo ReservationTicketService::BOOKING_ARRIVAL_STATUS_CHECKED_IN ?>"> Check-in </button>
+                <?php } ?>
+                <?php if (isset($card['arrivalStatus']) && ($card['arrivalStatus'] == BookingTicket::BOOKING_ARRIVAL_STATUS_EXPECTED || $card['arrivalStatus'] == BookingTicket::BOOKING_ARRIVAL_STATUS_CHECKED_IN)) { ?>
+                    <button class="change-status-button btn btn-success btn-sm"
+                            data-status="<?php echo ReservationTicketService::BOOKING_ARRIVAL_STATUS_CHECKED_OUT ?>"> Check-out </button>
+                <?php } ?>
+            <?php } ?>
+        </div>
+    </div>
+</div>
+
+<?php if (isset($card['guestBalance']) && isset($card['apartmentCurrencyCode'])) { ?>
+<div id="sendCccaModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-info">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">Generate CCCA form</h4>
+            </div>
+            <div class="modal-body">
+                <p>Do you want to generate CCCA form?</p>
+                <div class="row">
+                    <div class="col-sm-6 form-group">
+                        <select class="form-control" id="send_ccca_cc_id">
+                            <?php
+                            if (isset($card['creditCardsForAuthorization']) && count($card['creditCardsForAuthorization'])) {
+                                /* @var $ccForAuthorization \DDD\Domain\Booking\ChargeAuthorization\ChargeAuthorizationCreditCard */
+                                foreach ($card['creditCardsForAuthorization'] as $ccForAuthorization) {
+                            ?>
+                                    <option value="<?= $ccForAuthorization->getId() ?>"><?= $ccForAuthorization->getBrand() . ' - ' . $ccForAuthorization->getLast4Digits() . ' (' . $ccForAuthorization->getHolder() . ')' ?></option>
+                            <?php
+                                }
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="col-sm-6 form-group">
+                        <div class="input-group">
+                            <input type="text" id="amount-for-ccca" class="form-control" value="<?php echo abs($card['guestBalance'])?>">
+                            <label class="input-group-addon" for="amount-for-ccca" id="currency-code-for-ccca"><?php echo $card['apartmentCurrencyCode']?></label>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="javascript:void(0)" class="btn btn-default generateAndSendCccaForm" data-dismiss="modal" aria-hidden="true">Cancel</a>
+                <a href="javascript:void(0)" class="btn btn-primary"  onclick="generateCccaPage()" id="reservation_action_send_ccca_confirm">Yes</a>
+            </div>
+        </div>
+    </div>
+</div>
+<?php } ?>

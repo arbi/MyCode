@@ -1,0 +1,91 @@
+<?php
+    use DDD\Service\Parking\Inventory;
+?>
+<table class="table table-striped" id="apartel_inventory_tbl">
+    <tbody>
+        <tr>
+            <td>
+                <table class="table table-hover table-bordered left-tbl" style="border-right:none" id="left-tbl">
+                    <thead>
+                        <tr>
+                            <th data-name="Name" height="<?=Inventory::cellThHeight?>px">Spots</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php
+                    foreach ($this->spots as $spot) {?>
+                        <tr>
+                            <td height="<?=Inventory::cellHeight?>px" class="hidden-print">
+                                <a href="/parking/<?=$this->lotId?>/spots/edit/<?=$spot['id']?>" target="_blank"><?=$spot['unit']?></a>
+                            </td>
+                            <td height="<?=Inventory::cellHeightPrint?>px" class="visible-print">
+                                <span><?=$spot['unit']?></span>
+                            </td>
+                        </tr>
+                    <?php } ?>
+                    </tbody>
+                </table>
+            </td>
+            <td style="overflow-x: scroll !important;">
+                <div id="date-div" style="position: relative">
+                <?php foreach ($this->reservedDay as $res) {
+                    $link = "/booking/edit/" . $res['res_number'];
+                    if ($this->isFrontier) {
+                        $link = "/frontier?id=1_" . $res['res_id'];
+                    }
+                ?>
+                    <div style="<?=$res['style']?>;" class="reservation-item hidden-print">
+                        <a href="<?=$link?>" target="_blank"> <?=$res['res_number']?> </a>
+                    </div>
+                    <div style="<?=$res['style_print']?>;" class="reservation-item visible-print">
+                        <div><?=$res['res_number']?></div>
+                    </div>
+                <?php } ?>
+
+                <?php foreach ($this->closeDay as $day) {?>
+                    <div style="<?=$day['style']?>" class="unmovable closed-day hidden-print" data-length="1">Closed</div>
+                    <div style="<?=$day['style_print']?>" class="unmovable closed-day visible-print" data-length="1">Closed</div>
+                <?php } ?>
+                </div>
+                <table class="table table-bordered right-tbl" style="width: <?=$this->tableWidth?>px;">
+                    <thead>
+                        <tr>
+                            <?php
+                            $currDate = $this->from;
+                            while ($currDate <= $this->to) {?>
+                                <th width="<?=Inventory::cellWidth?>px" height="<?=Inventory::cellThHeight?>px">
+                                    <p class="text-muted hidden-print"><?=date('D', strtotime($currDate))?></p><?=date('m/d', strtotime($currDate))?>
+                                </th>
+                            <?php
+                                $currDate = date('Y-m-d', strtotime($currDate . ' +1 day'));
+                            } ?>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php for ($i = 0; $i < count($this->spots); $i++) {?>
+                        <tr>
+                            <?php for ($j = 0; $j < $this->dayCount; $j++) {?>
+                                <td height="<?=Inventory::cellHeight?>px" class="ui-droppable hidden-print">&nbsp;</td>
+                                <td height="<?=Inventory::cellHeightPrint?>px" class="ui-droppable visible-print">&nbsp;</td>
+                            <?php } ?>
+                        </tr>
+                    <?php } ?>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <?php
+                            $currDate = $this->from;
+                            while ($currDate <= $this->to) {?>
+                                <th width="<?=Inventory::cellWidth?>px" height="<?=Inventory::cellThHeight?>px">
+                                    <p class="text-muted hidden-print"><?=date('D', strtotime($currDate))?></p><?=date('m/d', strtotime($currDate))?>
+                                </th>
+                                <?php
+                                $currDate = date('Y-m-d', strtotime($currDate . ' +1 day'));
+                            } ?>
+                        </tr>
+                    </tfoot>
+                </table>
+            </td>
+        </tr>
+    </tbody>
+</table>

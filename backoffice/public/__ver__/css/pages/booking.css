@@ -1,0 +1,14 @@
+@media (max-width: 480px) {
+    #download-btn {
+        display: none;
+    }
+}
+
+.ui-autocomplete.ui-front.ui-menu.ui-widget.ui-widget-content {
+    overflow-x: hidden;
+}
+
+span.lock-sign-custom{
+    margin-left: 2px !important;
+	vertical-align: middle;
+}

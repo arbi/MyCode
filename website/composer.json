@@ -1,0 +1,14 @@
+{
+    "name": "ginosi/websire",
+    "description": "Ginosi Website",
+    "config": {
+        "vendor-dir": "/ginosi/incubator/website"
+    },
+    "require": {
+        "php": ">=5.3.3",
+        "zendframework/zendframework": "2.5.2",
+        "rwoverdijk/assetmanager": "1.*",
+        "graylog2/gelf-php": "~1.0",
+        "ua-parser/uap-php": "*"
+    }
+}

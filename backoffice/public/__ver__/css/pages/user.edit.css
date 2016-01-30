@@ -1,0 +1,34 @@
+.loading-tree {
+    position:relative;
+    bottom: 250px;
+    z-index:90000;
+}
+
+#permission span[data-toggle] {
+    margin-bottom: 7px!important;
+    display: inline-block!important;
+}
+
+#permission label.control-label {
+    position: relative;
+    bottom: 5px;
+}
+
+#datatable_user_account_container .user_account_edit, #datatable_salary_scheme_container .salary_scheme_edit {
+    margin-right: 5px;
+}
+
+.salary_scheme_inactivate {
+    margin-right: 5px;
+}
+
+#salary-scheme-form .daterangepicker {
+    top: 0;
+    left: 0;
+    padding: 0 5px;
+    margin: 0;
+}
+
+#datatable_salary_scheme_info_filter, #datatable_user_account_info_filter {
+    display: none;
+}

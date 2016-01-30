@@ -1,0 +1,38 @@
+<div class="page-header">
+    <h1><?php echo $this->escapeHtml($this->pageHeading); ?></h1>
+</div>
+<div class="tabbable">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="#output" data-toggle="tab">Output</a></li>
+        <li><a href="#formClass" data-toggle="tab">Form</a></li>
+        <?php if($this->inputFilterSource): ?>
+            <li><a href="#inputFilter" data-toggle="tab">Input filter</a></li>
+        <?php endif; ?>
+        <li><a href="#viewScript" data-toggle="tab">View script</a></li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane active" id="output">
+            <?php echo $this->formOutput; ?>
+        </div>
+        <div class="tab-pane" id="formClass">
+            <p>File: <code>&lt;module dir&gt;<?php echo $this->escapeHtml($this->formFile); ?></code></p>
+            <pre class="prettyprint linenums">
+<?php echo $this->escapeHtml($this->formSource); ?>
+            </pre>
+        </div>
+        <?php if($this->inputFilterSource): ?>
+            <div class="tab-pane" id="inputFilter">
+                <p>File: <code>&lt;module dir&gt;<?php echo $this->escapeHtml($this->inputFilterFile); ?></code></p>
+                <pre class="prettyprint linenums">
+<?php echo $this->escapeHtml($this->inputFilterSource); ?>
+                </pre>
+            </div>
+        <?php endif; ?>
+        <div class="tab-pane" id="viewScript">
+            <p>File: <code>&lt;module dir&gt;<?php echo $this->escapeHtml($this->viewScriptFile); ?></code></p>
+            <pre class="prettyprint linenums">
+<?php echo $this->escapeHtml($this->viewScriptSource); ?>
+            </pre>
+        </div>
+    </div>
+</div>

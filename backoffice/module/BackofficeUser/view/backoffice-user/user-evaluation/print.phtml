@@ -1,0 +1,86 @@
+<?php
+use DDD\Service\User\Evaluations as EvaluationService;
+use Library\Constants\Constants;
+
+$this->headLink()
+    ->appendStylesheet($this->basePath() . '/css/bootstrap-3.3.5.min.css', 'screen,print');
+
+/**
+ * @var \DDD\Domain\User\Evaluation\EvaluationExtended|bool $data
+ * @var \DDD\Domain\User\Evaluation\EvaluationValues[]|\ArrayObject $values
+ */
+$this->headTitle('Print Evaluation')->setSeparator(' - ');
+$data = $this->data;
+$values = $this->values;
+
+if ($this->error || !$data) {
+?>
+    <div class="alert alert-danger" role="alert">Error! <?php echo $this->error; ?></div>
+<?php
+} else {
+?>
+    <style scoped="scoped">
+        h2 { font-size: 170%; }
+        h4 { line-height: 120%; }
+        .half-width { width: 50%; margin: 0 auto; }
+        p {font-size: 90%;}
+    </style>
+
+    <h2><?= EvaluationService::getEvaluationTypeOptions()[$data->getTypeId()] ?> for <?= $data->getEmployeeFullName() ?></h2>
+    <p>
+        <?= $data->getCreatorFullName() ?>&nbsp;(<?= trim($data->getCreatorPosition()) ?>)
+        <br>
+        <?php echo date(Constants::GLOBAL_DATE_FORMAT, strtotime($data->getDateCreated())); ?>
+    </p>
+    <br />
+    <h4><?php echo $data->getDescription(); ?></h4>
+
+    <?php
+    if ($values->count()) {
+        $slaveItems = [];
+        $counter = 0;
+        $sum = 0;
+        ?>
+        <h2 align="center">Performance</h2>
+        <table border="0" class="half-width">
+            <?php
+            foreach ($values as $item) {
+                if ($item->getValue() == -1) {
+                    $slaveItems[] = $item;
+                    continue;
+                }
+
+                $counter++;
+                $sum += $item->getValue();
+                ?>
+                <tr>
+                    <td><?php echo $item->getItem(); ?></td>
+                    <td><?php echo number_format($item->getValue(), 2); ?></td>
+                </tr>
+            <?php } ?>
+            <?php
+            foreach ($slaveItems as $item) {
+                ?>
+                <tr class="text-muted hidden-print">
+                    <td><?php echo $item->getItem(); ?></td>
+                    <td>-</td>
+                </tr>
+            <?php } ?>
+            <tr>
+                <td colspan="2"><hr></td>
+            </tr>
+            <tr>
+                <th>Average</th>
+                <th><?php echo round($counter ? $sum / $counter : 0, 4); ?></th>
+            </tr>
+        </table>
+    <?php
+    }
+    ?>
+    <script>
+        if (window.location.hash == '#print') {
+            window.print();
+        }
+    </script>
+<?php
+}

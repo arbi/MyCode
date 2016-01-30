@@ -1,0 +1,163 @@
+.selectize-control.multi .selectize-input .selectize-ginosik-name, .selectize-control.plugin-remove_button.multi [data-value] .remove {
+    display: none;
+}
+
+.selectize-control.plugin-remove_button.multi [data-value] {
+    padding-right: 2px !important;
+}
+
+.selectize-control.plugin-remove_button.multi .selectize-input.focus [data-value] {
+    padding-right: 24px !important;
+}
+
+.selectize-control.multi .selectize-input.focus {
+    height: auto;
+}
+.selectize-control.multi .selectize-input.focus .selectize-ginosik-name, .selectize-control.multi .selectize-input.focus .remove {
+    display: inline;
+}
+
+.commentTask {
+    color: #333;
+    border: 1px solid #ccc;
+    height: 200px;
+    overflow: auto;
+    padding: 5px;
+    margin-bottom: 20px;
+    margin-left: 0 !important;
+}
+
+.dropdown-menu.ginosik-dropdown {
+    padding: 3px;
+    top: 120%;
+    border: none;
+}
+
+.form-control.subtask-description, .input-group-addon.remove-subtask {
+    border-top: none;
+    border-right: none;
+    border-left: none;
+    border-radius: 0;
+    box-shadow: none;
+    margin-bottom: 3px;
+}
+
+.form-control.subtask-description:focus {
+    box-shadow: none;
+    font-style: italic;
+}
+
+.subtask-done {
+    opacity: 0.4;
+}
+
+.subtask-done .form-control.subtask-description, .subtask-done .input-group-addon.remove-subtask {
+    color: #3c763d;
+    border-color: #3c763d;
+}
+
+.input-group-addon.remove-subtask {
+    cursor: pointer;
+    background: none;
+}
+
+#fieldset-staff.disabled .glyphicon-remove {
+    display: none;
+}
+
+#panelAdvanced .panel-title {
+    cursor: pointer;
+}
+
+#date-type-dropdown > span {
+    border: 0;
+    cursor: pointer;
+}
+
+#progress {
+    width: 250px;
+    display: none;
+}
+.progress {
+    margin-bottom: 5px;
+}
+#file-errors {
+    display: none;
+}
+
+#attachments-list {
+    list-style-type: none;
+}
+
+#attachments-list .attachment-item {
+    margin-bottom: 10px;
+    margin-right: 10px;
+    float: left;
+}
+
+#attachments-list .attachment-item:last-child {
+    margin-right: 0;
+}
+
+#attachments-list .attachment-item .attachment-btn {
+    box-shadow: 1px 1px 4px #eee;
+}
+
+#attachments-list .attachment-item.attachment-temp .attachment-btn {
+    border-style: dashed;
+}
+
+#file {
+    display: none;
+}
+
+.page-actions .btn-group {
+    padding: 0 !important;
+}
+
+#datatable_task_info_wrapper .selectize-input {
+    min-height: inherit;
+    padding: 2px 4px !important;
+}
+
+#subtasks .input-group {
+    width: 100%;
+}
+
+@media (min-width: 768px) {
+
+    #fieldset-staff .form-group>div {
+        margin-bottom: -3px;
+    }
+}
+
+ul.ui-autocomplete {
+    display: inline-table;
+}
+
+span.glyphicon-info-sign {
+    color: #1E81B5;
+}
+
+.selectize-control .selectize-input.disabled {
+    background-color: #eee!important;
+}
+
+#task-form #tags + div.selectize-control .selectize-input {
+    border: 0;
+}
+.main-title .glyphicon-tags {
+    font-size: 14px;
+    color: #555;
+    text-decoration: none;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.dt-ginosik-selectize .selectize-input>div,
+.dt-ginosik-selectize .selectize-dropdown-content>div
+{
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}

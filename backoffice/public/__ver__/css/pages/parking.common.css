@@ -1,0 +1,330 @@
+.nav {
+    margin-bottom: 20px !important;
+}
+
+.nav-stacked a {
+    padding: 5px !important;
+    font-size: 90%;
+}
+
+.nav-stacked a [class*="glyphicon-chevron-"] {
+    float: right !important;
+    opacity: .25;
+}
+.nav-stacked a:hover [class*="glyphicon-"] {
+    opacity: .5;
+}
+
+#progress {
+    width: 250px;
+}
+.progress {
+    margin-bottom: 5px;
+}
+#file {
+    display: none;
+}
+
+#permit-preview>img {
+    width: 100%;
+}
+
+.nav-inventory-months li a {
+    padding-top: 2px;
+    padding-bottom: 2px;
+    white-space: nowrap;
+}
+
+.spot-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.spot-list li {
+    padding: 6px 6px 5px;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.spot-list li:hover {
+    background: #eee;
+    color: inherit;
+}
+
+.spot-list-icon {
+    margin-right: 8px;
+    padding: 5px;
+    font-size: 0;
+    line-height: 0;
+    vertical-align: super;
+}
+
+.row_week {
+    margin: 0 -5px;
+}
+
+.col_week_day {
+    width: 14.2857142857%;
+    padding: 0px 5px 0;
+    float: left;
+}
+
+.calendar-header-item {
+    text-align: center;
+    padding: 0px 5px 0px 5px;
+    border: 1px solid #ddd;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.calendar-day-item {
+    min-height: 80px;
+    position: relative;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    padding-left: 5px;
+    padding-right: 5px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;;
+}
+
+.availability-badge {
+    position: absolute;
+    height: 8px;
+    top: 0;
+    width: 100%;
+}
+
+.availability-badge-open {
+    background-color: #42bd41;
+}
+
+.availability-badge-close {
+    background-color: #e84e40;
+}
+
+.calendar-day-item-empty {
+    min-height: 80px;
+    position: relative;
+    margin-bottom: 10px;
+    padding: 0px 5px 10px;
+    background-color: #fff;
+    border: 1px solid transparent;
+}
+
+.calendar-day-item .calendar-item-header {
+    height: 25px;
+    margin-bottom: 5px;
+    margin-right: -5px;
+    margin-left: -5px;
+}
+
+.calendar-day-item .day-of-month {
+    content: "Example";
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    padding: 3px 0;
+    width: 26px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: bold;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    color: #4c4e50;
+    -webkit-border-radius: 4px 0 4px 0;
+    -moz-border-radius: 4px 0 4px 0;
+    border-radius: 4px 0 4px 0;
+    z-index: 1;
+}
+
+.spots-container {
+    cursor: pointer;
+    padding: 1px 0 0 2px;
+}
+.calendar-day-item[data-status="open"] .day-of-month,
+.calendar-day-item[data-status="open"] {
+    border-color: #42bd41;
+}
+
+.calendar-day-item[data-status="open"]:hover {
+    background: rgba(101, 208, 94, 0.44) !important;
+}
+.calendar-day-item[data-status="close"] .day-of-month,
+.calendar-day-item[data-status="close"] {
+    border-color: #e84e40;
+}
+
+.calendar-day-item[data-status="close"]:hover {
+    background: rgba(250, 87, 60, 0.34) !important;
+}
+
+.row-last-item {
+    margin-right: 0;
+}
+
+.red {
+    background-color: #e84e40;
+}
+
+.green {
+    background-color: #42bd41;
+}
+
+.spot-container {
+    display: block;
+    color: white;
+    padding: 5px;
+    width: 32px;
+    float: left;
+    margin: 2px;
+}
+
+.spot-information {
+    display: block;
+    float: left;
+    height: 14px;
+    width: 51px;
+    margin: 1px 2px 1px 0;
+    padding: 2px;
+    border: 0 solid #ddd;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 1px;
+    border-radius: 1px;
+}
+
+.spot-icon {
+    display: block;
+    width: 10px;
+    height: 10px;
+    float: left;
+    border: 3px solid rgba(255,255,255,.7);
+    border-radius: 50%;
+}
+
+.spot-price {
+    display: block;
+    width: 30px;
+    height: 10px;
+    float: left;
+    line-height: 12px;
+    font-size: 10px;
+    font-weight: bold;
+    padding-left: 2px;
+}
+
+.calendar-item-header .action-bar {
+    display: none;
+    position: absolute;
+    height: 19px;
+    top: 8px;
+    width: 100%;
+}
+
+.calendar-day-item:hover .calendar-item-header .action-bar {
+    display: block;
+}
+
+.action-bar ul.day-inventory-actions {
+    padding: 0;
+    position: absolute;
+    left: 0;
+    display: block;
+    height: 19px;
+    width: 93px;
+    list-style-type: none;
+    margin-left: 25px;
+}
+
+.action-bar ul.day-inventory-actions li {
+    display: inline;
+    float: right;
+    margin-left: 8px;
+}
+
+.action-bar ul.day-inventory-actions a[data-action] {
+    text-decoration: none;
+    color: white;
+    text-shadow: 1px 1px 0 rgba(0,0,0,.6);
+    padding: 1px 2px;
+    line-height: 0;
+    font-size: 80%;
+    border-radius: 2px;
+}
+.action-bar ul.day-inventory-actions a[data-action="open"] {
+    background: rgba(0, 128, 0, .8);
+}
+.action-bar ul.day-inventory-actions a[data-action="open"]:hover {
+    background: rgba(0, 128, 0, 1);
+}
+.action-bar ul.day-inventory-actions a[data-action="close"] {
+    background: rgba(199, 0, 0, 0.8);
+}
+.action-bar ul.day-inventory-actions a[data-action="close"]:hover {
+    background: rgba(199, 0, 0, 1);
+}
+
+.availability-toggle-block,
+.availability-toggle-block label {
+    display: inline;
+}
+
+.availability-toggle-block .badge input {
+    vertical-align: text-bottom;
+}
+
+#locker {
+    position: absolute;
+    z-index: 999;
+    opacity: .7;
+    background: white;
+}
+
+.locker {
+    width: 102%;
+    height: 102%;
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    z-index: 99;
+    background: #fff;
+    opacity: .7;
+}
+
+.more-modal {
+    text-align:center;
+}
+
+.parking_permit_id label {
+    cursor:pointer;
+}
+
+.save_parking_permit{
+    margin-left:2px;
+}
+
+@media (max-width: 1300px) {
+    .action-bar ul.day-inventory-actions {
+        left: -84px;
+        top: 12px;
+    }
+    .spots-container {
+        margin-top:15px;
+    }
+    .spot-information {
+        width:21px;
+    }
+    .spot-icon {
+        display:none;
+    }
+}

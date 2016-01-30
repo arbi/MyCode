@@ -1,0 +1,127 @@
+.panel-type {
+    cursor: pointer;
+}
+
+.panel-body hr {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    border: 0;
+    border-top: 1px solid #ddd;
+}
+
+.nav-apartel {
+    margin-bottom: 20px !important;
+}
+
+.nav {
+    margin-bottom: 20px !important;
+}
+
+.nav-stacked a {
+    padding: 5px !important;
+    font-size: 90%;
+}
+
+.nav-stacked a [class*="glyphicon-chevron-"] {
+    float: right !important;
+    opacity: .25;
+}
+.nav-stacked a:hover [class*="glyphicon-"] {
+    opacity: .5;
+}
+
+.nav-stacked a.glyphicon-heart-empty {
+    float: left !important;
+    opacity: .25;
+}
+.nav-stacked a.glyphicon-heart-empty:hover {
+    margin-right: 10px;
+    opacity: .5;
+}
+
+.menu-rate {
+    padding-left: 20px;
+}
+
+.menu-type{
+    background: #F2F0F0;
+    border-radius: 3px;
+}
+
+.rate-add-part{
+    padding-left: 130px;
+    margin: 10px 0px 20px 0px;
+}
+
+.label-mid-size {
+    padding: 6px 10px !important;
+    margin-right: -2px !important;
+    line-height: 30px !important;;
+}
+
+a:link.apartment-label {
+    text-decoration: none !important;
+}
+
+.inventory-range-weekdays {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+.inventory-range-weekdays li {
+    display: inline;
+}
+
+.inventory-range-weekdays .day-name {
+    position: relative;
+    top: 12px;
+}
+
+.inventory-range-weekdays input[type=checkbox]:checked + label .day-name {
+    top: 3px;
+}
+
+.inventory-range-weekdays input[type=checkbox] {
+    display: none;
+}
+
+.inventory-range-weekdays input[type=checkbox] + label {
+    background: #eee;
+    height: 46px;
+    width: 46px;
+    display: inline-block;
+    padding: 0;
+    text-align: center;
+    cursor: pointer;
+    border: 3px double #ddd;
+    border-radius: 1px;
+    color: #555;
+    transition: all .2s linear;
+    -webkit-transition: all .2s linear;
+    -moz-transition: all .2s linear;
+    -o-transition: all .2s linear;
+}
+
+.inventory-range-weekdays input[type=checkbox] + label:hover {
+    border-color: #aaa;
+}
+
+.inventory-range-weekdays input[type=checkbox]:checked + label:hover {
+    background: #0080FF;
+    border-color: #fff;
+    opacity: .7;
+}
+
+.inventory-range-weekdays input[type=checkbox]:checked + label {
+    background: #0080FF;
+    color: #fff;
+}
+
+.inventory-range-weekdays input[type=checkbox]:checked + label:after {
+    content: "✓";
+    display: block;
+    position: absolute;
+    width: 46px;
+    text-align: center;
+    color: rgba(255, 255, 255, .6);
+}

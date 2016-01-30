@@ -1,0 +1,188 @@
+<?php
+
+use DDD\Service\User\Evaluations as EvaluationService;
+use Library\Constants\Constants;
+
+/**
+ * @var \DDD\Domain\User\Evaluation\EvaluationExtended[] $evaluationsList
+ */
+$evaluationsList = $this->evaluationsList;
+
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/module/backoffice-user/user-evaluation/index.js');
+
+?>
+<script type="text/javascript">
+	$(function() {
+        if (window.location.hash == '#evaluations-tab') {
+            $('#evaluations-tab').tab('show');
+
+            setTimeout(function() {
+                $('#evaluations-tab').trigger('click');
+            }, 100);
+        }
+    });
+</script>
+
+<style scoped="scoped"> p { margin: 0; } </style>
+<table class="table table-bordered table-stripped table-hover table-condensed evaluation-table">
+    <thead>
+        <tr>
+            <th style="width: 90px">Status</th>
+            <th style="width: 90px">Date</th>
+            <th class="w1">Type</th>
+            <th style="width: 160px">Evaluator</th>
+            <th style="width: 1px">Average</th>
+            <th>Description</th>
+            <th style="width: 65px"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        if ($evaluationsList && $evaluationsList->count()) {
+            foreach ($evaluationsList as $evaluation) {
+                $statusLabel = '<span class="label %s">' . EvaluationService::getEvaluationStatusOptions()[$evaluation->getStatus()] . '</span>';
+
+                switch ($evaluation->getStatus())
+                {
+                    case EvaluationService::USER_EVALUATION_STATUS_PLANNED:
+                        $statusLabel = sprintf($statusLabel, 'label-warning');
+                        break;
+                    case EvaluationService::USER_EVALUATION_STATUS_DONE:
+                        $statusLabel = sprintf($statusLabel, 'label-success');
+                        break;
+                    case EvaluationService::USER_EVALUATION_STATUS_CANCELLED:
+                        $statusLabel = sprintf($statusLabel, 'label-default');
+                        break;
+                }
+
+                $removeUrl = '//' . \Library\Constants\DomainConstants::BO_DOMAIN_NAME . $this->url('evaluation/delete',[
+                    'user_id' => $evaluation->getUserId(),
+                    'evaluation_id' => $evaluation->getId()
+                ]);
+
+                $printUrl = '//' . \Library\Constants\DomainConstants::BO_DOMAIN_NAME . $this->url('evaluation/print', [
+                    'evaluation_id' => $evaluation->getId()
+                ]) . '#print';
+
+                $viewUrl = '//' . \Library\Constants\DomainConstants::BO_DOMAIN_NAME . $this->url('evaluation/view', [
+                    'evaluation_id' => $evaluation->getId()
+                ]);
+
+                $cancelUrl = '//' . \Library\Constants\DomainConstants::BO_DOMAIN_NAME . $this->url('evaluation/cancel', [
+                    'evaluation_id' => $evaluation->getId()
+                ]);
+
+                $evaluateUrl = '//' . \Library\Constants\DomainConstants::BO_DOMAIN_NAME . $this->url('evaluation/edit',[
+                    'user_id' => $evaluation->getUserId(),
+                    'evaluation_id' => $evaluation->getId()
+                ]);
+
+                $cancelButton = ($evaluation->getStatus() == EvaluationService::USER_EVALUATION_STATUS_PLANNED) ?
+                    '<li><a href="#" onclick="cancelPlanEvaluation(this)" data-url="' . $cancelUrl . '" class="evaluation-cancel">Cancel</a></li>' : '';
+
+                $removeButton = (
+                    ($this->hasGlobalEvaluationManagerRole) || $this->userId == $evaluation->getCreatorId()  ) ?
+                    '<li><a href="#" onclick="removeEvaluation(this)" data-url="' . $removeUrl . '" class="evaluation-remove">Remove</a></li>' : '';
+
+                $evaluateButton = ($evaluation->getStatus() == EvaluationService::USER_EVALUATION_STATUS_PLANNED) ?
+                    '<li><a href="' . $evaluateUrl . '" class="evaluation-edit">Evaluate</a></li>' : '';
+
+                $actionButtons = '
+                    <div class="btn-group">
+                        <a href="' . $viewUrl . '" class="btn btn-xs btn-primary btn-default">View</a>
+                        <button type="button" class="btn btn-xs btn-primary dropdown-toggle" data-toggle="dropdown">
+                            <span class="caret"></span>
+                            <span class="sr-only">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="' . $printUrl . '" target="_blank">Print</a></li>
+                ' . $evaluateButton . $cancelButton . $removeButton;
+
+                $evaluationDescription = $evaluation->getDescription();
+                $evaluationDescription = strip_tags($evaluationDescription);
+
+                $dots = '';
+                if (strlen($evaluationDescription) > 80) {
+                    $dots = '...';
+                }
+
+                $evaluationDescription = mb_substr($evaluationDescription, 0, 80, 'utf-8');
+                $evaluationDescription .= $dots;
+
+                $averageScore = $evaluation->getTypeId() == EvaluationService::USER_EVALUATION_TYPE_EVALUATION ? $evaluation->getAverageScore() : '';
+
+                if ($evaluation->getTypeId() != 3) {
+
+                    $notificationMessage =
+
+                    $actionButtons .= '
+                        <li>
+                            <a  href="#"
+                                data-message = "' . $evaluationDescription . '"
+                                data-eval_id="' . $evaluation->getId() . '"
+                                data-type = "' . $evaluation->getTypeId() . '"
+                                data-owner_id = "' . $this->editableUserId . '"
+                                class="evaluation-inform-ud"
+                                onclick="informEmployee(this)"
+                            >Send to Employee</a>
+                        </li>';
+                }
+
+                $actionButtons .= '</ul></div>';
+        ?>
+                <tr>
+                    <td><?= $statusLabel ?></td>
+                    <td><?= date(Constants::GLOBAL_DATE_FORMAT, strtotime($evaluation->getDateCreated())) ?></td>
+                    <td><?= $evaluation->getTypeTitle() ?></td>
+                    <td><?= $evaluation->getCreatorFullName() ?></td>
+                    <td><?= '<div class="text-center">' . $averageScore . '</div>' ?></td>
+                    <td><?= $evaluationDescription ?></td>
+                    <td><?= $actionButtons ?></td>
+                </tr>
+        <?php
+            }
+        ?>
+    <?php
+        } else {
+
+        }
+    ?>
+    </tbody>
+</table>
+
+<div class="modal fade" id="evaluationRemoveModal" tabindex="-1" role="dialog" aria-labelledby="evaluationRemoveModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-danger">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">Remove Evaluation</h4>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger exact-remove-evaluation-button" data-loading-text="Removing...">Remove</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="cancelPlannedEvaluationModal" tabindex="-1" role="dialog" aria-labelledby="cancelPlannedEvaluationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-danger">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">Cancel Planned Evaluation</h4>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger btn-modal-cancel-evaluation" data-loading-text="Canceling...">Cancel Evaluation</button>
+            </div>
+        </div>
+    </div>
+</div>

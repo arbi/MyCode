@@ -1,0 +1,115 @@
+<?php
+use DDD\Service\User\Schedule;
+use Library\Constants\Constants;
+
+$this->InlineScript()
+     ->appendFile($this->basePath() . '/js/plugins/bootstrap-toggle-2.2.0.min.js')
+    ->appendFile($this->basePath() . '/js/plugins/jquery.datetimepicker.full.min.js')
+     ->appendFile($this->basePath() . '/js/module/backoffice-user/user-schedule/edit.js');
+
+$this->headLink()
+     ->appendStylesheet($this->basePath() . '/css/plugins/bootstrap-toggle-2.2.0.min.css')
+     ->appendStylesheet($this->basePath() . '/css/plugins/jquery.datetimepicker.css')
+     ->appendStylesheet($this->basePath() . '/css/pages/user.schedule.edit.css');
+?>
+<fieldset>
+    <legend>Apply Schedule</legend>
+    <input type="hidden" id="schedule-user-id" value="<?= $this->userId ?>">
+    <div class="row form-group">
+        <div class="col-lg-2 col-md-3">
+            <label class="control-label" for="schedule-type">
+                Type
+            </label>
+        </div>
+        <div class="col-lg-3 col-md-4">
+            <select class="form-control" id="schedule-type">
+                <option
+                    value="<?= Schedule::SCHEDULE_TYPE_WORK ?>"
+                    <?php if ($this->scheduleType == Schedule::SCHEDULE_TYPE_WORK) { ?>selected="selected"<?php } ?>
+                >
+                    Work Schedule
+                </option>
+                <option
+                    value="<?= Schedule::SCHEDULE_TYPE_AVAILABILITY ?>"
+                    <?php if ($this->scheduleType == Schedule::SCHEDULE_TYPE_AVAILABILITY) { ?>selected="selected"<?php } ?>
+                >
+                    Availability Schedule
+                </option>
+            </select>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-lg-2 col-md-3">
+            <label class="control-label" for="period-length">
+                Period Length <?php echo $this->required()?>
+            </label>
+        </div>
+        <div class="col-sm-1">
+            <input type="number" name="period_length" class="form-control" id="period-length" value="<?= $this->scheduleData ? count($this->scheduleData) : 7 ?>">
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-lg-2 col-md-3">
+            <label class="control-label" for="apply-from">
+                Apply From
+            </label>
+        </div>
+        <div class="col-lg-3 col-md-4">
+            <div class="input-group">
+                <input
+                    type="text" class="form-control" id="apply-from"
+                    value="<?= $this->scheduleStart ? date(Constants::GLOBAL_DATE_FORMAT, strtotime($this->scheduleStart)) : '' ?>"
+                    today-value="<?=date(Constants::GLOBAL_DATE_FORMAT)?>"
+                >
+                <label class="input-group-addon" for="apply-from">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="row" id="schedule-items">
+        <?php if ($this->scheduleData) { ?>
+            <?php foreach( $this->scheduleData as $daySchedule ) { ?>
+                <?= $this->partial('backoffice-user/user-schedule/partial/schedule-day', [
+                    'data' => $daySchedule
+                ]); ?>
+            <?php } ?>
+        <?php } else { ?>
+            <?php for( $day = 1; $day <= 7; $day++ ) { ?>
+                <?= $this->partial('backoffice-user/user-schedule/partial/schedule-day', [
+                    'day' => $day
+                ]); ?>
+            <?php } ?>
+        <?php } ?>
+    </div>
+</fieldset>
+
+<div class="hidden">
+    <div id="time-interval-sample">
+        <?= $this->partial('backoffice-user/user-schedule/partial/time-interval', []); ?>
+    </div>
+    <div id="day-schedule-sample">
+        <?= $this->partial('backoffice-user/user-schedule/partial/schedule-day', [
+            'day' => 0
+        ]); ?>
+    </div>
+</div>
+
+<div id="applyScheduleAlert" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="applyScheduleAlertLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-danger">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="applyScheduleAlertLabel">Are you sure?</h4>
+            </div>
+            <div class="modal-body">
+                <p>You chose a past date in the new schedule form.</p>
+                <p>Please take into account that if you apply these changes the user's schedule will change in the past too, starting from <span id="schedule-alert-date">_DATE_HERE_</span>.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <button class="btn btn-danger" id="applyScheduleConfidently">Apply</button>
+            </div>
+        </div>
+    </div>
+</div>

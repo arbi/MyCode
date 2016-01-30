@@ -1,0 +1,172 @@
+<?php
+use \DDD\Service\Booking\BookingTicket;
+use \DDD\Service\Frontier;
+use \DDD\Service\Booking;
+use \DDD\Service\Task;
+use Library\Constants\TextConstants;
+use DDD\Service\Booking\BookingTicket as ReservationTicketService;
+
+$pageTitle = 'Frontier Cards';
+
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($pageTitle);
+$this->layout()->viewTitle = $pageTitle;
+$this->layout()->breadcrumb = '<li>Administration</li>
+	                               <li class="active">Frontier Management</li>';
+
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/pages/frontier.management.js');
+$this->headLink()
+    ->appendStylesheet($this->basePath() . '/css/pages/frontier.management.css');
+$booked = (isset($card['bookingStatus']) && $card['bookingStatus'] == Booking::BOOKING_STATUS_BOOKED) ? true : false;
+?>
+<script>
+    var GLOBAL_CARD_SEARCH  = '<?= $this->url('backoffice/default', array('controller' => 'frontier', 'action' => 'ajaxCardSearch'))?>';
+    var GLOBAL_GET_THE_CARD = '<?= $this->url('backoffice/default', array('controller' => 'frontier', 'action' => 'ajaxGetTheCard'))?>';
+    var GLOBAL_GET_TASKS = '<?= $this->url('backoffice/default', array('controller' => 'frontier', 'action' => 'ajaxGetTasks'))?>';
+    var GLOBAL_SEND_COMMENT = '<?= $this->url('backoffice/default', ['controller' => 'frontier', 'action' => 'ajax-send-comment'])?>';
+    var GLOBAL_CHANGE_STATUS = '<?= $this->url('backoffice/default', ['controller' => 'frontier', 'action' => 'ajax-change-arrival-status'])?>';
+    var GLOBAL_SAVE_EMAIL = '<?= $this->url('backoffice/default', ['controller' => 'frontier', 'action' => 'ajax-save-email'])?>';
+    var GLOBAL_CREATE_TASK = '<?= $this->url('backoffice/default', array('controller' => 'task', 'action' => 'edit'))?>';
+    var GLOBAL_TASK_MARK_DONE = '<?= $this->url('backoffice/default', array('controller' => 'task', 'action' => 'ajax-mark-task-as-done'))?>';
+    var GLOBAL_QUICK_CREATE_TASK = '<?= $this->url('backoffice/default', array('controller' => 'task', 'action' => 'ajax-quick-task-create'))?>';
+    var GLOBAL_GENERATE_CCCA_PAGE = '<?= $this->url('backoffice/default', array('controller' => 'frontier', 'action' => 'ajax-generate-ccca-page'))?>';
+    var GLOBAL_GET_APARTMENTS = '<?= $this->url('backoffice/default', array('controller' => 'frontier', 'action' => 'ajax-get-apartments'))?>';
+    var ARRIVAL_STATUS_EXPECTED = '<?= BookingTicket::BOOKING_ARRIVAL_STATUS_EXPECTED ?>';
+    var ARRIVAL_STATUS_CHECKED_IN = '<?= BookingTicket::BOOKING_ARRIVAL_STATUS_CHECKED_IN ?>';
+    var ARRIVAL_STATUS_CHECKED_OUT = '<?= BookingTicket::BOOKING_ARRIVAL_STATUS_CHECKED_OUT ?>';
+    var GLOBAL_TASK_FOB_KEY_TYPE = <?= Task::TYPE_KEYFOB ?>;
+    var GLOBAL_TASK_TITLE_FOR_FOB = '<?= TextConstants::TASK_TITLE_FOR_FOB ?>';
+    var GLOBAL_TASK_TITLE_FOR_KEY = '<?= TextConstants::TASK_TITLE_FOR_KEY ?>';
+    var GLOBAL_TASK_TYPE_STATUS_FOB = <?= Frontier::FRONTIER_FOB_TASK ?>;
+    var GLOBAL_CARD_TYPE_BUILDING = <?= Frontier::CARD_BUILDING ?>;
+    var GLOBAL_BAD_EMAIL_LIST = $.parseJSON('<?= $this->getBadEmail?>');
+    var GLOBAL_LIMIT_APARTMENT_SHOW_COUNT_BUILDING_CARD = <?= Frontier::LIMIT_APARTMENT_SHOW_COUNT_BUILDING_CARD;?>;
+</script>
+<div class="row">
+    <div class="col-lg-5">
+        <select id="super-search" placeholder="Find a guest, reservation, apartment or building..."></select>
+        <div id="cards">
+        <?php
+            echo $this->partial('backoffice/frontier/partial/cards', [
+                'entityType' => $entityType,
+                'card' => $card,
+                'booked' => $booked,
+            ]);
+        ?>
+         </div>
+        <?php if ($entityType != Frontier::CARD_BUILDING) { ?>
+        <div id="tasks" class="bs-callout bs-callout-warning<?= empty($card) ? ' soft-hide' : '' ?>">
+            <?php
+            echo $this->partial(
+                'backoffice/frontier/partial/tasks',
+                [
+                    'entityType' => $entityType,
+                    'entityId' => $entityId,
+                    'card' => $card,
+                    'tasks' => $tasks,
+                ]
+            );
+            ?>
+        </div>
+        <?php } ?>
+    </div>
+
+    <div class="col-lg-7"></div>
+</div>
+
+<div class="hide">
+    <li class="change-status-no-show"><a
+        href="javascript:void(0)"
+        class="change-status-button"
+        data-status="<?php echo ReservationTicketService::BOOKING_ARRIVAL_STATUS_NO_SHOW ?>"
+        >
+        No Show
+    </a></li>
+    <button class="change-status-button change-status-check-in btn btn-success btn-sm check-in-button"
+            data-status="<?php echo ReservationTicketService::BOOKING_ARRIVAL_STATUS_CHECKED_IN ?>"> Check-in </button>
+    <button class="change-status-button change-status-check-out btn btn-success btn-sm"
+        data-status="<?php echo ReservationTicketService::BOOKING_ARRIVAL_STATUS_CHECKED_OUT ?>"> Check-out </button>
+
+    <li class="frontier-charge-li">
+        <a href="#" class="remove-before-view">Charge</a>
+    </li>
+
+    <li class="frontier-key-instructions-li">
+        <a target="_blank" href="#" class="remove-before-view">Entry Instructions</a>
+    </li>
+</div>
+
+<div class="modal fade" id="comment-modal" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-primary">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Add Comment</h4>
+            </div>
+            <div class="modal-body">
+                <textarea type="text" name="comment_field" id="comment-field" class="form-control" placeholder="Your comment here..."></textarea>
+                <input type="hidden" id="res-id" name="res_id" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="submit-comment">Submit Comment</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="quick-task-modal" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-primary">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Add Quick Task</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-6 col-xs-12">
+                        <input type="text" name="task-name" id="task-name" class="form-control margin-top-5-mobile" placeholder="Task Name">
+                        <input type="hidden" name="task-due-date" id="task-due-date">
+                    </div>
+                    <div class="col-sm-6 col-xs-12">
+                        <select name="task-type" id="task-type" class="form-control margin-top-5-mobile">
+                            <option value="0">-- Choose Type --</option>
+                            <?php foreach ($this->taskTypes as $optGroup) {
+                                if (isset($optGroup['label'])) {
+                                    foreach ($optGroup['options'] as $key => $option) { ?>
+                                        <option value="<?= $key ?>"><?= $option ?></option>
+                                <?php }
+                                 }
+                            } ?>
+                        </select>
+                    </div>
+                </div>
+                <input type="hidden" id="res-id" name="res_id" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="submit-task">Add Task</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="email-modal" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-primary">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Add Email</h4>
+            </div>
+            <div class="modal-body">
+                <input type="text" name="guest-email" id="guest-email" class="form-control" placeholder="Guest Email">
+                <input type="hidden" id="reservation-id" name="reservation-id" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="submit-email">Add Email & Check-in</button>
+            </div>
+        </div>
+    </div>
+</div>

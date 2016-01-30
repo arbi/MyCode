@@ -1,0 +1,45 @@
+<?php
+	$this->headTitle()->setSeparator(' - ');
+	$this->layout()->viewTitle = 'Sales Statistics';
+	$this->headTitle($this->layout()->viewTitle);
+	$this->headTitle()->setSeparator(' - ');
+	$this->layout()->breadcrumb = $this->breadcrumb([
+		['Apartment'],
+		['Sales Statistics'],
+	]);
+
+    $this->headLink()->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css');
+
+    $this->InlineScript()
+            ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+            ->appendFile($this->basePath() . '/js/DT_bootstrap.js');
+?>
+
+<h3>Reservations</h3>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>&nbsp;</th>
+            <th class="text-right">Total Value (EUR)</th>
+            <th class="text-right">Count</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+            /**
+             * @var \DDD\Domain\Booking\SaleStatisticsRow[] $saleStatistics
+             */
+            $saleStatistics = $this->saleStatistics;
+
+            foreach ($saleStatistics as $row) {
+        ?>
+                <tr>
+                    <td><?= $row->getLabel() ?></td>
+                    <td class="text-right"><?= $row->getTotalAmount() ?></td>
+                    <td class="text-right"><?= $row->getCount() ?></td>
+                </tr>
+        <?php
+            }
+        ?>
+    </tbody>
+</table>

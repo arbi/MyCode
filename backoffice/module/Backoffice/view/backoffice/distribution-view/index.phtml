@@ -1,0 +1,79 @@
+<?php
+	$this->layout()->viewTitle = 'Distribution View';
+    $this->headTitle()->setSeparator(' - ');
+    $this->headTitle($this->layout()->viewTitle);
+    $this->layout()->breadcrumb = $this->breadcrumb([
+	    ['Apartment'],
+	    [$this->layout()->viewTitle],
+    ]);
+    $this->InlineScript()
+         ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+         ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+         ->appendFile($this->basePath() . '/js/pages/distribution.view.js');
+
+    $this->headLink()
+         ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css');
+?>
+
+<script>
+    var AJAX_SOURCE_URL = "<?= $ajaxSourceUrl ?>";
+    var BUILDING_SEARCH = '<?= $this->url('apartments', ['controller' => 'apartment', 'action' => 'get-buildings'])?>';
+    var gTable          = false;
+
+    var GLOBAL_PARTNER_LIST = [
+        {
+            "name": "apartments",
+            "sortable": true,
+            "width" : "18%"
+        }
+    ];
+    <?php foreach ($this->options['partnerList'] as $row) { ?>
+        GLOBAL_PARTNER_LIST.push({
+            "name": "partner<?=$row['gid']?>",
+            "sortable": true,
+            "width" : "11%",
+            "sClass": "text-center"
+        });
+    <?php } ?>
+</script>
+
+<div class="row">
+    <div class="col-sm-12">
+        <div class="row form-group">
+            <div class="col-sm-11">
+                <select name="apartment_group_id"  id="apartment_group_id" class="form-control required" placeholder="All Groups, Country">
+                    <?php foreach ($groups as $country => $countryGroups) { ?>
+                        <optgroup label="<?= $country ?>">
+                            <?php foreach ($countryGroups as $groupId => $group) { ?>
+                                <option value="<?= $groupId?>" data-country="<?= $group['country'] ?>">
+                                    <?= $group['name'] ?>
+                                </option>
+                            <?php } ?>
+                        </optgroup>
+                    <?php } ?>
+                </select>
+            </div>
+
+            <div class="col-sm-1">
+                <input type="button" value="Show" id="show-group-distribution-view" class="btn btn-primary btn-block">
+            </div>
+         </div>
+    </div>
+</div>
+
+<div class="row hidden" id="datatable_apartment_container">
+    <div class="col-sm-12">
+        <table id="datatable_apartment" class="table table-striped table-bordered table-condensed table-hover">
+            <thead>
+            <tr>
+                <th> Apartments </th>
+                <?php foreach ($this->options['partnerList'] as $row) { ?>
+                    <th class="text-center"> <?=$row['partner_name']?> </th>
+                <?php } ?>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>

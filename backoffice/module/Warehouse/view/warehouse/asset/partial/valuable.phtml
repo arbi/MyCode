@@ -1,0 +1,37 @@
+<div class="form-group">
+    <label for="name" class="col-sm-2 control-label">Name <?php echo $this->required(); ?></label>
+    <div class="col-sm-4">
+        <?= $this->formInput($form->get('name')) ?>
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="location" class="col-sm-2 control-label">Locations <?php echo $this->required(); ?></label>
+    <div class="col-sm-4">
+        <?php echo $this->formSelect($form->get('location')); ?>
+    </div>
+</div>
+
+
+<div class="form-group">
+    <label for="serial-number" class="col-sm-2 control-label">Serial number <?php echo $this->required(); ?></label>
+    <div class="col-sm-4">
+        <?= $this->formInput($form->get('serial_number')) ?>
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="assignee" class="col-sm-2 control-label">Assignee</label>
+    <div class="col-sm-4">
+        <?php echo $this->formSelect($form->get('assignee')); ?>
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="description" class="col-sm-2 control-label">Description</label>
+    <div class="col-sm-4">
+        <?php echo $this->formTextarea($form->get('description')); ?>
+    </div>
+</div>
+
+

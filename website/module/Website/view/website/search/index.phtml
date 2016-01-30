@@ -1,0 +1,173 @@
+<?php
+use Library\Utility\Helper;
+
+$this->headTitle('Apartments in ' . (isset($this->options['city_id']) ? $this->cityname($this->options['city_id']) : ''));
+
+$environment = 'development';
+
+if ($environment === 'production') {
+    $this->inlineScript()->appendFile('//code.jquery.com/ui/1.11.4/jquery-ui.min.js');
+    $this->headLink()->appendStylesheet('//code.jquery.com/ui/1.11.4/themes/start/jquery-ui.css');
+} else {
+    $this->inlineScript()->appendFile($this->basePath() . '/js/vendor/jquery/ui/1.11.4/jquery-ui.min.js');
+    $this->headLink()->appendStylesheet($this->basePath() . '/css/vendor/jquery/ui/1.11.4/themes/jquery-ui.css');
+}
+
+$this->inlineScript()
+    ->appendFile($this->basePath() . '/js/vendor/bootstrap-datepicker.min.js')
+    ->appendFile($this->basePath() . '/js/search.js');
+
+$this->headLink()
+    ->prependStylesheet($this->basePath() . '/css/search.css')
+    ->appendStylesheet($this->basePath() . '/css/pagination.css');
+
+$queryParamForApartel = (isset($this->options['apartel_url'])) ? '?apartel=' . $this->options['apartel_url'] : '';
+$queryParamForCity    = (isset($this->options['city_url'])) ? '?city=' . $this->options['city_url'] . '&show=all' : '';
+
+$this->headLink([
+    'rel'  => 'canonical',
+    'href' => $this->url('search', [], ['force_canonical' => true]) . $queryParamForCity . $queryParamForApartel,
+]);
+
+if (isset($this->options['city_id'])) {
+    $description = Helper::evaluateTextline(
+        $this->textline(1514),
+        ['{{CITY_NAME}}' => $this->cityname($this->options['city_id'])]
+    );
+
+    $this->headMeta()
+        ->appendHttpEquiv('Content-Type', 'text/html;charset=utf-8')
+        ->appendName('description', $description);
+}
+
+?>
+<script>
+    var GLOBAL_SEARCH            = '<?= $this->url('search', ['controller' => 'search', 'action' => 'ajax-search'])?>';
+    var GLOBAL_AUTOCOMPLATE      = '<?= $this->url('search', ['controller' => 'search', 'action' => 'ajax-autocomplete-search'])?>';
+</script>
+<div class="col-sm-12">
+    <form class="search search-general" data-today="<?=$this->options['current_date']?>">
+	    <div class="row hidden-xs">
+	        <div class="col-sm-3 col-md-offset-1 col search-location">
+	            <label>
+	                <span class="block-subject"><?=$this->textline(1221)?></span>
+	            </label>
+	        </div>
+	        <div class="col-xs-6 col-sm-3 col-md-2 col search-date">
+	            <label>
+	                <span class="block-subject"><?=$this->textline(1222)?></span>
+	            </label>
+	        </div>
+	        <div class="col-xs-6 col-sm-3 col-md-2 col search-date">
+	            <label>
+	                <span class="block-subject"><?=$this->textline(1223)?></span>
+	            </label>
+	        </div>
+	        <div class="col-sm-1 col search-guest">
+	            <label>
+	                <span class="block-subject"><?=$this->textline(1205)?></span>
+	            </label>
+	        </div>
+	    </div>
+
+	    <div class="row padding-right-13-media-max-768px padding-left-13-media-max-768px">
+	        <div class="col-sm-3 col-md-offset-1 grid-sep col search-location">
+	            <input type="hidden" id="destionation" value="<?php if (isset($this->options['city_url'])) echo $this->options['city_url']; ?>">
+	            <input type="hidden" id="apartel_url" value="<?php if (isset($this->options['apartel_url'])) echo $this->options['apartel_url']; ?>">
+	            <input type="hidden" id="apartment_name">
+                <input type="hidden" id="viewAllApartment" value="<?=$this->viewAllApartment?>">
+                <input type="hidden" id="current_page" value="<?php echo isset($this->options['page']) ? $this->options['page'] : 1; ?>">
+	            <div class="dropdown input-destination">
+	                <input data-toggle="dropdown" type="text" class="form-control input-lg" readonly id="search_autocomplete" value="<?php
+                    if (isset($this->options['city_id']) && isset($this->options['city_url'])) {
+                        echo $this->cityname($this->options['city_id']);
+                    } elseif (isset($this->options['apartel_url']) && isset($this->options['apartel_name'])) {
+                        echo $this->options['apartel_name'];
+                    }
+                    ?>" data-city-id="<?php if (isset($this->options['city_id'])) echo $this->options['city_id']; ?>">
+	                <ul class="dropdown-menu col-xs-12" role="menu">
+	                    <?php foreach ($this->options['cities'] as $key => $city) { ?>
+	                    <li>
+                            <a href="javascript:void(0)" data-id="<?=$city['id']?>" data-url="<?=$city['city_url']?>" data-currentdate="<?=$city['current_date']?>" data-max-capacity="<?=$city['max_capacity']?>">
+                                <span style="font-size:1.2em"><?=$this->cityname($city['id'])?></span>
+                                <small class="text-muted"><?=$city['short_name']?></small>
+                            </a>
+                        </li>
+	                    <?php } ?>
+	                    <li class="divider"></li>
+	                    <li><a href="javascript:void(0)" class="extended"><small><?=$this->textline(1224)?></small></a></li>
+	                </ul>
+	            </div>
+	            <i class="glyphicon glyphicon-map-marker text-muted"></i>
+	        </div>
+	        <div class="input-daterange">
+	            <div class="col-xs-6 col-sm-3 col-md-2 grid-sep col search-date padding-right-6-media-max-768px">
+                    <input type="text" class="form-control input-lg text-left" id="start" readonly value="<?php if (isset($this->options['arrival'])) echo $this->options['arrival']; ?>" placeholder="dd/mm/yyyy">
+	                <i class="glyphicon glyphicon-calendar text-muted"></i>
+	            </div>
+	            <div class="col-xs-6 col-sm-3 col-md-2 grid-sep col search-date padding-left-6-media-max-768px pull-right-xs">
+	                <input type="text" class="form-control input-lg text-left" id="end" readonly value="<?php if (isset($this->options['departure'])) echo $this->options['departure']; ?>" placeholder="dd/mm/yyyy">
+	                <i class="glyphicon glyphicon-calendar text-muted"></i>
+	            </div>
+	        </div>
+	        <div class="col-sm-1 grid-sep col search-guest">
+	            <select class="form-control input-lg" id="capacity">
+	                <?php foreach ($this->options['guest'] as $key => $guest) { ?>
+	                <option value="<?=$key?>" <?php if (isset($this->options['guest_user']) && $this->options['guest_user'] == $key) echo 'selected="selected"'?>><?=$guest?></option>
+	                <?php } ?>
+	            </select>
+	        </div>
+	        <div class="col-sm-2 grid-sep col search-button">
+	            <input type="button" class="btn-block buttonBlue" id="update_search" value="Search">
+	        </div>
+	    </div>
+    </form>
+
+    <div class="floating-row">
+        <p class="block-subject"><?=$this->textline(1620)?></p>
+
+        <ul class="list-unstyled list-inline">
+            <li>
+                <a class="cm-button">
+                    <span class="icon icon-bed hidden-xs muted"></span>
+                    <?=$this->textline(1621)?>
+                    <div class="cm-checkbox"></div>
+                    <input type="hidden" class="input-studio" name="studio" value="0">
+                </a>
+            </li>
+            <li>
+                <a class="cm-button">
+                    <span class="icon icon-bed hidden-xs muted"></span>
+                    <?=$this->textline(1622)?>
+                    <div class="cm-checkbox"></div>
+                    <input type="hidden" class="input-onebedroom" name="onebedroom" value="0">
+                </a>
+            </li>
+            <li>
+                <a class="cm-button">
+                    <span class="icon icon-bed hidden-xs muted"></span>
+                    <?=$this->textline(1623)?>
+                    <div class="cm-checkbox"></div>
+                    <input type="hidden" class="input-twobedroom" name="twobedroom" value="0">
+                </a>
+            </li>
+        </ul>
+    </div>
+
+	<hr>
+
+    <div class="search-main">
+        <div class="loading-part"><img src="<?=$this->basePath()?>/img/loader.gif" alt="loading..."></div>
+        <div class="row search-results">
+            <?php
+                if (!$this->error && $this->viewAllApartment) {
+                    echo $this->partial('partial/search.phtml', [
+                        'apartelList' => $this->allApartment['list'],
+                        'options' => $this->allApartment['options'],
+                        'hasPagination' => false,
+                    ]);
+                }
+            ?>
+        </div>
+    </div>
+</div>

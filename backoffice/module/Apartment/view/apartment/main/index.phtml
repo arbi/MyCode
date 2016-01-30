@@ -1,0 +1,214 @@
+<?php
+use Library\Constants\Constants;
+use Library\Constants\DomainConstants;
+use FileManager\Constant\DirectoryStructure;
+use DDD\Service\Task;
+
+$this->headTitle()->setSeparator(' - ');
+$apartmentTitle = $this->layout()->apartmentName . ' - Apartment Intro';
+$this->headTitle($apartmentTitle);
+$this->headLink()->appendStylesheet($this->basePath() . '/css/apartment/common.css');
+?>
+<div class="row">
+    <div class="col-sm-12">
+        <hr>
+        <?= $this->apartmentNavigation($this->apartmentId, $this->apartmentStatus, 'apartment/main')?>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-4">
+        <?php if ($this->dateDisabled) { ?>
+        <fieldset>
+            <legend>
+                General
+            </legend>
+            <table class="table table-striped table-condensed">
+                <tr class="success">
+                    <th>Date Created</th>
+                    <td>
+                        <?= date(Constants::GLOBAL_DATE_FORMAT, strtotime($this->dateCreated)); ?>
+                    </td>
+                </tr>
+                <tr class="danger">
+                    <th>Date Disabled</th>
+                    <td>
+                        <?= date(Constants::GLOBAL_DATE_FORMAT, strtotime($this->dateDisabled)); ?>
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+        <?php } elseif ($this->currentReservation) { ?>
+        <fieldset>
+            <legend>
+                Current Reservation
+            </legend>
+            <table class="table table-striped table-condensed">
+                <tr>
+                    <th>Res. #</th>
+                    <td>
+                        <a href="<?= '/booking/edit/' . $this->currentReservation['res_number'] ?>" target="_blank">
+                            <?= $this->currentReservation['res_number']?>
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Guest</th>
+                    <td><?= $this->currentReservation['guest_last_name'] . ', ' . $this->currentReservation['guest_first_name'] ?></td>
+                </tr>
+                <tr>
+                    <th>Email:</th>
+                    <td>
+                        <a href="mailto: <?= $this->currentReservation['guest_email'] ?>" target="_blank">
+                            <?= $this->currentReservation['guest_email'] ?>
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Phone:</th>
+                    <td><?= $this->currentReservation['guest_phone'] ?></td>
+                </tr>
+                <tr>
+                    <th>Apartment Entry code:</th>
+                    <td><?= $this->currentReservation['pin'] ? $this->currentReservation['pin'] : 'Not Set' ?></td>
+                </tr>
+                <tr>
+                    <th>Entering Date:</th>
+                    <td><?= date(Constants::GLOBAL_DATE_FORMAT, strtotime($this->currentReservation['date_from'])) ?></td>
+                </tr>
+                <tr>
+                    <th>Leaving Date:</th>
+                    <td><?= date(Constants::GLOBAL_DATE_FORMAT, strtotime($this->currentReservation['date_to'])) ?></td>
+                </tr>
+            </table>
+        </fieldset>
+        <?php } elseif ($this->nextReservation) { ?>
+        <fieldset>
+            <legend>
+                Next Reservation
+            </legend>
+            <table class="table table-striped table-condensed">
+                <tr>
+                    <th>Res. #</th>
+                    <td>
+                        <a href="<?= '/booking/edit/' . $this->nextReservation['res_number'] ?>" target="_blank">
+                            <?= $this->nextReservation['res_number']?>
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Guest</th>
+                    <td><?= $this->nextReservation['guest_last_name'] . ', ' . $this->nextReservation['guest_first_name'] ?></td>
+                </tr>
+                <tr>
+                    <th>Email:</th>
+                    <td>
+                        <a href="mailto: <?= $this->nextReservation['guest_email'] ?>" target="_blank">
+                            <?= $this->nextReservation['guest_email'] ?>
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Phone:</th>
+                    <td><?= $this->nextReservation['guest_phone'] ?></td>
+                </tr>
+                <tr>
+                    <th>PIN:</th>
+                    <td><?= $this->nextReservation['pin'] ? $this->nextReservation['pin'] : 'Not Set' ?></td>
+                </tr>
+                <tr>
+                    <th>Entering Date:</th>
+                    <td><?= date(Constants::GLOBAL_DATE_FORMAT, strtotime($this->nextReservation['date_from'])) ?></td>
+                </tr>
+                <tr>
+                    <th>Leaving Date:</th>
+                    <td><?= date(Constants::GLOBAL_DATE_FORMAT, strtotime($this->nextReservation['date_to'])) ?></td>
+                </tr>
+            </table>
+        </fieldset>
+        <?php } else { ?>
+            <div class="alert">
+                No upcoming reservations on this apartment...
+            </div>
+        <?php } ?>
+    </div>
+    <div class="col-sm-4">
+        <fieldset>
+            <legend>
+                Details
+            </legend>
+            <table class="table table-striped table-condensed">
+                <?php if ($building) { ?>
+                <tr>
+                    <th>Building</th>
+                    <td><?= $building['name'] ?></td>
+                </tr>
+                <?php } ?>
+                <?php if ($this->apartels) { ?>
+                    <?php $counter = 1 ?>
+                    <?php foreach ($this->apartels as $apartel) { ?>
+                        <?php if (!empty($apartel['apartel_name'])) { ?>
+                <tr>
+                    <th> Apartel <?= $counter++ ?> </th>
+                    <td><?= $apartel['apartel_name'] ?></td>
+                </tr>
+                        <?php } ?>
+                    <?php } ?>
+                <?php } ?>
+                <?php if ($this->OTAList) { ?>
+                    <?php $counter = 1 ?>
+                    <?php foreach($this->OTAList as $ota) { ?>
+                <tr>
+                    <th> OTA <?= $counter++ ?></th>
+                    <td>
+                        <?php if (!empty($ota['url'])) { ?>
+                        <a href="<?= $ota['url']?>" target="_blank"><?= $ota['partner_name']?></a>
+                        <?php } else { ?>
+                        <?= $ota['partner_name']?>
+                        <?php } ?>
+                    </td>
+                </tr>
+                    <?php } ?>
+                <?php } ?>
+            </table>
+        </fieldset>
+    </div>
+
+    <div class="col-sm-4">
+        <?php if ($this->img && file_exists(DirectoryStructure::FS_GINOSI_ROOT . DirectoryStructure::FS_IMAGES_ROOT . ltrim($this->img, '/'))) {
+            $img = '//' . DomainConstants::IMG_DOMAIN_NAME . $this->img;
+        } else {
+            $img = Constants::VERSION . 'img/no_image.png';
+        } ?>
+        <img src="<?= $img ?>" id="main-img">
+    </div>
+</div>
+<div class="row margin-top-20">
+    <div class="col-sm-6">
+        <fieldset>
+            <legend>
+                <span class="glyphicon glyphicon-list-alt"></span>
+                Apartment Tasks
+            </legend>
+            <?php if ($apartmentTasks && $apartmentTasks->count()) { ?>
+                <ul class="tasks-list">
+                    <?php foreach ($apartmentTasks as $task) { ?>
+                        <li>
+                            <div class="pull-left task-priority-label">
+                                <?= Task::getTaskPriorityLabeled()[$task->getPriority()]; ?>
+                            </div>
+                            <a href="/task/edit/<?= $task->getId() ?>" target="_blank">
+                                <?= $task->getTitle() ?>
+                                <span class="glyphicon glyphicon-share"></span>
+                            </a>
+                        </li>
+                    <?php } ?>
+                </ul>
+            <?php } else { ?>
+                <div class="alert alert-success">
+                    <span class="glyphicon glyphicon-ok-circle"></span> There are no open tasks on this apartment
+                </div>
+            <?php } ?>
+        </fieldset>
+    </div>
+</div>

@@ -1,0 +1,143 @@
+<?= $this->parkingPageTitle($this->parkingLotId) ?>
+
+<?php
+$this->headTitle()->setSeparator(' - ');
+
+$pageTitle = $this->layout()->parkingLotName . ' - Parking Lots';
+$this->headTitle($pageTitle);
+if ($this->selectedSpotId) {
+    $lotName = $form->get('unit')->getValue();
+} else {
+    $lotName = 'Add';
+}
+$this->layout()->breadcrumb = $this->breadcrumb([
+    ['Apartments'],
+    ['Parking Lots', $this->url('parking_lots')],
+    [$this->layout()->parkingLotName],
+    [$lotName]
+]);
+
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/module/parking/spot.js')
+    ->appendFile($this->basePath() . '/js/validation/parking.spot.js');
+
+$this->headLink()
+    ->appendStylesheet($this->basePath () . '/css/pages/parking.common.css');
+$deleteSpotUrl = $this->url('parking/spots/delete-spot', ['parking_lot_id' => $this->parkingLotId, 'spot_id' => $this->selectedSpotId]);
+?>
+
+<script>
+    var SAVE_DATA = '<?= $this->url("parking/spots/save", array('parking_lot_id' => $this->parkingLotId)) ?>';
+    var GET_SPOT_RESERVATIONS = '<?= $this->url('parking/spots/edit', ['controller' => 'controller_parking_spots', 'action' => 'ajax-check-spot-is-used', 'parking_lot_id' => $this->parkingLotId, 'spot_id' => $this->selectedSpotId])?>';
+</script>
+
+<div class="col-sm-12">
+	<hr>
+	<?= $this->parkingNavigation($this->parkingLotId, 'parking/spots/edit', $form->get('unit')->getValue())?>
+</div>
+
+<?php
+$form = $this->form;
+$form->prepare();
+?>
+<!-- Form opening tag -->
+<?= $this->form()->openTag($form) ?>
+<div class="col-sm-12">
+	<div class="row">
+		<!-- Spots navigation -->
+		<div class="col-sm-3">
+
+		</div>
+
+        <div class="col-sm-9">
+            <div class="row">
+                <div class="col-sm-6">
+                    <fieldset>
+                        <?= $this->formInput($form->get('id'))?>
+                        <input type="hidden" name="lot_id" value="<?= $this->parkingLotId ?>">
+
+                        <div class="form-group">
+                            <label class="col-xs-5 col-sm-4 control-label" for="<?= $form->get('unit')->getAttribute('id') ?>">
+                                <?= $form->get('unit')->getLabel() ?>
+                                <?= $this->required() ?>
+                            </label>
+                            <div class="col-xs-6">
+                                <?= $this->formInput($form->get('unit')) ?>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-xs-5 col-sm-4 control-label" for="<?= $form->get('price')->getAttribute('id') ?>">
+                                <?= $form->get('price')->getLabel() ?>
+                                <?= $this->required() ?>
+                            </label>
+                            <div class="col-xs-6">
+                                <div class="input-group">
+                                    <?= $this->formInput($form->get('price')) ?>
+                                    <label class="input-group-addon">
+                                        <?= $this->parkingLot->getCurrency() ?>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-xs-5 col-sm-4 control-label" for="<?= $form->get('permit_id')->getAttribute('id') ?>">
+                                <?= $form->get('permit_id')->getLabel() ?>
+                            </label>
+                            <div class="col-xs-6">
+                                    <?= $this->formInput($form->get('permit_id')) ?>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="page-actions container">
+    <div class="row text-right">
+        <?= $this->formInput($form->get('save_button')) ?>
+        <?php if ($this->selectedSpotId) { ?>
+            <a data-toggle="modal" href="javascript:void(0)" class="delete-spot btn col-sm-2 col-xs-12 margin-left-10 pull-right btn-danger">
+                Delete Spot
+            </a>
+        <?php } ?>
+    </div>
+</div>
+
+<!-- Form close tag -->
+<?= $this->form()->closeTag() ?>
+
+
+<!-- Delete rate modal -->
+<div id="delete-modal" class="modal fade" aria-labelledby="myModalLabel">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-danger">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true"><span class="sr-only">Close</span>&times;</span>
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Delete Spot <span id="delete_group"></span></h4>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure?</p>
+                <?php if (isset($this->usages) && count($this->usages)) { ?>
+                    <p> This spot is attached to the following apartments</p>
+                    <ul>
+                        <?php foreach ($this->usages as $usage) { ?>
+                            <li><?= $usage['name']; ?></li>
+                        <?php } ?>
+                    </ul>
+                <?php } ?>
+                <div class='res-links'></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <a class="btn btn-danger" id="delete-spot-btn" href="<?= $deleteSpotUrl ?>">Delete Spot</a>
+            </div>
+        </div>
+    </div>
+</div>

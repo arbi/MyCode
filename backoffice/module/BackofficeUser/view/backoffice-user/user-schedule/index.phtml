@@ -1,0 +1,199 @@
+<?php
+
+use Library\Constants\Constants;
+use DDD\Service\User\Schedule;
+
+$pageTitle = 'People Schedule';
+
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($pageTitle);
+
+$this->layout()->viewTitle = $pageTitle;
+$this->layout()->breadcrumb = '
+    <li>Administration</li>
+    <li class="active">People Schedule</li>
+';
+
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/plugins/jquery.datetimepicker.full.min.js')
+    ->appendFile($this->basePath() . '/js/plugins/bootstrap-toggle-2.2.0.min.js')
+    ->appendFile($this->basePath() . '/js/module/backoffice-user/user-schedule/index.js');
+
+$this->headLink()
+    ->appendStylesheet($this->basePath() . '/css/plugins/jquery.datetimepicker.css')
+    ->appendStylesheet($this->basePath() . '/css/plugins/bootstrap-toggle-2.2.0.min.css')
+    ->appendStylesheet($this->basePath() . '/css/pages/user.schedule.index.css');
+
+$monday = date(Constants::GLOBAL_DATE_FORMAT, strtotime('last monday', time()));
+$sunday = date(Constants::GLOBAL_DATE_FORMAT, strtotime('this sunday', time()));
+?>
+
+<script>
+    SEARCH_URL = '<?= $this->url('schedule', ['controller' => 'user-schedule', 'action' => 'ajax-show-schedule'])?>';
+    UPDATE_URL = '<?= $this->url('schedule', ['controller' => 'user-schedule', 'action' => 'ajax-save-day'])?>';
+</script>
+
+<div class="clear">
+
+    <div class="row" style="padding-bottom: 10px">
+
+        <div class="col-xs-3">
+            <input type="text" id="date-range" class="form-control" value="<?= $monday . ' - ' . $sunday ?>">
+        </div>
+
+        <div class="col-xs-3">
+            <select class="form-control" id="team_id">
+                <option value="">All Teams</option>
+                <?php if ($this->teams) { ?>
+                    <?php /** @var \DDD\Domain\Team\ForSelect $team */ ?>
+                    <?php $firstTeam = 1; foreach ($this->teams as $teamId => $teamName) { ?>
+                        <option value="<?= $teamId ?>" <?php if ($firstTeam) {echo 'selected'; $firstTeam = 0;}?>>
+                            <?= $teamName ?>
+                        </option>
+                    <?php } ?>
+                <?php } ?>
+            </select>
+        </div>
+
+        <div class="col-xs-3">
+            <select class="form-control selectize" id="office_id">
+                <option value="">All Offices</option>
+                <?php
+                /** @var \DDD\Domain\Office\OfficeManager $office */
+                foreach ($this->offices as $office) {
+                    ?>
+                    <option value="<?php echo $office->getId(); ?>">
+                        <?php echo $office->getName(); ?>
+                    </option>
+                <?php } ?>
+            </select>
+        </div>
+
+        <div class="col-xs-3">
+            <select class="form-control selectize" id="schedule_type_id">
+                <option value="">All Schedule Types</option>
+                <?php foreach ($this->schedule_types as $scheduleTypeId => $scheduleTypeTitle) { ?>
+                    <option value="<?php echo $scheduleTypeId; ?>" <?php if ($scheduleTypeId == Schedule::SCHEDULE_TYPE_WORK) { echo 'selected'; }?>>
+                        <?php echo $scheduleTypeTitle; ?>
+                    </option>
+                <?php } ?>
+            </select>
+        </div>
+    </div>
+
+    <div class="row hidden-print" style="padding-bottom: 20px">
+        <div class="col-sm-6">
+            <button class="btn btn-primary" id="show-btn" data-loading-text="Loading..."> Show </button>
+        </div>
+
+        <div class="col-sm-3">
+            <button class="btn btn-default" id="clear-btn"> Clear Filter </button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-12">
+        <div id="schedule-table-container">
+            <table class="table table-condensed table-hover table-bordered" id="schedule-table">
+
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="change-modal">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-primary">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">
+                    <span id="change-user"></span>
+                    <small id="change-day"></small>
+                </h4>
+            </div>
+            <div class="modal-body form-horizontal">
+                <div class="row form-group">
+                    <div class="col-xs-9 pull-left">
+                        <?php
+                        foreach (Schedule::getInventoryColors() as $colorId => $colorHash) {
+                            echo '<div id="color-' . $colorId . '" class="color-box color-' . $colorId .'" style="background: ' . $colorHash .'"></div>';
+                        }
+                        ?>
+                        <input type="hidden" id="color-id" value="">
+                    </div>
+
+                    <div class="col-xs-3" style="margin-left: -6px;">
+                        <input type="checkbox" class="schedule-day-toggler">
+                        <input type="hidden" id="schedule-day-id">
+                        <input type="hidden" id="schedule-next-day-id">
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-xs-12">
+                        <select class="form-control selectize" id="office-id">
+                            <option value="0">
+                                -- Select Office --
+                            </option>
+                            <?php
+                            /** @var \DDD\Domain\Office\OfficeManager $office */
+                            foreach ($this->offices as $office) {
+                            ?>
+                                <option value="<?php echo $office->getId(); ?>">
+                                    <?php echo $office->getName() ?>
+                                </option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-xs-6">
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="timepicker form-control" placeholder="from" id="time_from1">
+                            <label class="input-group-addon">
+                                <span class="glyphicon glyphicon-time"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="timepicker form-control" placeholder="to" id="time_to1">
+                            <label class="input-group-addon">
+                                <span class="glyphicon glyphicon-time"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-xs-6">
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="timepicker form-control" placeholder="from" id="time_from2">
+                            <label class="input-group-addon">
+                                <span class="glyphicon glyphicon-time"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="timepicker form-control" placeholder="to" id="time_to2">
+                            <label class="input-group-addon">
+                                <span class="glyphicon glyphicon-time"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-xs-12">
+                        <div>
+                            <textarea class="form-control" placeholder="Add note..." id="note"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="save-schedule-day-btn">Save</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal" id="schedule-modal-close">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

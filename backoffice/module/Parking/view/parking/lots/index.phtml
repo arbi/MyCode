@@ -1,0 +1,63 @@
+<?php
+    $this->layout()->viewTitle = 'Parking Lots';
+    $this->headTitle()->setSeparator(' - ');
+    $this->headTitle($this->layout()->viewTitle);
+    $this->layout()->breadcrumb = $this->breadcrumb([
+        ['Apartments'],
+        [$this->layout()->viewTitle]
+    ]);
+?>
+
+<script>
+    var DATATABLE_AJAX_SOURCE = '<?= $this->ajaxSourceUrl ?>';
+</script>
+
+<?php
+    $this->InlineScript()
+        ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+        ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+        ->appendFile($this->basePath() . '/js/module/parking/index.js');
+
+    $this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css');
+
+    $this->headMeta()->appendName('viewport', 'width=device-width, initial-scale=1.0');
+?>
+
+<div id="status-switch">
+    <div class="btn-group fn-buttons pull-right">
+        <a href="#all" class="btn btn-sm btn-default" data-status="0">All</a>
+        <a href="#active" class="btn btn-sm btn-default active" data-status="1">Active</a>
+        <a href="#inactive" class="btn btn-sm btn-default" data-status="2">Inactive</a>
+    </div>
+    <input type="hidden" name="show_status" id="show-status" value="1" />
+</div>
+
+<div class="row" id="lots">
+    <div class="col-sm-12">
+        <table id="datatable-parking-lots" class="table table-striped table-bordered table-condensed table-hover">
+            <thead>
+                <tr>
+                    <th> Status </th>
+                    <th> Name </th>
+                    <th> City </th>
+                    <th> Address </th>
+                    <th> Virtual </th>
+                    <th> &nbsp; </th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="container page-actions">
+
+    <div class="row text-right">
+        <a href="<?= $this->url(
+            'add_parking'
+        )?>" class="btn btn-primary col-sm-2 col-xs-12
+        pull-right">Add New Parking Lot</a>
+    </div>
+</div>

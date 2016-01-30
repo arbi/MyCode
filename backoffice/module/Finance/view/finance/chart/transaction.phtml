@@ -1,0 +1,241 @@
+<?php
+
+$this->layout()->viewTitle = 'Transactions';
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($this->layout()->viewTitle);
+$this->layout()->breadcrumb = $this->breadcrumb([
+    ['Finance'],
+    ['Account Receivable'],
+    [$this->layout()->viewTitle],
+]);
+
+$environment = getenv('APPLICATION_ENV') ?: 'production';
+
+if ($environment === 'production') {
+    $this->InlineScript()->prependFile('//code.highcharts.com/highcharts.js');
+} else {
+    $this->InlineScript()->prependFile($this->basePath() . '/js/plugins/highcharts.js');
+}
+
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/pages/charts.js');
+
+?>
+
+<?php echo $this->form()->openTag($form); ?>
+
+<div class="transaction-filter" data-product-url="<?php echo $this->url('apartments', ['controller' => 'apartment', 'action' => 'search-by-address-components']); ?>">
+
+    <!-- First Row -->
+    <div class="row">
+        <!-- Status -->
+        <div class="col-sm-2">
+            <div class="form-group">
+                <?php echo $this->formSelect($form->get('status')); ?>
+            </div>
+        </div>
+
+        <!-- Payment Model -->
+        <div class="col-sm-2">
+            <div class="form-group">
+                <?php echo $this->formSelect($form->get('payment_model')); ?>
+            </div>
+        </div>
+
+        <!-- Partners -->
+        <div class="col-sm-2">
+            <div class="form-group">
+                <?php echo $this->formSelect($form->get('partner_id')); ?>
+            </div>
+        </div>
+
+        <!-- Show Standings -->
+        <div class="col-sm-2 booking_checkbox">
+            <div class="form-group">
+                <?php echo $this->formSelect($form->get('no_collection')); ?>
+            </div>
+        </div>
+
+        <!-- Apartment Groups -->
+        <div class="col-sm-2">
+            <div class="form-group">
+                <?php echo $this->formSelect($form->get('group')); ?>
+            </div>
+        </div>
+
+        <!-- Transaction Status -->
+        <div class="col-sm-2">
+            <div class="form-group">
+                <?php echo $this->formSelect($form->get('transaction_status')); ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- Second Row -->
+    <div class="row">
+        <!-- Booking date -->
+        <div class="col-sm-3">
+            <div class="form-group">
+                <div class="input-group">
+                    <label class="input-group-addon" for="booking_date">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </label>
+                    <?php echo $this->formInput($form->get('booking_date')); ?>
+                </div>
+            </div>
+        </div>
+
+        <!-- Arrival date -->
+        <div class="col-sm-3">
+            <div class="form-group">
+                <div class="input-group">
+                    <label class="input-group-addon" for="arrival_date">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </label>
+                    <?php echo $this->formInput($form->get('arrival_date')); ?>
+                </div>
+            </div>
+        </div>
+
+        <!-- Departure date -->
+        <div class="col-sm-3">
+            <div class="form-group">
+                <div class="input-group">
+                    <label class="input-group-addon" for="departure_date">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </label>
+                    <?php echo $this->formInput($form->get('departure_date')); ?>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction date -->
+        <div class="col-sm-3">
+            <div class="form-group">
+                <div class="input-group">
+                    <label class="input-group-addon" for="transaction_date">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </label>
+                    <?php echo $this->formInput($form->get('transaction_date')); ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Third Row -->
+    <div class="row">
+        <!-- Product -->
+        <div class="col-sm-5">
+            <div class="form-group">
+                <div class="input-group">
+                    <?php echo $this->formInput($form->get('product')); ?>
+                    <label class="input-group-btn" for="product">
+                        <a href="javascript:void(0)" class="btn btn-default apt-filter-btn">
+                            <span class="glyphicon glyphicon-filter" data-toggle="popover" data-container="body" title="Filter is ON" data-content="Autocomplete will search among <b>active</b> apartments only."></span>
+                            <span class="glyphicon glyphicon-asterisk hide" data-toggle="popover" data-container="body" title="Filter is OFF" data-content="Autocomplete will search among all apartments."></span>
+                        </a>
+                    </label>
+                </div>
+                <?php echo $this->formHidden($form->get('product_id')); ?>
+                <?php echo $this->formHidden($form->get('product_type')); ?>
+            </div>
+        </div>
+
+        <div class="col-sm-5">
+            <div class="form-group">
+                <div class="input-group">
+                    <?php echo $this->formInput($form->get('assigned_product')); ?>
+                    <label class="input-group-btn" for="assigned_product">
+                        <a href="javascript:void(0)" class="btn btn-default apt-filter-btn">
+                            <span class="glyphicon glyphicon-filter" data-toggle="popover" data-container="body" title="Filter is ON" data-content="Autocomplete will search among <b>active</b> apartments only."></span>
+                            <span class="glyphicon glyphicon-asterisk hide" data-toggle="popover" data-container="body" title="Filter is OFF" data-content="Autocomplete will search among all apartments."></span>
+                        </a>
+                    </label>
+                </div>
+                <?php echo $this->formHidden($form->get('assigned_product_id')); ?>
+                <?php echo $this->formHidden($form->get('assigned_product_type')); ?>
+            </div>
+        </div>
+
+        <!-- City -->
+        <div class="col-sm-2">
+            <div class="form-group">
+                <?php echo $this->formSelect($form->get('city')); ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fourth Row -->
+    <div class="row">
+        <div class="col-sm-10 form-inline">
+            <?php
+            $transactionTypes = [
+                \DDD\Service\Booking\BankTransaction::BANK_TRANSACTION_TYPE_CASH,
+                \DDD\Service\Booking\BankTransaction::BANK_TRANSACTION_TYPE_CASH_REFUND,
+                \DDD\Service\Booking\BankTransaction::BANK_TRANSACTION_TYPE_CHARGEBACK_DISPUTE,
+                \DDD\Service\Booking\BankTransaction::BANK_TRANSACTION_TYPE_CHARGEBACK_FRAUD,
+                \DDD\Service\Booking\BankTransaction::BANK_TRANSACTION_TYPE_CHARGEBACK_OTHER,
+                \DDD\Service\Booking\BankTransaction::BANK_TRANSACTION_TYPE_COLLECT,
+                \DDD\Service\Booking\BankTransaction::BANK_TRANSACTION_TYPE_BANK_DEPOSIT,
+                \DDD\Service\Booking\BankTransaction::BANK_TRANSACTION_TYPE_PAY,
+                \DDD\Service\Booking\BankTransaction::BANK_TRANSACTION_TYPE_REFUND,
+                \DDD\Service\Booking\BankTransaction::BANK_TRANSACTION_TYPE_VALIDATION,
+            ];
+            ?>
+            <div class="btn-group">
+            <?php
+                foreach ($transactionTypes as $type) {
+            ?>
+                <a class="btn btn-default checkbox-cover" data-status="0" id="transaction_type_<?php echo $type; ?>"><?php echo \Library\Constants\Objects::getTransactionTypeById($type); ?></a>
+            <?php
+                }
+            ?>
+            </div>
+
+            <?php
+                foreach ($transactionTypes as $type) {
+                    echo $this->formHidden($form->get('transaction_type[' . $type . ']'));
+                }
+            ?>
+        </div>
+
+        <!-- psp -->
+        <div class="col-sm-2">
+            <div class="form-group">
+                <?php echo $this->formSelect($form->get('psp')); ?>
+            </div>
+        </div>
+    </div>
+
+    <br>
+
+    <!-- Fifth Row -->
+    <div class="row">
+        <div class="col-sm-2" id="download-btn">
+            <div class="form-group">
+                <a href="<?php echo $this->url('finance/chart/transaction/download'); ?>" class="btn btn-block btn-info" id="btn_download_transaction_filtered_csv"><i class="glyphicon glyphicon-download"></i> Download</a>
+            </div>
+        </div>
+        <div class="col-sm-8">
+            <div class="form-group">
+                <a href="<?php echo $this->url('finance/chart/transaction/get'); ?>" class="btn btn-block btn-primary transaction-search"><span class="glyphicon glyphicon-search"></span> Show</a>
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <div class="form-group">
+                <a href="#reset" class="btn btn-default btn-block filter-reset">Clear Filter</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php echo $this->form()->closeTag(); ?>
+
+<div class="row">
+    <div class="col-sm-12">
+        <div id="amount"></div>
+    </div>
+    <div class="col-sm-12">
+        <div id="summary"></div>
+    </div>
+</div>

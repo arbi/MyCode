@@ -1,0 +1,87 @@
+<?php
+use Zend\Session\Container;
+
+	if ($this->apartelList) {
+		foreach ($this->apartelList as $row) {
+?>
+        <section class="col-sm-6 item" itemscope itemtype="http://schema.org/LodgingBusiness">
+            <a href="<?=$row['url_to_search']?>" class="thumbnail" itemprop="url">
+	            <div>
+                    <?php if (isset($row['image']) && $row['image']) { ?>
+                    <img alt="<?=$row['prod_name']?>" class="img img-100 inner-border" src="<?=$row['image']?>" itemprop="photo">
+                    <?php } ?>
+	                <div class="item-header">
+	                    <h1>
+                            <span itemprop="name"><?=$row['prod_name']?></span>
+	                    </h1>
+	                </div>
+	                <div class="item-container row">
+                        <div class="col-xs-7 item-footer"><!--item-footer-->
+	                        <div class="title">
+	                            <span class="text-danger">
+	                                <i class="glyphicon glyphicon-user text-small-90"></i> <?=$row['capacity']?> <?=$this->textline(1216)?>
+	                            </span>
+	                            <span class="text-muted hidden-xs hidden-sm">/</span>
+		                        <span class="bedrooms"><?=($row['bedroom_count'] > 0) ? $row['bedroom_count'] . ' ' . $this->textline(1176):
+		                        	$this->textline(1190);
+
+		                        if ($this->visitorLoc['country_id'] == 213) {
+		                        	$squareFt = round($row['square_meters'] * 10.764);
+		                        	?>
+                                    <span class="text-muted">/</span> <?=$squareFt?>ft<sup>2</sup>
+
+		                        <?php }else {
+		                        ?>
+                                    <span class="text-muted">/</span> <?=$row['square_meters']?>m<sup>2</sup>
+                                    <?php } ?>
+                                </span>
+	                        </div>
+	                        <div class="location" itemprop="location" itemscope itemtype="http://schema.org/Place">
+	                            <?= $row['address'] . ', ' .$this->cityname($row['city_id'])?>
+                                <span itemprop="url" class="hidden"><?php echo $this->urltoCity($row['city_id']); ?></span>
+	                        </div>
+	                    </div>
+	                    <div class="col-xs-5 item-price"> <!--item-price-->
+		                    <div class="offer">
+			                    <span class="btn-lg searchButton smallButton"><?=$this->textline(1439)?></span>
+		                    </div>
+                            <span>from</span>
+                            <span class="only-price">
+                                <?php
+                                    $originPrice = number_format($row['price_min'], 2, '.', '');
+                                    $visitor     = new Container('visitor');
+
+                                    if (   !is_null($visitor->partnerId)
+                                        && (int)$visitor->partnerId
+                                        && $this->hasDate
+                                    ) {
+                                        $partnerDao  = new \DDD\Dao\Partners\Partners($this->sl);
+                                        $partnerInfo = $partnerDao->fetchOne(['gid' => (int)$visitor->partnerId]);
+
+                                        if ($partnerInfo && ceil($partnerInfo->getDiscount())) {
+                                            $discountPrice = number_format($row['price_min'] * (100 - $partnerInfo->getDiscount()) * 0.01, 2, '.', '');
+                                        ?>
+                                            <del style="color: #f00;"><p style='color:black; display: inline;'><sup><?=$row['symbol']?></sup><?=number_format($row['price_min'], 2, '.', '')?></p></del>&nbsp; <p style='color:#f00; display: inline;'><sup><?=$row['symbol']?></sup><?= $discountPrice ?></p>
+                                            <span itemprop="priceRange" class="hidden"><?php echo $discountPrice .' '. $row['symbol']?></span>
+                                        <?php } else { ?>
+                                            <sup><?=$row['symbol']?></sup><?=number_format($row['price_min'], 2, '.', '')?>
+                                            <span itemprop="priceRange" class="hidden"><?php echo number_format($row['price_min'], 2, '.', '').' '.$row['symbol']?></span>
+                                        <?php }
+                                    } else {
+                                ?>
+                                    <sup><?=$row['symbol']?></sup><?=number_format($row['price_min'], 2, '.', '')?>
+                                    <span itemprop="priceRange" class="hidden"><?php echo number_format($row['price_min'], 2, '.', '').' '.$row['symbol']?></span>
+                                <?php } ?>
+                            </span>
+	                        <p><?=$this->options['price_text']?></p>
+	                    </div>
+	                </div>
+	            </div>
+	        </a>
+        </section>
+<?php } ?>
+		<div class="col-sm-12">
+	        <span class="col-sm-9 paging-extra text-muted" id="pagination_view"></span>
+	        <div id="search_pagination" class="row text-right"></div>
+		</div>
+<?php } ?>

@@ -1,0 +1,106 @@
+<?php
+
+$current = $this->id ? $this->form->get('name')->getValue() : 'Add PSP';
+$this->layout()->viewTitle = $current;
+$this->layout()->breadcrumb = $this->breadcrumb([
+	['Finance'],
+	['PSP Management', $this->url('finance/default', ['controller' => 'psp'])],
+	[$current]
+]);
+
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($this->layout()->viewTitle);
+
+$this->InlineScript()
+	->appendFile($this->basePath() . '/js/validation/psp.js')
+	->appendFile($this->basePath() . '/js/pages/psp.js');
+?>
+<?php echo $this->form()->openTag($this->form);  ?>
+
+<div class="row">
+    <div class="col-sm-6">
+        <fieldset name="General">
+            <legend>General</legend>
+            <div class="form-group">
+                <label for="name" class="col-sm-4 control-label">Name <?php echo $this->required(); ?></label>
+                <div class="col-sm-8">
+                    <?=$this->formInput($form->get('name'));?>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="short_name" class="col-sm-4 control-label">Short Name <?php echo $this->required(); ?></label>
+                <div class="col-sm-8">
+                    <?=$this->formInput($form->get('short_name'));?>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="money_account_id" class="col-sm-4 control-label">Deposit Account <?php echo $this->required(); ?></label>
+                <div class="col-sm-8">
+                    <?php echo $this->formSelect($form->get('money_account_id')); ?>
+                </div>
+            </div>
+            <?php if ($this->id) { ?>
+            <div class="form-group">
+                <label for="money_account_id" class="col-sm-4 control-label">
+                    <?php echo $this->info('Batch', 'No automatic money transactions will be added if \'Batch\' is set.'); ?>
+                </label>
+                <div class="col-sm-8">
+                    <div class="form-control-static">
+                        <?php
+                            echo $form->get('batch')->getValue() == '1'
+                                ? '<span class="label label-success">Yes</span>'
+                                : '<span class="label label-danger">No</span>';
+                        ?>
+                    </div>
+                </div>
+            </div>
+            <?php } ?>
+        </fieldset>
+    </div>
+    <div class="col-sm-6">
+        <fieldset name="Permission">
+            <legend>Permission</legend>
+            <div class="form-group">
+                <label class="col-sm-4 control-label">
+                    <?= $this->info('Authorization', 'Require this gateway to have an authorization code.'); ?>
+                </label>
+                <div class="col-sm-8">
+                    <?= $this->formRadio($form->get('authorization')); ?>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label">
+                    <?= $this->info('RRN', 'Require this gateway to have an RRN code.'); ?>
+                </label>
+                <div class="col-sm-8">
+                    <?= $this->formRadio($form->get('rrn')); ?>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label">
+                    <?= $this->info('Error Code', 'Require this gateway to have an Error code.'); ?>
+                </label>
+                <div class="col-sm-8">
+                    <?= $this->formRadio($form->get('error_code')); ?>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+</div>
+<div class="page-actions container">
+	<div class="row text-right">
+		<?=$this->formInput($form->get('save')); ?>
+		<?php if ($this->id) {
+                $activationUrl = '/finance/psp/activate/' . $this->id . '?status=' . (int)!$this->status;
+
+                $buttonClass = 'btn-success';
+                $buttonName  = 'Activate';
+                if($this->status) {
+                    $buttonClass = 'btn-danger';
+                    $buttonName = 'Deactivate';
+                }?>
+                <a href="<?=$activationUrl?>" class="btn col-sm-2 col-xs-12 margin-left-10 pull-right <?=$buttonClass?> bank-account-activate"><?=$buttonName?></a>
+        <?php } ?>
+	</div>
+</div>
+<?=$this->form()->closeTag(); ?>

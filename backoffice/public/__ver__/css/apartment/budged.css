@@ -1,0 +1,106 @@
+.yc {
+	width: 100%;
+}
+.yc td {
+	vertical-align: bottom;
+}
+.yc td:nth-child(odd) {
+	text-align: right;
+}
+
+
+/********* Expense Indicator *********/
+.indicator,
+.indicator .provided,
+.indicator .provided-container,
+.indicator .spend {
+    height: 20px;
+}
+
+.indicator:before,
+.indicator:after,
+.indicator .spend:after {
+    position: absolute;
+    font-size: 9px;
+}
+
+.indicator {
+    display: inline-block;
+    width: 96%;
+    font: 10px Helvetica, Arial, serif;
+    background: #f4f4f4;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    position: relative;
+    margin: 10px 0;
+    line-height: 20px;
+    text-align: right;
+}
+
+.indicator:before {;
+    content: attr(data-currency-sign) attr(data-cost-starting);
+    top: -20px;
+    left: 0
+}
+
+.indicator:after {
+    content: attr(data-currency-sign) attr(data-cost-overall);
+    top: -20px;
+    right: 0;
+}
+
+.indicator .provided,
+.indicator .provided-container,
+.indicator .spend {
+    display: inline-block;
+    position: absolute;
+    width: 0;
+    left: 0;
+    top: 0;
+}
+
+.indicator .provided-container {
+    background: #d5ebfb;
+    z-index: 2;
+    overflow: hidden;
+}
+
+.indicator .provided {
+    height: 30px;
+    top: -5px;
+    border-right: 1px solid #444;
+    z-index: 10;
+}
+
+.indicator .spend {
+    background: #428bca;
+
+    -moz-box-shadow:inset 0px 1px 0px 0px #ffffff;
+    -webkit-box-shadow:inset 0px 1px 0px 0px #ffffff;
+    box-shadow:inset 0px 1px 0px 0px rgba(255, 255, 255, .3);
+
+    text-shadow: 1px 1px 0px rgba(0,0,0, .4);
+    border-radius: 4px 0 0 4px;
+    color: #fff;
+    z-index: 3;
+    min-width: 45px;
+}
+
+.indicator .spend.bg-danger {
+    background: #d9534f;
+}
+
+.indicator .spend.bg-warning {
+    background: #f0ad4e;
+}
+
+.indicator .spend:after {
+    top: 25px;
+    right: 0;
+}
+
+.indicator .spend span {
+    margin-right: 2px;
+    position: relative;
+    z-index: 3;
+}

@@ -1,0 +1,251 @@
+{
+    "event": "suiteStart",
+    "suite": "",
+    "tests": 14
+}{
+    "event": "suiteStart",
+    "suite": "API_Warehouse_Assets_Resource",
+    "tests": 5
+}{
+    "event": "suiteStart",
+    "suite": "ApiTest\\Warehouse\\Controller\\AssetsResourceTest",
+    "tests": 5
+}{
+    "event": "testStart",
+    "suite": "ApiTest\\Warehouse\\Controller\\AssetsResourceTest",
+    "test": "ApiTest\\Warehouse\\Controller\\AssetsResourceTest::testFetchAll"
+}{
+    "event": "test",
+    "suite": "ApiTest\\Warehouse\\Controller\\AssetsResourceTest",
+    "test": "ApiTest\\Warehouse\\Controller\\AssetsResourceTest::testFetchAll",
+    "status": "pass",
+    "time": 0.56023597717285,
+    "trace": [],
+    "message": "",
+    "output": ""
+}{
+    "event": "testStart",
+    "suite": "ApiTest\\Warehouse\\Controller\\AssetsResourceTest",
+    "test": "ApiTest\\Warehouse\\Controller\\AssetsResourceTest::testFetch"
+}{
+    "event": "test",
+    "suite": "ApiTest\\Warehouse\\Controller\\AssetsResourceTest",
+    "test": "ApiTest\\Warehouse\\Controller\\AssetsResourceTest::testFetch",
+    "status": "pass",
+    "time": 0.14512610435486,
+    "trace": [],
+    "message": "",
+    "output": ""
+}{
+    "event": "testStart",
+    "suite": "ApiTest\\Warehouse\\Controller\\AssetsResourceTest",
+    "test": "ApiTest\\Warehouse\\Controller\\AssetsResourceTest::testPost"
+}{
+    "event": "test",
+    "suite": "ApiTest\\Warehouse\\Controller\\AssetsResourceTest",
+    "test": "ApiTest\\Warehouse\\Controller\\AssetsResourceTest::testPost",
+    "status": "pass",
+    "time": 0.4912428855896,
+    "trace": [],
+    "message": "",
+    "output": ""
+}{
+    "event": "testStart",
+    "suite": "ApiTest\\Warehouse\\Controller\\AssetsResourceTest",
+    "test": "ApiTest\\Warehouse\\Controller\\AssetsResourceTest::testPatch"
+}{
+    "event": "test",
+    "suite": "ApiTest\\Warehouse\\Controller\\AssetsResourceTest",
+    "test": "ApiTest\\Warehouse\\Controller\\AssetsResourceTest::testPatch",
+    "status": "pass",
+    "time": 0.39271593093872,
+    "trace": [],
+    "message": "",
+    "output": ""
+}{
+    "event": "testStart",
+    "suite": "ApiTest\\Warehouse\\Controller\\AssetsResourceTest",
+    "test": "ApiTest\\Warehouse\\Controller\\AssetsResourceTest::testDuplicateRequest"
+}{
+    "event": "test",
+    "suite": "ApiTest\\Warehouse\\Controller\\AssetsResourceTest",
+    "test": "ApiTest\\Warehouse\\Controller\\AssetsResourceTest::testDuplicateRequest",
+    "status": "pass",
+    "time": 0.33471393585205,
+    "trace": [],
+    "message": "",
+    "output": ""
+}{
+    "event": "suiteStart",
+    "suite": "API_Warehouse_Categories_Resource",
+    "tests": 1
+}{
+    "event": "suiteStart",
+    "suite": "ApiTest\\Warehouse\\Controller\\CategoriesResourceTest",
+    "tests": 1
+}{
+    "event": "testStart",
+    "suite": "ApiTest\\Warehouse\\Controller\\CategoriesResourceTest",
+    "test": "ApiTest\\Warehouse\\Controller\\CategoriesResourceTest::testFethAll"
+}{
+    "event": "test",
+    "suite": "ApiTest\\Warehouse\\Controller\\CategoriesResourceTest",
+    "test": "ApiTest\\Warehouse\\Controller\\CategoriesResourceTest::testFethAll",
+    "status": "pass",
+    "time": 0.14720010757446,
+    "trace": [],
+    "message": "",
+    "output": ""
+}{
+    "event": "suiteStart",
+    "suite": "API_Warehouse_Histories_Resource",
+    "tests": 1
+}{
+    "event": "suiteStart",
+    "suite": "ApiTest\\Warehouse\\Controller\\HistoriesResourceTest",
+    "tests": 1
+}{
+    "event": "testStart",
+    "suite": "ApiTest\\Warehouse\\Controller\\HistoriesResourceTest",
+    "test": "ApiTest\\Warehouse\\Controller\\HistoriesResourceTest::testFethAll"
+}{
+    "event": "test",
+    "suite": "ApiTest\\Warehouse\\Controller\\HistoriesResourceTest",
+    "test": "ApiTest\\Warehouse\\Controller\\HistoriesResourceTest::testFethAll",
+    "status": "pass",
+    "time": 0.1778450012207,
+    "trace": [],
+    "message": "",
+    "output": ""
+}{
+    "event": "suiteStart",
+    "suite": "API_Warehouse_Configs_Resource",
+    "tests": 1
+}{
+    "event": "suiteStart",
+    "suite": "ApiTest\\Warehouse\\Controller\\ConfigsResourceTest",
+    "tests": 1
+}{
+    "event": "testStart",
+    "suite": "ApiTest\\Warehouse\\Controller\\ConfigsResourceTest",
+    "test": "ApiTest\\Warehouse\\Controller\\ConfigsResourceTest::testFethAll"
+}{
+    "event": "test",
+    "suite": "ApiTest\\Warehouse\\Controller\\ConfigsResourceTest",
+    "test": "ApiTest\\Warehouse\\Controller\\ConfigsResourceTest::testFethAll",
+    "status": "pass",
+    "time": 0.17193603515625,
+    "trace": [],
+    "message": "",
+    "output": ""
+}{
+    "event": "suiteStart",
+    "suite": "API_Common_Locations_Resource",
+    "tests": 1
+}{
+    "event": "suiteStart",
+    "suite": "ApiTest\\Common\\Controller\\LocationsResourceTest",
+    "tests": 1
+}{
+    "event": "testStart",
+    "suite": "ApiTest\\Common\\Controller\\LocationsResourceTest",
+    "test": "ApiTest\\Common\\Controller\\LocationsResourceTest::testFethAll"
+}{
+    "event": "test",
+    "suite": "ApiTest\\Common\\Controller\\LocationsResourceTest",
+    "test": "ApiTest\\Common\\Controller\\LocationsResourceTest::testFethAll",
+    "status": "pass",
+    "time": 0.15776085853577,
+    "trace": [],
+    "message": "",
+    "output": ""
+}{
+    "event": "suiteStart",
+    "suite": "API_Common_Users_Resource",
+    "tests": 1
+}{
+    "event": "suiteStart",
+    "suite": "ApiTest\\Common\\Controller\\UsersResourceTest",
+    "tests": 1
+}{
+    "event": "testStart",
+    "suite": "ApiTest\\Common\\Controller\\UsersResourceTest",
+    "test": "ApiTest\\Common\\Controller\\UsersResourceTest::testFethAll"
+}{
+    "event": "test",
+    "suite": "ApiTest\\Common\\Controller\\UsersResourceTest",
+    "test": "ApiTest\\Common\\Controller\\UsersResourceTest::testFethAll",
+    "status": "pass",
+    "time": 0.15868401527405,
+    "trace": [],
+    "message": "",
+    "output": ""
+}{
+    "event": "suiteStart",
+    "suite": "API_Task_Incidents_Resource",
+    "tests": 1
+}{
+    "event": "suiteStart",
+    "suite": "ApiTest\\Task\\Controller\\IncidentsResourceTest",
+    "tests": 1
+}{
+    "event": "testStart",
+    "suite": "ApiTest\\Task\\Controller\\IncidentsResourceTest",
+    "test": "ApiTest\\Task\\Controller\\IncidentsResourceTest::testPost"
+}{
+    "event": "test",
+    "suite": "ApiTest\\Task\\Controller\\IncidentsResourceTest",
+    "test": "ApiTest\\Task\\Controller\\IncidentsResourceTest::testPost",
+    "status": "pass",
+    "time": 0.48557996749878,
+    "trace": [],
+    "message": "",
+    "output": ""
+}{
+    "event": "suiteStart",
+    "suite": "API_Application_Authenticate_Controller",
+    "tests": 3
+}{
+    "event": "suiteStart",
+    "suite": "ApiTest\\Application\\Controller\\AuthenticateControllerTest",
+    "tests": 3
+}{
+    "event": "testStart",
+    "suite": "ApiTest\\Application\\Controller\\AuthenticateControllerTest",
+    "test": "ApiTest\\Application\\Controller\\AuthenticateControllerTest::testLogin"
+}{
+    "event": "test",
+    "suite": "ApiTest\\Application\\Controller\\AuthenticateControllerTest",
+    "test": "ApiTest\\Application\\Controller\\AuthenticateControllerTest::testLogin",
+    "status": "pass",
+    "time": 0.13562798500061,
+    "trace": [],
+    "message": "",
+    "output": ""
+}{
+    "event": "testStart",
+    "suite": "ApiTest\\Application\\Controller\\AuthenticateControllerTest",
+    "test": "ApiTest\\Application\\Controller\\AuthenticateControllerTest::testRefreshToken"
+}{
+    "event": "test",
+    "suite": "ApiTest\\Application\\Controller\\AuthenticateControllerTest",
+    "test": "ApiTest\\Application\\Controller\\AuthenticateControllerTest::testRefreshToken",
+    "status": "pass",
+    "time": 0.17332601547241,
+    "trace": [],
+    "message": "",
+    "output": ""
+}{
+    "event": "testStart",
+    "suite": "ApiTest\\Application\\Controller\\AuthenticateControllerTest",
+    "test": "ApiTest\\Application\\Controller\\AuthenticateControllerTest::testlogOut"
+}{
+    "event": "test",
+    "suite": "ApiTest\\Application\\Controller\\AuthenticateControllerTest",
+    "test": "ApiTest\\Application\\Controller\\AuthenticateControllerTest::testlogOut",
+    "status": "pass",
+    "time": 0.17612099647522,
+    "trace": [],
+    "message": "",
+    "output": ""
+}

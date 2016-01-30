@@ -1,0 +1,171 @@
+<?php
+	$this->headTitle()->setSeparator(' - ');
+	$this->headTitle('People Directory');
+
+    $this->layout()->breadcrumb = '<li>Administration</li>
+                                  <li class="active">People Directory</li>';
+    $this->layout()->viewTitle  = 'People Directory';
+
+    $this->InlineScript()
+        ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+        ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+        ->appendFile($this->basePath() . '/js/pages/company-directory.js');
+
+    $this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css')
+        ->appendStylesheet($this->basePath() . '/css/datatable/datatables.responsive.css');
+?>
+<?php
+    if (!is_null($this->search_form)) {
+        $form = $this->search_form;
+        $form->setAttribute('id', 'search-ginosik');
+?>
+<script>
+    DATATABLE_AJAX_SOURCE = "<?= $data_url ?>";
+
+    HAS_PEOPLE_HR_ROLE                      = <?= ($hasPeopleHRRole) ? 1 : 0 ?>;
+    HAS_PROFILE_MODULE                      = <?= ($hasProfileModule) ? 1 : 0 ?>;
+</script>
+
+<div class="row">
+    <div class="col-sm-12">
+        <?= $this->form()->openTag($form) ?>
+            <div class="row">
+                <?php
+                    if ($hasPeopleManagementRole || $hasPeopleDirectoryPermissionsRole) {
+                ?>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <?= $this->formElement($form->get('group')) ?>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <?= $this->formElement($form->get('ud')) ?>
+                            </div>
+                        </div>
+                <?php
+                    }
+                ?>
+
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <?= $this->formElement($form->get('city')) ?>
+                    </div>
+                </div>
+
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <?= $this->formElement($form->get('team')) ?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-7">
+                    <?php if ($hasPeopleManagementRole || $hasPeopleHRRole) { ?>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="user-switch">
+                                        <div class="btn-group fn-buttons">
+                                            <a href="#all-sys" class="btn btn-sm btn-default" data-status="all">All</a>
+                                            <a href="#active-sys" class="btn btn-sm btn-default active" data-status="active">Human</a>
+                                            <a href="#inactive-sys" class="btn btn-sm btn-default" data-status="inactive">System</a>
+                                        </div>
+                                        <input type="hidden" name="system-user-status" id="system-user-status" class="user-switch-status" value="1" />
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="user-switch">
+                                        <div class="btn-group fn-buttons">
+                                            <a href="#all-active" class="btn btn-sm btn-default" data-status="all">All</a>
+                                            <a href="#active-active" class="btn btn-sm btn-default active" data-status="active">Active</a>
+                                            <a href="#inactive-active" class="btn btn-sm btn-default" data-status="inactive">Inactive</a>
+                                        </div>
+                                        <input type="hidden" name="active-user-status" id="active-user-status" class="user-switch-status" value="1" />
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="user-switch">
+                                        <div class="btn-group fn-buttons">
+                                            <a href="#all-active" class="btn btn-sm btn-default active" data-status="all">All</a>
+                                            <a href="#inactive-ext" class="btn btn-sm btn-default" data-status="inactive">External</a>
+                                            <a href="#active-ext" class="btn btn-sm btn-default" data-status="active">Not External</a>
+                                        </div>
+                                        <input type="hidden" name="external-user-status" id="external-user-status" class="user-switch-status" value="1" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php } else { ?>
+                        <input type="hidden" name="system-user-status" id="system-user-status" class="user-switch-status" value="1" />
+                        <input type="hidden" name="external-user-status" id="external-user-status" class="user-switch-status" value="1" />
+                        <input type="hidden" name="active-user-status" id="active-user-status" class="user-switch-status" value="1" />
+                    <?php } ?>
+                </div>
+
+
+
+                <div class="col-sm-5">
+                    <?php if ($hasPeopleManagementRole || $hasPeopleHRRole) { ?>
+                        <div class="columns-onoff">
+                            <div class="btn-group fn-columns pull-right">
+                                <a href="#col-evaluation-date" class="btn btn-sm btn-default btn-evaluation-date" data-column-name="5">Next Eval</a>
+                                <a href="#col-vacation-days-left" class="btn btn-sm btn-default btn-vacation-days-left" data-column-name="6">Vacation Granted</a>
+                                <a href="#col-vacation-days-allotted" class="btn btn-sm btn-default btn-vacation-days-allotted" data-column-name="7">Vacation Vested</a>
+                                <a href="#col-start-date" class="btn btn-sm btn-default btn--start-date" data-column-name="8">Start Date</a>
+                                <a href="#col-end-date" class="btn btn-sm btn-default btn-end-date" data-column-name="9">End Date</a>
+                            </div>
+                        </div>
+                    <?php } ?>
+                </div>
+            </div>
+
+        <?= $this->form()->closeTag($form) ?>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-12">
+        <a href="javascript:void(0)" class="btn btn-medium btn-block btn-primary" id="btn_filter_ginosiks"><i class="icon-search icon-white"></i> Search</a>
+    </div>
+</div>
+
+<hr />
+
+<?php } ?>
+
+<div class="row">
+    <div class="col-sm-12">
+        <table id="datatable_users" class="table table-striped table-bordered table-condensed table-hover">
+            <thead>
+            <tr>
+                <th> ST </th>
+                <th> Name </th>
+                <th> City </th>
+                <th class="hidden-xs"> Position </th>
+                <th class="hidden-xs"> Department </th>
+                <th class="hidden-xs"> Next Eval </th>
+                <th class="hidden-xs"> Vacation Granted </th>
+                <th class="hidden-xs"> Vacation Vested </th>
+                <th class="hidden-xs"> Start Date </th>
+                <th class="hidden-xs"> End Date </th>
+                <th> &nbsp; </th>
+                <th> &nbsp; </th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<?php if ($this->can_add) { ?>
+<div class="container page-actions">
+    <div class="row text-right">
+        <a href="<?= $this->url('backoffice/default', array('controller' => 'user', 'action' => 'edit'))?>" class="btn btn-primary pull-right col-sm-2 col-xs-12 margin-left-10">Add User</a>
+    </div>
+</div>
+<?php } ?>

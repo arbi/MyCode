@@ -1,0 +1,70 @@
+<?php
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($this->layout()->apartmentName . ' - Apartment Media');
+
+$this->InlineScript()
+    ->appendFile($this->basePath().'/js/plugins/jquery.form.min.js')
+    ->appendFile($this->basePath().'/js/apartment/media.js');
+
+$this->headLink()
+    ->appendStylesheet($this->basePath().'/css/apartment/common.css')
+    ->appendStylesheet($this->basePath().'/css/apartment/media.css');
+?>
+
+<script>
+  var BASE_PATH  = '<?php echo $this->basePath();?>';
+  var IMAGES_DOMAIN = '<?php echo "//".Library\Constants\DomainConstants::IMG_DOMAIN_NAME; ?>';
+</script>
+<div class="row">
+    <div class="col-sm-12">
+        <hr>
+        <?= $this->apartmentNavigation($this->apartmentId, $this->apartmentStatus, 'apartment/media')?>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <fieldset>
+            <legend>Images</legend>
+        </fieldset>
+        <div id="images_context">
+        </div>
+        <form id="upload-form" class="hidden-form" enctype="multipart/form-data" method="post" action="media/ajax-upload-images">
+            <input type="file" id="uploadImages" multiple="multiple" name="files[]" accept="image/*">
+        </form>
+    </div>
+</div>
+
+<?= $this->formOutput ?>
+
+<div class="modal fade" id="image-delete">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-danger">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true"><span class="sr-only">Close</span>&times;</span>
+                </button>
+                <h4 class="modal-title">Delete Images</h4>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure?</p>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-default modal-close">Close</a>
+                <a href="#" class="btn btn-danger">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="image-dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="loader-dialog">
+    <img src="<?php echo $this->basePath().'/img/loading-blue.gif' ?>" width="120" height="120" />
+</div>

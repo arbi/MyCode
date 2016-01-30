@@ -1,0 +1,240 @@
+body {
+    overflow-y: scroll;
+}
+.task-panel ul.subtasks {
+    padding-left: 20px;
+    list-style-type: none;
+}
+
+.btn-group li:hover {
+    cursor: pointer;
+}
+
+.tas-panel ul>li {
+    list-style-type: none;
+}
+
+.panel-heading .accordion-toggle .glyphicon-triangle-bottom {
+    display:none;
+}
+
+.panel-heading .accordion-toggle .glyphicon-triangle-top {
+    display:block;
+}
+
+.panel-heading .accordion-toggle.collapsed .glyphicon-triangle-bottom {
+    display:block;
+}
+
+.panel-heading .accordion-toggle.collapsed .glyphicon-triangle-top {
+    display:none;
+}
+
+.panel-heading .accordion-toggle {
+    text-decoration: none;
+}
+
+.panel-body button {
+    margin-top: 5px;
+}
+
+.panel-heading {
+    font-size: 15px !important;
+}
+
+.panel-title-container {
+    font-size: 1.3em;
+}
+.panel-title-container small {
+    font-size: 0.7em;
+}
+.panel-title-container>.row>.col-sm-5:first-child {
+    padding-top: 1px;
+}
+
+.icon-incident {
+    vertical-align: bottom;
+}
+
+.selectize-control {
+    font-size: 0 !important;
+}
+.selectize-control .selectize-input, .selectize-control .selectize-dropdown {
+    font-size: 14px;
+}
+
+.task-panel .label:not(:last-child) {
+    margin-right: 5px;
+}
+
+.subtask-checkbox {
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.subtask-checkbox:hover {
+    color: #337ab7;
+}
+
+.comment-field-container {
+    padding-right: 80px;
+    position: relative;
+    width: 100%;
+    margin-top: 10px;
+}
+
+
+.comment-field-container .comment-submit-btn {
+    position: absolute;
+    right: -5px;
+    top: -5px;
+}
+
+.task-panel .panel-heading {
+    cursor:pointer;
+}
+
+.label.label-icon {
+    padding: 3px;
+    color: #FFFFFF;
+}
+.label.label-icon span {
+    font-size: inherit;
+}
+.label.label-icon span {
+    position: relative;
+    top: 2px;
+    right: -2px;
+}
+
+.status-icon-small-padding {
+    padding: 6px 6px !important;
+}
+
+.task-priority {
+    display: inline-block;
+    background: #fad46f;
+    border-radius: 50%;
+    height: 24px;
+    width: 24px;
+    text-align: center;
+    vertical-align: middle;
+    font-weight: bold;
+    color: white;
+    font-size: 18px;
+    float: none;
+    margin: 0 6px 0 0;
+}
+
+.task-priority-normal {
+    background: #fad46f;
+}
+
+.task-priority-high {
+    background: #fabd6f;
+}
+
+.task-priority-important {
+    background: #f78f50;
+}
+
+.task-priority-critical {
+    background: #f75850;
+}
+
+#housekeeping-tasks-loader {
+    padding-top: 5px;
+}
+
+.selectize-remove-item {
+    color: #E0E0E0;
+}
+
+.selectize-remove-item:hover {
+    color: #FF8A65;
+    cursor: pointer;
+}
+
+.panel-toggle {
+    margin-top: 6px;
+    color: #9E9E9E;
+}
+
+.task-body-tags {
+    padding: 0 15px 7px;
+}
+
+.panel-faded .panel-heading {
+    opacity: 0.4 !important;
+}
+
+.panel-toggle span {
+    font-size: 20px;
+}
+
+.hk-container .accordion-toggle {
+    cursor: pointer;
+}
+
+.visible-xs-inline-block.hide {
+    display: none !important;
+}
+
+.task-panel .panel-title-container .selectize-input>div,
+.task-panel .panel-title-container .selectize-dropdown-content>div
+{
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.task-panel .panel-title-container .selectize-input>div {
+    width: 90%;
+}
+
+@media (max-width: 767px) {
+    div.sort-hk {
+        text-align: left;
+        margin-top: 20px;
+    }
+
+    .panel-title-container h3 {
+        font-size: inherit;
+        margin: 10px 0
+    }
+
+    .task-responsible-container {
+        margin-bottom: 5px !important;
+    }
+
+    .panel.in .panel-toggle {
+        display: none;
+    }
+    ul.incident-report-buttons li a{
+        width:100%;
+        white-space: normal;
+    }
+}
+
+@media (min-width: 768px) {
+    .task-body-left-block {
+        border-right: 1px solid #ddd;
+    }
+}
+
+.opacity-60{
+    opacity:0.6 !important;
+}
+
+@media (min-width: 992px) {
+    .task-body-tags {
+        text-align: right;
+        padding-top: 7px;
+    }
+}
+
+@media (max-width: 992px) {
+    footer>div, footer .btn, footer .btn-group {
+        width: 100%;
+    }
+}

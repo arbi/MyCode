@@ -1,0 +1,7 @@
+.label-inactive-rate {
+    position: absolute;
+    display: inline-block !important;
+    vertical-align: middle !important;
+    top: 7px;
+    right: 20px;
+}

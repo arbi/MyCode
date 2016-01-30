@@ -1,0 +1,7 @@
+<OTA_HotelResRQ Version="2.02" xmlns="http://www.opentravel.org/OTA/2003/05">
+	%pos%
+	%unique_id%
+	<HotelReservations>
+		<HotelReservation %purge_date% />
+	</HotelReservations>
+</OTA_HotelResRQ>

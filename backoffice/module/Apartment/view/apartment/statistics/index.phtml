@@ -1,0 +1,226 @@
+<?php
+	$this->headTitle()->setSeparator(' - ');
+	$this->headTitle($this->layout()->apartmentName . ' - Apartment Statistics');
+
+	$this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/apartment/common.css')
+        ->appendStylesheet($this->basePath() . '/css/apartment/basicdata.css')
+        ->appendStylesheet($this->basePath() . '/css/apartment/budged.css');
+    $this->InlineScript()->appendFile($this->basePath() . '/js/pages/budged.js');
+?>
+
+<div class="row">
+    <div class="col-sm-12">
+        <hr>
+        <?= $this->apartmentNavigation($this->apartmentId, $this->apartmentStatus, 'apartment/statistics')?>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-12">
+        <fieldset>
+            <legend>Upcoming Year <small class="text-muted">Based on departures and in <?=($this->currency)?> currency</small></legend>
+            <table class="table table-bordered table-condensed">
+                <thead>
+                    <tr>
+                        <th width="100"></th>
+                        <?php  foreach ($this->months as $month){?>
+                            <th><?=$month?></th>
+                        <?php } ?>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="success">
+                        <td>Bookings</td>
+                        <?php foreach ($this->sale['monthly_bookings'] as $monthly_booking){ ?>
+                            <td <?php if(!$monthly_booking) echo 'class="text-danger"'; ?>><?=$monthly_booking?></td>
+                        <?php } ?>
+                        <td>-</td>
+                    </tr>
+                    <tr class="danger">
+                        <td>Cancelations</td>
+                        <?php foreach ($this->sale['monthly_cancalations'] as $monthly_cancalations){ ?>
+                                <td><?=$monthly_cancalations?></td>
+                        <?php } ?>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>Unsold Days</td>
+                        <?php foreach ($this->sale['unsold_days'] as $unsoldDays){ ?>
+                            <td <?php if(!$unsoldDays) echo 'class="text-success"'; ?>><?=$unsoldDays?></td>
+                        <?php } ?>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>Average Price</td>
+                        <?php foreach ($this->sale['monthly_av_price'] as $monthly_price){ ?>
+                               <td><?=$monthly_price?></td>
+                        <?php } ?>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>Close Outs</td>
+                        <?php foreach ($this->sale['close_out'] as $closeOut){ ?>
+                               <td><?=$closeOut?></td>
+                        <?php } ?>
+                        <td>-</td>
+                    </tr>
+                    <tr class="success">
+                        <td>Revenue</td>
+                        <?php foreach ($this->sale['monthly_revenue'] as $monthly_revenue){ ?>
+                        <td <?php if($monthly_revenue < 0) echo 'class="text-danger"'; ?>><?=number_format($monthly_revenue,2, '.', '')?></td>
+                        <?php  } ?>
+                        <td><?=number_format($this->sale['monthly_revenue_total'], 2, '.', '')?></td>
+                    </tr>
+                    <tr class="danger">
+                        <td>Expenses</td>
+                        <?php foreach ($this->sale['monthly_cost'] as $monthly_cost){ ?>
+                        <td <?php if($monthly_cost < 0) echo 'class="text-danger"'; ?>><?=number_format($monthly_cost,2, '.', '')?></td>
+                        <?php } ?>
+                        <td><?=number_format($this->sale['monthly_cost_total'], 2, '.', '')?></td>
+                    </tr>
+                    <tr class="info">
+                        <td>Profit</td>
+                        <?php foreach ($this->sale['profit'] as $profit){ ?>
+                        <td <?php if($profit < 0) echo 'class="text-danger"'; ?>><?=number_format($profit,2, '.', '')?></td>
+                        <?php } ?>
+                        <td><?=number_format(($this->sale['monthly_revenue_total'] - $this->sale['monthly_cost_total']), 2, '.', '')?></td>
+                    </tr>
+                </tbody>
+            </table>
+       </fieldset>
+        <fieldset>
+            <legend>Yearly Statistics <?=$this->sale['period'];?> <small class="text-muted">Based on Departure Date</small></legend>
+            <table class="table table-bordered table-condensed">
+                <tr>
+                    <td>Lowest Nightly Price</td>
+                    <td><?=number_format($this->sale['min_price'], 2, '.', '').' '.($this->currency)?></td>
+                    <td>Active Bookings</td>
+                    <td><?=$this->sale['all_bookings']?></td>
+                    <td> Lowest Sold Price</td>
+                    <td><?= (isset($this->sale['lowest_sold_price'])) ? number_format($this->sale['lowest_sold_price'], 2, '.', '').' '.($this->currency) : 0?></td>
+                </tr>
+                <tr>
+                    <td>Highest Nightly Price</td>
+                    <td><?=number_format($this->sale['max_price'], 2, '.', '').' '.($this->currency)?></td>
+                    <td>Cancelations</td>
+                    <td><?=$this->sale['all_cancelations']?></td>
+                    <td>Highest Sold Price</td>
+                    <td><?=number_format($this->sale['highest_sold_price'], 2, '.', '').' '.($this->currency)?></td>
+                </tr>
+                <tr>
+                    <td>Review Score</td>
+                    <td<?php if($this->sale['review'] < 3) echo ' class="text-danger"';?>><?=$this->sale['review']?></td>
+                    <td>Cancelation Rate</td>
+                    <td<?php if($this->sale['cancelation_score'] >= 100) echo ' class="text-danger"';?>><?=$this->sale['cancelation_score'].'%'?></td>
+                    <td>Longest Stay</td>
+                    <td><?=$this->sale['long_stay']?></td>
+                </tr>
+            </table>
+        </fieldset>
+       <fieldset>
+            <legend>Previous Year <small class="text-muted">Based on departures and in <?=($this->currency)?> currency</small></legend>
+            <table class="table table-bordered table-condensed">
+                <thead>
+                    <tr>
+                        <th width="100"></th>
+                        <?php  foreach ($this->months_previous as $month){?>
+                            <th><?=$month?></th>
+                        <?php } ?>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="success">
+                        <td>Bookings</td>
+                        <?php foreach ($this->sale_previous['monthly_bookings'] as $monthly_booking){ ?>
+                            <td <?php if(!$monthly_booking) echo 'class="text-danger"'; ?>><?=$monthly_booking?></td>
+                         <?php } ?>
+                        <td>-</td>
+                    </tr>
+                    <tr class="danger">
+                        <td>Cancelations</td>
+                        <?php foreach ($this->sale_previous['monthly_cancalations'] as $monthly_cancalations){ ?>
+                                <td><?=$monthly_cancalations?></td>
+                        <?php } ?>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>Unsold Days</td>
+                        <?php foreach ($this->sale_previous['unsold_days'] as $unsoldDays){ ?>
+                            <td <?php if(!$unsoldDays) echo 'class="text-success"'; ?>><?=$unsoldDays?></td>
+                         <?php } ?>
+                        <td>-</td>
+                    </tr>
+                     <tr>
+                        <td>Free Stays</td>
+                        <?php foreach ($this->sale_previous['free_sold'] as $monthlyFreeSold){ ?>
+                            <td><?=$monthlyFreeSold?></td>
+                         <?php } ?>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>Average Price</td>
+                        <?php foreach ($this->sale_previous['monthly_av_price'] as $monthly_price){ ?>
+                               <td><?=$monthly_price?></td>
+                        <?php } ?>
+                        <td>-</td>
+                    </tr>
+                    <tr class="success">
+                        <td>Revenue</td>
+                        <?php foreach ($this->sale_previous['monthly_revenue'] as $monthly_revenue){ ?>
+                        <td <?php if($monthly_revenue < 0) echo 'class="text-danger"'; ?>><?=number_format($monthly_revenue, 2, '.', '')?></td>
+                        <?php  } ?>
+                        <td><?=number_format($this->sale_previous['monthly_revenue_total'], 2, '.', '')?></td>
+                    </tr>
+                    <tr class="danger">
+                        <td>Expenses</td>
+                        <?php foreach ($this->sale_previous['monthly_cost'] as $monthly_cost){ ?>
+                        <td <?php if($monthly_cost < 0) echo 'class="text-danger"'; ?>><?=number_format($monthly_cost, 2, '.', '')?></td>
+                        <?php } ?>
+                        <td><?=number_format($this->sale_previous['monthly_cost_total'], 2, '.', '')?></td>
+                    </tr>
+                    <tr class="info">
+                        <td>Profit</td>
+                        <?php foreach ($this->sale_previous['profit'] as $profit){ ?>
+                        <td <?php if($profit < 0) echo 'class="text-danger"'; ?>><?=number_format($profit,2, '.', '')?></td>
+                        <?php } ?>
+                        <td><?=number_format(($this->sale_previous['monthly_revenue_total'] - $this->sale_previous['monthly_cost_total']), 2, '.', '')?></td>
+                    </tr>
+                </tbody>
+            </table>
+       </fieldset>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <fieldset>
+            <legend>Budget</legend>
+            <table class="yc">
+                <caption class="jqplot-title">Budget</caption>
+                <tr>
+                    <td style="padding: 10px;vertical-align: middle;">Startup Budget</td>
+                    <td style="width:150px">
+                        <span class="indicator startup"
+                              data-spend="<?php echo $this->indicator->startup->data_spend; ?>"
+                              data-spend-cost="<?php echo $this->indicator->startup->data_spend_cost; ?>"
+                              data-cost-overall="<?php echo $this->indicator->startup->data_cost_overall; ?>"
+                              data-cost-starting="<?php echo $this->indicator->startup->data_cost_starting; ?>"
+                              data-currency-sign="<?php echo $this->indicator->startup->data_currency_sign; ?>"></span>
+                    </td>
+                    <td style="padding-right: 10px;vertical-align: middle;">Running Cost</td>
+                    <td style="width:450px">
+                        <span class="indicator running"
+                              data-provided="<?php echo $this->indicator->running->data_provided; ?>"
+                              data-spend="<?php echo $this->indicator->running->data_spend; ?>"
+                              data-spend-cost="<?php echo $this->indicator->running->data_spend_cost; ?>"
+                              data-cost-overall="<?php echo $this->indicator->running->data_cost_overall; ?>"
+                              data-cost-starting="<?php echo $this->indicator->running->data_cost_starting; ?>"
+                              data-currency-sign="<?php echo $this->indicator->running->data_currency_sign; ?>"></span>
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+    </div>
+</div>

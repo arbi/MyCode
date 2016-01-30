@@ -1,0 +1,266 @@
+<?php
+
+use Library\Constants\Constants;
+use Library\Constants\DomainConstants;
+use Zend\Session\Container;
+use DDD\Service\ApartmentGroup\Usages\Building as BuildingService;
+
+echo $this->doctype();
+
+/** @var bool|\DDD\Domain\Booking\KeyInstructionPage $keyData */
+$keyData    = $this->keyData;
+$godModeOrKiTypeNotReception = false;
+$phoneNumber = $this->phoneNumber();
+
+if ($this->godMode || $keyData->getKiPageType() !== BuildingService::KI_PAGE_TYPE_RECEPTION ) {
+    $godModeOrKiTypeNotReception = true;
+}
+
+?>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <?php
+
+    echo $this->headTitle($this->textline(1611))->setSeparator(' | ');
+
+    echo $this->headMeta()
+              ->appendName('viewport', 'width=device-width, initial-scale=1.0')
+              ->appendHttpEquiv('X-UA-Compatible', 'IE=edge');
+
+    echo $this->headLink(['rel' => 'shortcut icon', 'type' => 'image/vnd.microsoft.icon', 'href' => '/favicon.ico?v=2'])
+              ->appendStylesheet($this->basePath() . '/css/layout.css', 'all')
+              ->appendStylesheet($this->basePath() . '/css/ginosicustomicons-ie7.css', 'screen', 'IE7')
+              ->appendStylesheet('//fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,600', 'all')
+              ->appendStylesheet('https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css', 'all');
+
+    echo $this->headScript()
+              ->prependFile($this->basePath() . '/js/layout.js')
+              ->prependFile($this->basePath() . '/js/vendor/respond.min.js', 'text/javascript', ['conditional' => 'lt IE 9',])
+              ->prependFile($this->basePath() . '/js/vendor/html5shiv.js', 'text/javascript', ['conditional' => 'lt IE 9',]);
+
+    ?>
+
+    <script>
+        GLOBAL_CURRENCIES = <?= json_encode(iterator_to_array($this->currencyList())) ?>;
+    </script>
+</head>
+
+<body id="ki-page">
+
+<?= $this->userTracking($this->userTrackingInfo) ?>
+<?= $this->googleTagManager() ?>
+
+<!-- Static navbar -->
+<?php $noSecureDomain = '//' . Library\Constants\DomainConstants::WS_DOMAIN_NAME; ?>
+<header class="navbar navbar-default navbar-static-top">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-7 col-lg-8 pull-left">
+                <a id="ginosi-label" href="<?= $noSecureDomain ?>">
+                    <img src="<?php echo $this->basePath(); ?>/img/logo.png" class="brand" alt="Ginosi Apartments"
+                         width="135" height="52">
+                </a>
+                <?php
+                $visitor = new Container('visitor');
+
+                if ($visitor->showPartner) {
+                    if (!is_null($visitor->partnerName)) { ?>
+                        &nbsp;<span class='partner-name'><?= $visitor->partnerName ?></span>
+                        <?php
+                    }
+                }
+                ?>
+            </div>
+
+            <div class="col-xs-12 col-sm-12 col-md-5 col-lg-4">
+                <div class="row">
+                    <?php ob_start(); ?>
+                    <?php if ($godModeOrKiTypeNotReception) { ?>
+                        <!-- ENTRY CODES -->
+                        <?php
+                        $outsideCode = false;
+                        $doorCode    = false;
+
+                        $showLockIconForOneLine = false;
+                        if ($godModeOrKiTypeNotReception && trim($keyData->getOutsideCode()) && $keyData->getOutsideCode() != '0000') {
+                            $outsideCode = true;
+                        } else {
+                            $showLockIconForOneLine = true;
+                        }
+
+                        if ($godModeOrKiTypeNotReception && trim($keyData->getShowApartmentEntryCode())) {
+                            $doorCode = true;
+                        } else {
+                            $showLockIconForOneLine = true;
+                        }
+
+                        if (is_null($keyData->getPin())) {
+                            $showLockIconForOneLine = true;
+                        }
+
+                        if (($outsideCode || $doorCode) && ($keyData->getOutsideCode() || $keyData->getPin())) {
+                            ?>
+                            <div class="col-sm-12">
+                                <div class="col-sm-12 header-ki-info">
+                                    <h4><?php echo $this->textline(1568); ?></h4>
+                                    <div class="row">
+                                        <div class="col-xs-1 hidden-print">
+                                            <span class="ginosi-icon-lock <?php echo ($showLockIconForOneLine) ? 'ginosi-icon-lock-mini': '';?>"></span>
+                                        </div>
+<?/*
+                                        <div class="pull-left visible-print-block" style="padding-left: 15px">
+                                            <?php
+                                            if ($showLockIconForOneLine) {
+                                                $printLockImg = Constants::VERSION . 'img/lock-mini.png';
+                                            } else {
+                                                $printLockImg = Constants::VERSION . 'img/lock.png';
+                                            }
+                                            ?>
+                                            <img src="<?php echo $printLockImg; ?>"
+                                                 class="ginosi-icon-lock pull-left print-left" />
+                                        </div>
+*/?>
+                                        <div class="col-xs-11 pull-right lock-div" style="padding-left: 20px;   margin-left: -10px;">
+                                            <?php if ($outsideCode) { ?>
+                                                <div class="row">
+                                                    <div class="col-xs-4 text-muted pull-left print-left <?php echo ($showLockIconForOneLine) ? ' print-padding-top-2': '';?>">
+                                                        <?php echo $this->textline(1569); ?>
+                                                    </div>
+                                                    <div class="col-xs-8 text-right print-right <?php echo ($showLockIconForOneLine) ? ' print-padding-top-2': '';?>">
+                                                        <?php echo $keyData->getOutsideCode(); ?>
+                                                    </div>
+                                                </div>
+                                            <?php } ?>
+
+                                            <?php if ($doorCode && $keyData->getPin()) { ?>
+                                                <div class="row">
+                                                    <div class="col-sm-4 text-muted pull-left print-left <?php echo ($showLockIconForOneLine) ? ' print-padding-top-2': '';?>">
+                                                        <?php echo $this->textline(1232); ?>
+                                                    </div>
+                                                    <div class="col-sm-8 text-right print-right <?php echo ($showLockIconForOneLine) ? ' print-padding-top-2': '';?>">
+                                                        <?php echo $keyData->getPin(); ?>
+                                                    </div>
+                                                </div>
+                                            <?php } ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php } ?>
+                    <?php } ?>
+                    <?php
+                    $entryCodeBlock = ob_get_contents();
+                    ob_end_flush();
+                    ?>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+<div class="visible-print-block ki-page-header">
+    <div class="col-xs-7 col-sm-7">
+        <img src="/s/logo/450x175_transparent.png" class="brand" alt="Ginosi Apartments" width="135" height="52">
+    </div>
+    <div class="col-xs-5 col-sm-5">
+        <div class="row">
+            <?= $entryCodeBlock?>
+        </div>
+    </div>
+</div>
+<div class="main-contant">
+    <div class="container">
+        <div class="row-offcanvas row-offcanvas-right">
+            <?php echo $this->content; ?>
+        </div>
+    </div>
+</div>
+<?php if ($this->footerVisibility != 'visible') { ?>
+    <footer class="hidden-print">
+        <div class="main-breadcrumb hidden-xs">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-8">
+                        <?= $this->customBreadcrumb() ?>
+                    </div>
+                    <div class="col-sm-4">
+                        <a href="<?= '//' . \Library\Constants\DomainConstants::WS_DOMAIN_NAME . '/contact-us' ?>"><p
+                                class="footer-contact-h"><?= $this->textline(1378) ?></p></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-9 col-md-9 col-lg-9 hidden-print footer-menu">
+                    <p class="hidden-xs footer-text">
+                        <?= $this->textline(1376) ?>
+                    </p>
+
+                    <ul class="text-muted list-inline navigation">
+                        <li><a href="<?= $noSecureDomain . '/about-us' ?>"><?= $this->textline(1440) ?></a></li>
+                        <li>|</li>
+                        <li><a href="<?= $noSecureDomain . '/blog' ?>"><?= $this->textline(1331) ?></a></li>
+                        <li>|</li>
+                        <li>
+                            <a href="<?= $noSecureDomain . '/about-us/privacy-policy' ?>"><?= $this->textline(1371) ?></a>
+                        </li>
+                        <li>|</li>
+                        <li><a href="<?= $noSecureDomain . '/faq' ?>"><?= $this->textline(1379) ?></a></li>
+                        <li>|</li>
+                        <li><a href="<?= $noSecureDomain . '/location' ?>"><?= $this->textline(1320) ?></a></li>
+                        <li>|</li>
+                        <li>
+                            <a href="<?= $noSecureDomain . '/about-us/terms-and-conditions' ?>"><?= $this->textline(1373) ?></a>
+                        </li>
+                        <li>|</li>
+                        <li><a href="<?= $noSecureDomain . '/jobs' ?>"><?= $this->textline(1368) ?></a></li>
+                        <li>|</li>
+                        <li><a href="<?= $noSecureDomain . '/news' ?>"><?= $this->textline(1417) ?></a></li>
+                    </ul>
+                </div>
+
+                <div class="col-sm-3 col-md-3 col-lg-3 text-right contact footer-contact">
+                    <p>
+                        <i class="icon-phone text-primary"></i>
+                        <span><?= $phoneNumber ?></span>
+                    </p>
+
+                    <ul class="list-inline social-mini hidden-print">
+                        <li>
+                            <a href="https://www.facebook.com/ginosi" target="_blank" class="bg-primary">
+                                <i class="icon-facebook"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://twitter.com/ginosi" target="_blank" class="bg-primary">
+                                <i class="icon-twitter"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://plus.google.com/+Ginosi" target="_blank" class="bg-primary">
+                                <i class="icon-gplus"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12 footer-copyright">
+                    <p class="text-muted"><?php echo date('Y') ?> <?= $this->textline(1377) ?></p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <div style="width:180px; position:fixed; bottom:0;" class="hidden" id="chat-opener">
+        <a href="#liveChat" class="col-xs-12 buttonBlue btn-lg text-center open-chat-window hidden-print"
+           data-url="<?php echo '//' . DomainConstants::WS_DOMAIN_NAME . $this->url('chat'); ?>">Chat Now&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i
+                class="glyphicon glyphicon-user"></i></a>
+    </div>
+<?php } ?>
+<?php echo $this->inlineScript(); ?>
+
+</body>
+</html>

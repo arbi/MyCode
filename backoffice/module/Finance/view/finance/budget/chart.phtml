@@ -1,0 +1,51 @@
+<?php
+
+$this->layout()->viewTitle = 'Budget Overview';
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($this->layout()->viewTitle);
+$this->layout()->breadcrumb = $this->breadcrumb([
+    ['Finance'],
+    ['Budget'],
+    [$this->layout()->viewTitle],
+]);
+
+$this->InlineScript()->prependFile('//code.highcharts.com/highcharts.js');
+
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/pages/budget.chart.js');
+?>
+<script>
+    var BUDGETS = $.parseJSON('<?= json_encode($this->budgets) ?>');
+</script>
+<div class="row">
+    <div class="col-sm-3">
+        <select class="form-control" id="year">
+            <option value="0">-- All Years --</option>
+        <?php
+        //getting years from 2015 to now
+        $currentYear = date('Y');
+        $startYear = 2015;
+        while (true) {
+            if ($startYear == $currentYear) {
+                $selected = ' selected="selected"';
+            } else {
+                $selected = '';
+            }
+            echo '<option value="' . $startYear . '"' . $selected . '>' . $startYear . '</option>';
+            if ($startYear++ == $currentYear) {
+                break;
+            }
+        }
+        ?>
+        </select>
+    </div>
+
+    <div class="col-sm-3">
+        <a href="javascript:void(0)" class="btn btn-medium btn-block btn-primary" id="btn_draw"><i class="glyphicon glyphicon-stats"></i> Draw Chart</a>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div id="chart-x"></div>
+    </div>
+</div>

@@ -1,0 +1,60 @@
+<?php
+
+// Form object
+$form = $this->form;
+
+$form->prepare ();
+
+?>
+<!-- Controlled form display -->
+
+<!-- Form opening tag -->
+<?= $this->form()->openTag($form)?>
+
+<fieldset>
+	<legend>Cubilis Connection</legend>
+</fieldset>
+
+<div class="form-group" id="connection-status">
+    <label class="control-label col-sm-5" id="connection-status-key">Connection Status</label>
+    <div class="help-block col-sm-5" id="connection-status-value">
+        <span class="label label-warning">Disconnected</span>
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="control-label col-sm-5" for="<?= $form->get('cubilis_id')->getAttribute('id') ?>">
+        <?= $form->get('cubilis_id')->getLabel() ?>
+    </label>
+	<div class="col-sm-3">
+		<?= $this->formInput($form->get('cubilis_id')) ?>
+	</div>
+</div>
+
+<div class="form-group">
+    <label class="control-label col-sm-5" for="<?= $form->get('cubilis_username')->getAttribute('id') ?>">
+        <?= $form->get('cubilis_username')->getLabel() ?>
+    </label>
+    <div class="col-sm-7">
+        <?= $this->formInput($form->get('cubilis_username')) ?>
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="control-label col-sm-5" for="<?= $form->get('cubilis_password')->getAttribute('id') ?>">
+        <?= $form->get('cubilis_password')->getLabel() ?>
+    </label>
+    <div class="col-sm-5">
+        <?= $this->formInput($form->get('cubilis_password')) ?>
+    </div>
+</div>
+
+<div class="page-actions container">
+    <div class="row text-right">
+		<a name="connect_button" data-loading-text="Connecting..." id="connect_button" class="btn btn-success col-sm-2 col-xs-12 margin-left-10 pull-right">Save &amp; Connect</a>
+		<?= $this->formElement($form->get('save_button')) ?>
+	</div>
+</div>
+
+<!-- Form close tag -->
+<?= $this->form()->closeTag() ?>

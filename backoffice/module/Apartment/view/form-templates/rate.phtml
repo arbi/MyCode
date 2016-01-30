@@ -1,0 +1,296 @@
+<?php
+
+$form = $this->form;
+$form->prepare();
+$isWeekMinus = isset($this->viewPriceData['is_week_minus']) && $this->viewPriceData['is_week_minus'] ? true : false;
+$isWeekendMinus = isset($this->viewPriceData['is_weekend_minus']) && $this->viewPriceData['is_weekend_minus'] ? true : false;
+?>
+
+<?= $this->form()->openTag($form) ?>
+
+<fieldset>
+	<legend>General</legend>
+
+    <?= $this->formInput($form->get('id')) ?>
+
+    <div class="form-group">
+        <label class="control-label col-sm-6 col-md-4 col-lg-3" for="<?= $form->get('rate_name')->getAttribute('id') ?>">
+            <?= $form->get('rate_name')->getLabel() ?>
+            <?= $this->required() ?>
+        </label>
+        <div class="col-sm-6">
+            <?= $this->formInput($form->get('rate_name')) ?>
+        </div>
+    </div>
+
+    <div class="form-group <?= ($this->isParent) ? 'soft-hide' : ''?>">
+        <label class="control-label col-sm-6 col-md-4 col-lg-3" for="<?= $form->get('active')->getAttribute('id') ?>">
+            <?= $form->get('active')->getLabel() ?>
+        </label>
+        <div class="col-sm-4 col-md-2">
+            <?= $this->formSelect($form->get('active')) ?>
+        </div>
+    </div>
+    <div class="form-group form-inline">
+        <label class="control-label col-sm-6 col-md-4 col-lg-3" for="<?= $form->get('type')->getAttribute('id') ?>">
+            <?= $form->get('type')->getLabel() ?>
+            <?= $this->required() ?>
+        </label>
+        <div class="col-sm-4 col-md-2">
+            <?= $this->formSelect($form->get('type')) ?>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-sm-6 col-md-4 col-lg-3" for="<?= $form->get('capacity')->getAttribute('id') ?>">
+            <?= $form->get('capacity')->getLabel() ?>
+            <?= $this->required() ?>
+        </label>
+        <div class="col-sm-4 col-md-2">
+            <?= $this->formInput($form->get('capacity')) ?>
+        </div>
+    </div>
+
+        <div class="form-group <?= (!$this->isParent) ? 'soft-hide' : ''?>"">
+            <label for="<?= $form->get('open_next_month_availability')->getAttribute('id'); ?>" class="control-label col-sm-6 col-md-4 col-lg-3">
+                    <?= $this->info($form->get('open_next_month_availability')->getLabel(), 'if checkbox is unchecked, the apartment availability will not be opened automatically'); ?>
+                </label>
+            <div class="col-sm-2">
+                    <div class="checkbox">
+                            <?= $this->formCheckbox($form->get('open_next_month_availability')); ?>
+                        </div>
+                </div>
+        </div>
+
+
+</fieldset>
+
+<fieldset>
+	<legend>
+		Price
+	</legend>
+
+    <div class="form-group">
+        <label class="control-label col-sm-6 col-md-4 col-lg-3" for="<?= $form->get('weekday_price')->getAttribute('id') ?>">
+            <?= $form->get('weekday_price')->getLabel() ?>
+            <?= $this->required() ?>
+        </label>
+
+        <div class="col-sm-4 col-md-3">
+            <div class="input-group form-inline">
+                <?php if ($this->isParent) {?>
+                    <span class="input-group-addon"><?= $this->currency?></span>
+                <?php } else { ?>
+                    <span class="input-group-btn">
+                        <a href="javascript:void(0)" class="btn <?=$isWeekMinus ? 'btn-danger' : 'btn-success'?> btn-number plus-minus-switcher">
+                            <span class="glyphicon glyphicon-<?=$isWeekMinus ? 'minus' : 'plus'?>"></span>
+                        </a>
+                        <input type="hidden" name="week_day_plus_minus" id="week_day_plus_minus" class="plus-minus-symbol" value="<?=$isWeekMinus ? -1 : 1?>">
+                    </span>
+                <?php } ?>
+                <?= $this->formInput($form->get('weekday_price')) ?>
+                <?php if (!$this->isParent) {?>
+                    <span class="input-group-addon">%</span>
+                <?php } ?>
+            </div>
+        </div>
+        <?php if (!$this->isParent) {?>
+        <div class="col-md-5 col-sm-2">
+             <span class="checkbox">
+                <span class="current-rate-price-view">
+                    <?=isset($this->viewPriceData['week_price']) ? $this->viewPriceData['week_price'] : '' ?></span> <?= $this->currency?>
+                </span>
+             </span>
+        </div>
+        <?php } ?>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-sm-6 col-md-4 col-lg-3" for="<?= $form->get('weekend_price')->getAttribute('id') ?>">
+            <?= $form->get('weekend_price')->getLabel() ?>
+            <?= $this->required() ?>
+        </label>
+        <div class="col-sm-4 col-md-3">
+            <div class="input-group">
+                <?php if ($this->isParent) {?>
+                    <span class="input-group-addon"><?= $this->currency?></span>
+                <?php } else { ?>
+                    <span class="input-group-btn">
+                        <a href="javascript:void(0)" class="btn <?=$isWeekendMinus ? 'btn-danger' : 'btn-success'?> btn-number plus-minus-switcher">
+                            <span class="glyphicon glyphicon-<?=$isWeekendMinus ? 'minus' : 'plus'?>"></span>
+                        </a>
+                        <input type="hidden" name="weekend_plus_minus" id="weekend_plus_minus" class="plus-minus-symbol" value="<?=$isWeekendMinus ? -1: 1?>">
+                    </span>
+                <?php } ?>
+                <?= $this->formInput($form->get('weekend_price')) ?>
+                <?php if (!$this->isParent) {?>
+                    <span class="input-group-addon">%</span>
+                <?php } ?>
+            </div>
+        </div>
+        <?php if (!$this->isParent) {?>
+            <div class="col-md-5 col-sm-2">
+                 <span class="checkbox">
+                    <span class="current-rate-price-view">
+                        <?=isset($this->viewPriceData['weekend_price']) ? $this->viewPriceData['weekend_price'] : '' ?>
+                    </span>
+                    <?= $this->currency?>
+                 </span>
+            </div>
+        <?php } ?>
+    </div>
+</fieldset>
+
+<fieldset>
+	<legend>
+		Stay
+	</legend>
+
+    <div class="form-group">
+        <label class="control-label col-sm-6 col-md-4 col-lg-3" for="<?= $form->get('min_stay')->getAttribute('id') ?>">
+            <?= $form->get('min_stay')->getLabel() ?>
+            <?= $this->required() ?>
+        </label>
+        <div class="col-sm-5 col-md-3">
+            <div class="input-group">
+                <?= $this->formInput($form->get('min_stay')) ?>
+                <span class="input-group-addon">Nights</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-sm-6 col-md-4 col-lg-3" for="<?= $form->get('max_stay')->getAttribute('id') ?>">
+            <?= $form->get('max_stay')->getLabel() ?>
+            <?= $this->required() ?>
+        </label>
+        <div class="col-sm-5 col-md-3">
+            <div class="input-group">
+                <?= $this->formInput($form->get('max_stay')) ?>
+                <span class="input-group-addon">Nights</span>
+            </div>
+        </div>
+    </div>
+</fieldset>
+
+<fieldset>
+	<legend>
+		Release Window
+	</legend>
+
+    <div class="form-group">
+        <label class="control-label col-sm-6 col-md-4 col-lg-3" for="<?= $form->get('release_window_start')->getAttribute('id') ?>">
+            <?= $form->get('release_window_start')->getLabel() ?>
+            <?= $this->required() ?>
+        </label>
+        <div class="col-sm-6 col-md-4">
+            <div class="input-group">
+                <?= $this->formInput($form->get('release_window_start')) ?>
+                <span class="input-group-addon">Days From Now</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-sm-6 col-md-4 col-lg-3" for="<?= $form->get('release_window_end')->getAttribute('id') ?>">
+            <?= $form->get('release_window_end')->getLabel() ?>
+            <?= $this->required() ?>
+        </label>
+        <div class="col-sm-6 col-md-4">
+            <div class="input-group">
+                <?= $this->formInput($form->get('release_window_end')) ?>
+                <span class="input-group-addon">Days From Now</span>
+            </div>
+        </div>
+    </div>
+</fieldset>
+
+<fieldset>
+	<legend>Cancelation</legend>
+
+    <div class="form-group">
+        <label class="control-label col-sm-6 col-md-4 col-lg-3" for="<?= $form->get('is_refundable')->getAttribute('id') ?>">
+            <?= $form->get('is_refundable')->getLabel() ?>
+        </label>
+        <div class="col-sm-5 col-md-3">
+            <?= $this->formRadio($form->get('is_refundable')) ?>
+        </div>
+    </div>
+
+    <div id="refundable_options">
+        <div class="form-group">
+            <label class="control-label col-sm-6 col-md-4 col-lg-3" for="<?= $form->get('refundable_before_hours')->getAttribute('id') ?>">
+                <?= $form->get('refundable_before_hours')->getLabel() ?>
+            </label>
+            <div class="col-sm-4 col-md-2">
+                <?= $this->formSelect($form->get('refundable_before_hours')) ?>
+            </div>
+            <div class="col-sm-5 col-md-3">
+                <?= $this->formRadio($form->get('penalty_type')) ?>
+            </div>
+            <div class="col-sm-3">
+                <div class="row">
+                    <div class="col-sm-12 col-md-8" id="penalty_percent_row">
+                        <div class="input-group">
+                            <?= $this->formInput($form->get('penalty_percent')) ?>
+                            <label class="input-group-addon"> % </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12" id="penalty_amount_row">
+                        <?= $this->formInput($form->get('penalty_fixed_amount')) ?>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12" id="penalty_night_row">
+                        <?= $this->formInput($form->get('penalty_nights')) ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</fieldset>
+
+<div class="page-actions container">
+    <div class="row text-right">
+        <div class="col-sm-9">
+		<?= $this->formInput($form->get('save_button')) ?>
+		<?php
+         if (!$this->isParent && !is_null($this->rateId)) { ?>
+			<?= $this->formButton($form->get('delete_button')) ?>
+		<?php } ?>
+        </div>
+	</div>
+</div>
+<?= $this->formInput($form->get('is_parent')) ?>
+<?= $this->formInput($form->get('parent_week_price')) ?>
+<?= $this->formInput($form->get('parent_weekend_price')) ?>
+<?= $this->formInput($form->get('current_week_price')) ?>
+<?= $this->formInput($form->get('current_weekend_price')) ?>
+<!-- Form close tag -->
+<?= $this->form()->closeTag() ?>
+
+
+<div class="modal fade" id="modal_do_not_open_next_month_availability" tabindex="-1" role="dialog" aria-labelledby="DoNotOpenNextMonthAvailability" aria-hidden="true">
+        <div class="modal-dialog">
+                <div class="modal-content">
+                        <div class="modal-header bg-warning text-warning">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title">
+                                        Do not open Next mont's availability
+                                    </h4>
+                            </div>
+                        <div class="modal-body">
+                                <p>If you select this option the inventory will not be opened for the upcoming month. <br>Are you sure that you want to complete this action?</p>
+                            </div>
+                        <div class="modal-footer">
+                                <button class="btn btn-default" data-dismiss="modal">Close</button>
+                                <button class="btn btn-warning" id="btn_do_not_open_next_month_availability">Submit</button>
+                            </div>
+                    </div>
+            </div>
+</div>
+
+
+

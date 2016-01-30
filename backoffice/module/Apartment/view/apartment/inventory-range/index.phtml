@@ -1,0 +1,179 @@
+<?php
+$this->headTitle()->setSeparator(' - ');
+
+$this->headTitle($this->layout()->apartmentName . ' - Apartment Inventory Range');
+
+$this->headLink()
+	->appendStylesheet($this->basePath() . '/css/apartment/common.css')
+	->appendStylesheet($this->basePath() . '/css/apartment/inventory.css');
+
+$this->InlineScript()
+	->appendFile($this->basePath() . '/js/pages/apartment.range.js')
+	->appendFile($this->basePath() . '/js/validation/apartment.range.js');
+?>
+<script>
+	var GLOBAL_UPDATE = '<?php echo $this->urlUpdate; ?>';
+</script>
+
+<div class="row">
+    <div class="col-sm-12">
+        <hr>
+        <?= $this->apartmentNavigation($this->apartmentId, $this->apartmentStatus, 'apartment/inventory-range')?>
+    </div>
+</div>
+
+<form name="inventory-range" id="inventory-range" class="form-horizontal">
+    <div class="col-sm-6">
+        <fieldset>
+            <legend>Date Range</legend>
+            <div class="row">
+                <div class="col-sm-5 col-md-5 col-lg-5">
+                    <input type="text" id="date-range" name="date-range" placeholder="Select Date Range" required="required" class="form-control pull-left">
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    <div class="col-sm-6">
+        <fieldset>
+            <legend>Days</legend>
+            <ul class="inventory-range-weekdays">
+                <li>
+                    <input type='checkbox' name='week-mon' value='1' id="week-mon" checked="checked">
+                    <label for="week-mon">
+                        <span class="day-name">Mon</span>
+                    </label>
+                </li>
+                <li>
+                    <input type='checkbox' name='week-tue' value='1' id="week-tue" checked="checked">
+                    <label for="week-tue">
+                        <span class="day-name">Tue</span>
+                    </label>
+                </li>
+                <li>
+                    <input type='checkbox' name='week-wed' value='1' id="week-wed" checked="checked">
+                    <label for="week-wed">
+                        <span class="day-name">Wed</span>
+                    </label>
+                </li>
+                <li>
+                    <input type='checkbox' name='week-thu' value='1' id="week-thu" checked="checked">
+                    <label for="week-thu">
+                        <span class="day-name">Thu</span>
+                    </label>
+                </li>
+                <li>
+                    <input type='checkbox' name='week-fri' value='1' id="week-fri" checked="checked">
+                    <label for="week-fri">
+                        <span class="day-name">Fri</span>
+                    </label>
+                </li>
+                <li>
+                    <input type='checkbox' name='week-sat' value='1' id="week-sat" checked="checked">
+                    <label for="week-sat">
+                        <span class="day-name">Sat</span>
+                    </label>
+                </li>
+                <li>
+                    <input type='checkbox' name='week-sun' value='1' id="week-sun" checked="checked">
+                    <label for="week-sun">
+                        <span class="day-name">Sun</span>
+                    </label>
+                </li>
+            </ul>
+        </fieldset>
+    </div>
+
+    <div class="col-sm-12">
+<br />
+        <fieldset>
+            <legend>Set Parent</legend>
+            <ul class="nav nav-tabs" id="inventory-range-actions">
+                <li><a href="#action-availability" data-toggle="tab">Availability</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <span class="dropdown-price-label">Price</span>
+                        <b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#action-price" data-toggle="tab" data-type="amount" data-id="0" id="price-amount-tab">Price by <span class="label label-info">Amount</span></a></li>
+                        <li><a href="#action-price" data-toggle="tab" data-type="percent" data-id="1">Price by <span class="label label-info">% More</span> than</a></li>
+                        <li><a href="#action-price" data-toggle="tab" data-type="percent" data-id="2">Price by <span class="label label-info">% Less</span> than</a></li>
+                        <li><a href="#action-price" data-toggle="tab" data-type="amount" data-id="3">Price by <span class="label label-info">+ Amount</span> of</a></li>
+                        <li><a href="#action-price" data-toggle="tab" data-type="amount" data-id="4">Price by <span class="label label-info">- Amount</span> of</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </fieldset>
+
+        <fieldset>
+            <div class="tab-content">
+                <div class="tab-pane" id="action-availability">
+                    <div class="form-group">
+                        <label class="control-label col-sm-4 col-md-3 col-lg-2" for="availability-availability">Availability</label>
+                        <div class="col-sm-4 col-md-3 col-lg-2">
+                            <input type="number" id="availability-availability" class="form-control" min="0" max="1" required="required">
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane" id="action-price">
+                    <div class="form-group">
+                        <label class="control-label col-sm-4 col-md-3 col-lg-2 price-label" for="price-amount">Price</label>
+                        <div class="col-sm-4 col-md-3 col-lg-2">
+                            <input type="text" id="price-amount" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-4 col-md-3 col-lg-2" for="price-amount">Lock Price</label>
+                        <div class="col-sm-4 col-md-3 col-lg-2 checkbox">
+                            <input type="checkbox" id="lock-price" name="lock-price">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    <div class="page-actions container">
+        <div class="row text-right">
+            <input type="submit" name="submit" class="btn btn-primary pull-right inventory-range-save" value="Save">
+        </div>
+    </div>
+</form>
+
+<div id="closeAvailability" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-danger">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 id="closeAvailabilityModalLabel" class="modal-title">Are you sure want to close this availability?</h4>
+            </div>
+            <div class="modal-body">
+                <div class="col-sm-12">
+                    <textarea id="closeAvailabilityComment" class="form-control" rows="5" placeholder="Write comments here"></textarea>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true" id="closeAvailabilityCancel">Cancel</button>
+                <button class="btn btn-danger" id="closeAvailabilitySubmit" disabled="disabled" data-loading-text="Closing...">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="forceUpdatePrice" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-warning">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">Update Price</h4>
+            </div>
+            <div class="modal-body">
+                The new set price is too different from the original one. Are you sure to change the rate price?
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <button class="btn btn-warning force-change-price" data-loading-text="Save...">Save</button>
+            </div>
+        </div>
+    </div>
+</div>

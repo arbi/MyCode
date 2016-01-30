@@ -1,0 +1,101 @@
+.explanation-span{
+    width:120px;
+    display:inline-block;
+}
+.explanation-div-container{
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 6px 12px;
+}
+.review-score-chooser{
+    display: inline-block;
+    background: #f0ad4e;
+    padding: 1px 8px;
+    color: white !important;
+    text-decoration:none!important;
+}
+#stay_length_from, #stay_length_to {
+    display: inline-block;
+    width:80px;
+    height:24px;
+    padding: 0 12px!important;
+}
+.explanation-div-container-small-padding{
+    padding:4px 12px;
+}
+
+.review-score-chooser-disabled{
+    background: #cccccc;
+}
+
+.review-categories-counter-part{
+    max-height:350px;
+    overflow-y: auto;
+}
+
+.review-category-count{
+    color: dodgerblue;
+    font-size: 25px;
+    display:inline-block;
+    width:75px;
+    padding-left: 10px;
+}
+
+.chart-and-review-categories-counter-part{
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    margin-top: 24px;
+    margin-bottom: 20px;
+}
+
+.review-categories-counter-part{
+    border-left: 1px solid #eee;
+}
+
+.review-categories-counter-part table td, .table-no-border td{
+    vertical-align:middle!important;
+    border-top:none!important;
+}
+
+.star_good {
+    background: url('../../img/star_good.png') center;
+    width: 12px;
+    height: 12px;
+    display: block;
+    float: left;
+    margin: 0 0 0 3px;
+}
+
+.mw-100{
+    min-width:100px;
+}
+
+.table-tooltip td{
+    padding: 0 8px!important;
+}
+
+.in-highcharts{
+    padding-right:5px;
+    width:auto;
+}
+
+.label-success-important{
+    background-color: #5cb85c!important;
+}
+
+.highcharts-tooltip {
+    z-index: 10 !important;
+    background: white !important;
+}
+.highcharts-tooltip>span {
+    z-index: 10 !important;
+    background: #FFFFFF;
+    opacity: 1;
+    top: 1px !important;
+    left: 1px !important;
+}
+.highcharts-subtitle {
+    z-index: 1 !important;
+}

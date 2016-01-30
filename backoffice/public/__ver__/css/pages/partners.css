@@ -1,0 +1,60 @@
+/* 
+    Document   : partners
+    Created on : Aug 17, 2013, 6:47:44 PM
+    Author     : developer
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+div.dataTables_filter label { 
+    width: auto !important;
+}
+
+#preview{
+    border: 2px solid #CCCCCC;
+    border-radius: 4px 4px 4px 4px;
+    -webkit-border-radius: 4px 4px 4px 4px;
+     -moz-border-radius: 4px 4px 4px 4px;
+    float: right;
+    margin-right: 70px;
+    text-align: center;
+    vertical-align: middle;
+    width: auto;
+    padding: 4px;
+    position: relative;
+}
+
+.attachment-container{
+    position: relative;
+}
+
+.preview-border{
+    position: absolute;
+    z-index: 999;
+    border: 1px dashed red;
+    width: 180px;
+    height: 55px;
+    margin: 0 0 0 -1px;
+}
+
+.icon-fullscreen{
+    left: -25px;
+    position: absolute;
+}
+
+@media (max-width: 768px) {
+    #notes { width: 100%; }
+}
+@media (min-width: 1200px) {
+    #notes { width: 851px; }
+}
+
+#add-account {
+    margin-left: 10px;
+}
+.partner-account-edit {
+    margin-right: 5px;
+}
+.partner-havent-transaction p {
+    padding: 10px;
+}

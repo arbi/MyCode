@@ -1,0 +1,161 @@
+<?php
+
+$title = $this->basicInfo->getName() .
+    ', ' . $this->basicInfo->getCategoryName() . ' (Valuable)';
+
+$this->layout()->viewTitle = $title;
+$this->layout()->breadcrumb = $this->breadcrumb([
+	['Administration'],
+	['Asset Management', $this->url('warehouse/asset', ['controller' => 'asset'])],
+	[$title]
+]);
+
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($this->layout()->viewTitle);
+
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+    ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+	->appendFile($this->basePath() . '/js/warehouse/asset.valuable.edit.js');
+
+$this->headLink()->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css');
+
+?>
+<script>
+    var GLOBAL_SELECTED_LOCATION = '<?php echo $location;?>';
+    var GLOBAL_LOCATION_LIST     = <?php echo json_encode($this->locationList);?>;
+    var GLOBAL_SET_STATUS        = <?php echo json_encode($this->basicInfo->getStatus());?>;
+	var HISTORY_DATA             = <?php echo $this->historyData; ?>;
+</script>
+
+<!-- TABS: START -->
+<ul class="nav nav-tabs tabs-general">
+    <li class="active">
+        <a href="#general" data-toggle="tab" aria-expanded="false" id="general-tab">General</a>
+    </li>
+    <li class="history-tab pull-right">
+        <a href="#history" data-toggle="tab" aria-expanded="false" id="history-tab"><span class="glyphicon glyphicon-list-alt"></span> History</a>
+    </li>
+</ul>
+<!-- TABS: END -->
+
+<div class="tab-content">
+
+<!-- GENERAL TAB: START-->
+<div class="tab-pane fade active in" id="general">
+
+<form action="" method="post" name="asset-form" class="form-horizontal" id="asset-form">
+    <div class="row">
+        <div class="col-sm-12">
+            <?php echo $this->formHidden($form->get('id')); ?>
+
+            <div class="form-group">
+                <label for="status" class="col-sm-2 control-label">Status <?php echo $this->required(); ?></label>
+                <div class="col-sm-4">
+                    <?php echo $this->formSelect($form->get('status')); ?>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="name" class="col-sm-2 control-label">Name / Model</label>
+                <div class="col-sm-4">
+                    <?= $this->formInput($form->get('name')) ?>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="location" class="col-sm-2 control-label">Locations <?php echo $this->required(); ?></label>
+                <div class="col-sm-4">
+                    <?php echo $this->formSelect($form->get('location')); ?>
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                <label for="location" class="col-sm-2 control-label">Serial number <?php echo $this->required(); ?></label>
+                <div class="col-sm-4">
+                    <?php echo $this->formInput($form->get('serial_number')); ?>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="location" class="col-sm-2 control-label">Assignee</label>
+                <div class="col-sm-4">
+                    <?php echo $this->formSelect($form->get('assignee')); ?>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="name" class="col-sm-2 control-label">Last Updated By</label>
+                <div class="col-sm-4">
+                    <?= $this->formInput($form->get('last_updated_by')) ?>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="location" class="col-sm-2 control-label">Description</label>
+                <div class="col-sm-4">
+                    <?php echo $this->formTextarea($form->get('description')); ?>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+     <div class="page-actions container">
+        <div class="row text-right">
+                    <button type="submit" class="btn btn-primary col-sm-2 col-xs-12 margin-left-10 pull-right">Save</button>
+        </div>
+    </div>
+</form>
+
+
+<div id="comment-status-change" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-warning">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">Please write a comment why do you want to change the status</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                            <?php echo $this->formTextarea($form->get('comment_status')); ?>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="javascript:void(0)" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</a>
+                <a href="#close-comment" class="btn btn-primary hidden" id="submit-comment">OK</a>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<!-- HISTORY TAB: START-->
+<div class="tab-pane fade" id="history">
+    <div class="row" id="history-block">
+        <div class="col-sm-12">
+            <table id="datatable_history" class="table table-bordered table-condensed table-hover">
+                <thead>
+                <tr>
+                    <th> Date </th>
+                    <th> Employee </th>
+                    <th> Message </th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <div class="alert alert-success" id="history_clean">
+                <span class="glyphicon glyphicon-ok-sign" aria-hidden="true"></span>
+                There are no items to display
+            </div>
+        </div>
+    </div>
+</div>
+<!-- HISTORY TAB: END-->
+
+</div>

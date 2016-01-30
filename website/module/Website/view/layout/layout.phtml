@@ -1,0 +1,192 @@
+<?php
+
+use Library\Constants\DomainConstants;
+use Zend\Session\Container;
+
+echo $this->doctype();
+
+?>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<?php
+
+	echo $this->headTitle($this->textline(1611))->setSeparator(' | ');
+
+	echo $this->headMeta()
+		->appendName('viewport', 'width=device-width, initial-scale=1.0')
+		->appendHttpEquiv('X-UA-Compatible', 'IE=edge')
+	;
+
+	echo $this->headLink(['rel' => 'shortcut icon', 'type' => 'image/vnd.microsoft.icon', 'href' => '/favicon.ico?v=2'])
+        ->appendStylesheet($this->basePath() . '/css/layout.css', 'all')
+		->appendStylesheet($this->basePath() . '/css/ginosicustomicons-ie7.css', 'screen', 'IE7')
+		->appendStylesheet('//fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,600', 'all')
+		->appendStylesheet('https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css', 'all')
+	;
+
+	echo $this->headScript()
+		->prependFile($this->basePath() . '/js/layout.js')
+		->prependFile($this->basePath() . '/js/vendor/respond.min.js', 'text/javascript', array('conditional' => 'lt IE 9',))
+		->prependFile($this->basePath() . '/js/vendor/html5shiv.js',   'text/javascript', array('conditional' => 'lt IE 9',))
+	;
+
+    $phoneNumber = $this->phoneNumber();
+
+    ?>
+
+	<script>
+		GLOBAL_CURRENCIES = <?= json_encode(iterator_to_array($this->currencyList())) ?>;
+	</script>
+</head>
+
+<body>
+
+<?= $this->userTracking($this->userTrackingInfo) ?>
+<?= $this->googleTagManager() ?>
+
+<!-- Static navbar -->
+<?php $noSecureDomain = '//' . Library\Constants\DomainConstants::WS_DOMAIN_NAME;?>
+<header class="navbar navbar-default navbar-static-top">
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-5 col-sm-6">
+				<a id="ginosi-label" href="<?=$noSecureDomain?>">
+					<img src="<?php echo $this->basePath(); ?>/img/logo.png" class="brand" alt="Ginosi Apartments" width="135" height="52">
+				</a>
+				<?php
+					$visitor = new Container('visitor');
+
+					if ($visitor->showPartner) {
+						if (!is_null($visitor->partnerName)) { ?>
+							&nbsp;<span class='partner-name'><?= $visitor->partnerName ?></span>
+				<?php
+						}
+					}
+				?>
+			</div>
+
+			<div class="col-xs-7 col-sm-6 text-right">
+				<div class="row contact-us">
+					<?php if ($this->view_currency) { ?>
+                        <div class="col-sm-6 col-lg-4 col-xs-12 text-right padding-right-0-media-max-768px pull-right margin-top-0-important visible-xs padding-right-0 <?= ($this->view_currency) ? '' : 'col-sm-offset-8'?>">
+                            <a href="<?='//' . Library\Constants\DomainConstants::WS_DOMAIN_NAME.'/contact-us'; ?>" class="hidden-print"><?=$this->textline(1378)?></a>
+                            <p class="header-phone"><i class="glyphicon glyphicon-earphone"></i> <?= $phoneNumber ?></p>
+                        </div>
+
+						<div class="col-sm-2 col-lg-4 currency-label hidden-sm hidden-xs">&nbsp;</div>
+						<div class="col-sm-4 col-lg-4 col-xs-8 text-left currency-select-container padding-right-0-media-max-768px pull-right-xs width-sm-150">
+							<select id="global-currency" class="form-control" data-value="<?= $this->currencyUser() ?>"></select>
+						</div>
+					<?php } ?>
+					<div class="col-sm-6 col-lg-4 col-xs-12 text-right padding-right-0-media-max-768px pull-right margin-top-0-important padding-right-0 <?= ($this->view_currency) ? 'hidden-xs' : '' ?><?= ($this->view_currency) ? '' : 'col-sm-offset-8'?>">
+						<a href="<?='//' . Library\Constants\DomainConstants::WS_DOMAIN_NAME.'/contact-us'; ?>" class="hidden-print"><?=$this->textline(1378)?></a>
+						<p class="header-phone"><i class="glyphicon glyphicon-earphone"></i> <?= $phoneNumber ?></p>
+					</div>
+				 </div>
+			</div>
+		</div>
+	</div>
+</header>
+<div class="visible-print-block">
+    <div class="row">
+        <div class="col-xs-9">
+            <img src="/s/logo/450x175_transparent.png" class="brand" alt="Ginosi Apartments" width="135" height="52">
+        </div>
+        <div class="col-xs-3">
+            <div class="row contact-us">
+                <p class="header-phone"><i class="glyphicon glyphicon-earphone"></i> <?= $phoneNumber ?></p>
+            </div>
+        </div>
+    </div>
+    <hr>
+</div>
+<div class="main-contant">
+    <div class="container">
+        <div class="row row-offcanvas row-offcanvas-right">
+            <?php echo $this->content; ?>
+        </div>
+    </div>
+</div>
+<?php if ($this->footerVisibility != 'visible') { ?>
+<footer class="hidden-print">
+    <div class="main-breadcrumb hidden-xs">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-8">
+                    <?=$this->customBreadcrumb()?>
+                </div>
+                <div class="col-sm-4">
+                    <a href="<?='//' . \Library\Constants\DomainConstants::WS_DOMAIN_NAME . '/contact-us'?>"><p class="footer-contact-h"><?=$this->textline(1378)?></p></a>
+                </div>
+            </div>
+        </div>
+    </div>
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-9 col-md-9 col-lg-9 hidden-print footer-menu">
+				<p class="hidden-xs footer-text">
+                    <?=$this->textline(1376)?>
+				</p>
+
+				<ul class="text-muted list-inline navigation">
+                    <li><a href="<?=$noSecureDomain.'/about-us'?>"><?=$this->textline(1440)?></a></li>
+                    <li>|</li>
+					<li><a href="<?=$noSecureDomain.'/blog'?>"><?=$this->textline(1331)?></a></li>
+					<li>|</li>
+					<li><a href="<?=$noSecureDomain.'/about-us/privacy-policy'?>"><?=$this->textline(1371)?></a></li>
+					<li>|</li>
+					<li><a href="<?=$noSecureDomain.'/faq'?>"><?=$this->textline(1379)?></a></li>
+					<li>|</li>
+					<li><a href="<?=$noSecureDomain.'/location'?>"><?=$this->textline(1320)?></a></li>
+					<li>|</li>
+					<li><a href="<?=$noSecureDomain.'/about-us/terms-and-conditions'?>"><?=$this->textline(1373)?></a></li>
+					<li>|</li>
+					<li><a href="<?=$noSecureDomain.'/jobs'?>"><?=$this->textline(1368)?></a></li>
+					<li>|</li>
+					<li><a href="<?=$noSecureDomain.'/news'?>"><?=$this->textline(1417)?></a></li>
+				</ul>
+			</div>
+
+			<div class="col-sm-3 col-md-3 col-lg-3 text-right contact footer-contact">
+				<p>
+					<i class="icon-phone text-primary"></i>
+                    <span><?= $phoneNumber ?></span>
+				</p>
+
+				<ul class="list-inline social-mini hidden-print">
+					<li>
+						<a href="https://www.facebook.com/ginosi" target="_blank" class="bg-primary">
+							<i class="icon-facebook"></i>
+						</a>
+					</li>
+					<li>
+						<a href="https://twitter.com/ginosi" target="_blank" class="bg-primary">
+							<i class="icon-twitter"></i>
+						</a>
+					</li>
+					<li>
+						<a href="https://plus.google.com/+Ginosi" target="_blank" class="bg-primary">
+							<i class="icon-gplus"></i>
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-xs-12 footer-copyright">
+				<p class="text-muted"><?php echo date('Y') ?> <?=$this->textline(1377)?></p>
+			</div>
+		</div>
+	</div>
+</footer>
+
+<div style="width:180px; position:fixed; bottom:0;" class="hidden" id="chat-opener">
+    <a href="#liveChat" class="col-xs-12 buttonBlue btn-lg text-center open-chat-window hidden-print" data-url="<?php echo '//' . DomainConstants::WS_DOMAIN_NAME . $this->url('chat'); ?>">Chat Now&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i class="glyphicon glyphicon-user"></i></a>
+</div>
+<?php } ?>
+<?php echo $this->inlineScript(); ?>
+
+</body>
+</html>

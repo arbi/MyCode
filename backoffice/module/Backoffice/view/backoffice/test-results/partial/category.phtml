@@ -1,0 +1,172 @@
+<?php
+use DDD\Service\UnitTesting;
+
+?>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="row hidden-print">
+            <div class="col-sm-12 panel-title-container">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <span
+                            class="label label-<?php echo $this->categoryClass; ?> text-size-11 vertical-center"><?php echo $this->categoryName; ?></span>
+                    </div>
+                    <div class="col-sm-6 text-right">
+                        <span
+                            class="label label-primary text-size-11 vertical-center">Total: <strong><?php echo $this->category['totalCount']; ?></strong></span>
+                        <span
+                            class="label label-success text-size-11 vertical-center <?php echo (!$this->category['passCount'])  ? 'hidden' : ''?>">Passed: <strong><?php echo $this->category['passCount']; ?></strong></span>
+                        <span
+                            class="label label-pink  text-size-11 vertical-center <?php echo (!$this->category['failCount'])  ? 'hidden' : ''?>">Failed: <strong><?php echo $this->category['failCount']; ?></strong></span>
+                        <span
+                            class="label label-danger text-size-11 vertical-center <?php echo (!$this->category['errorCount']) ? 'hidden' : ''?>">Have Errors: <strong><?php echo $this->category['errorCount']; ?></strong></span>
+                        <span
+                            class="label label-warning text-size-11 vertical-center <?php echo (!$this->category['warningCount']) ? 'hidden' : ''?>">Warning: <strong><?php echo $this->category['warningCount']; ?></strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="panel-collapse collapse">
+        <div class="panel-body">
+            <div class="col-sm-12">
+                <?php if ($this->category['passCount']) { ?>
+                    <div class="row passed-tests">
+                        <div class="col-sm-12">
+                            <a href="#" class="link-passed link-status">Passed:
+                                <strong><?php echo $this->category['passCount']; ?></strong></a>
+
+                            <div class="results-description-container" style="display:none">
+                                <?php
+                                $passTestCounter = 0;
+                                foreach ($this->category['tests'] as $passedTest) {
+                                    if ($passedTest['status'] != UnitTesting::PASSED_VALUE) {
+                                        continue;
+                                    }
+                                    $passTestCounter++;
+                                    ?>
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            Test Name: <strong><?php echo $passedTest['test']; ?></strong> <br>
+                                            Execution Time: <strong><?php echo $passedTest['time']; ?></strong>
+                                        </div>
+                                    </div>
+                                    <?php if ($passTestCounter < $this->category['passCount']) { ?>
+                                        <hr>
+                                    <?php } ?>
+                                <?php } ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php } ?>
+                <?php if ($this->category['failCount']) { ?>
+                    <div class="row fail-tests">
+                        <div class="col-sm-12">
+                            <a href="#" class="link-fail link-status">Fails:
+                                <strong><?php echo $this->category['failCount']; ?></strong></a>
+
+                            <div class="results-description-container">
+                                <?php
+                                $failTestCounter = 0;
+                                foreach ($this->category['tests'] as $failedTest) {
+                                    if ($failedTest['status'] != UnitTesting::FAILED_VALUE) {
+                                        continue;
+                                    }
+                                    $failTestCounter++;
+                                    ?>
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            Test Name: <strong><?php echo $failedTest['test']; ?></strong> <br>
+                                            Execution Time: <strong><?php echo $failedTest['time']; ?></strong><br><br>
+                                            TRACE:<br>
+                                            Message: <strong><?php echo $failedTest['message'] ?></strong><br>
+                                            <?php foreach ($failedTest['trace'] as $trace) { ?>
+                                                &nbsp;File: <strong><?php echo $trace['file'] ?></strong><br>
+                                                &nbsp;Line: <strong><?php echo $trace['line'] ?></strong><br><br>
+                                            <?php } ?>
+                                        </div>
+                                    </div>
+                                    <?php if ($failTestCounter < $this->category['failCount']) { ?>
+                                        <hr>
+                                    <?php } ?>
+                                <?php } ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php } ?>
+                <?php if ($this->category['errorCount']) { ?>
+                    <div class="row error-tests">
+                        <div class="col-sm-12">
+                            <a href="#" class="link-error link-status">Have Errors:
+                                <strong><?php echo $this->category['errorCount']; ?></strong></a>
+
+                            <div class="results-description-container">
+                                <?php
+                                $errorTestCounter = 0;
+                                foreach ($this->category['tests'] as $errorTest) {
+                                    if ($errorTest['status'] != UnitTesting::ERROR_VALUE) {
+                                        continue;
+                                    }
+                                    $errorTestCounter++;
+                                    ?>
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            Test Name: <strong><?php echo $errorTest['test']; ?></strong> <br>
+                                            Execution Time: <strong><?php echo $errorTest['time']; ?></strong><br><br>
+                                            TRACE:<br>
+                                            Message: <strong><?php echo $errorTest['message'] ?></strong><br>
+                                            <?php foreach ($errorTest['trace'] as $trace) { ?>
+                                                &nbsp;File: <strong><?php echo $trace['file'] ?></strong><br>
+                                                &nbsp;Line: <strong><?php echo $trace['line'] ?></strong><br><br>
+                                            <?php } ?>
+                                        </div>
+                                    </div>
+                                    <?php if ($errorTestCounter < $this->category['errorCount']) { ?>
+                                        <hr>
+                                    <?php } ?>
+                                <?php } ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php } ?>
+                <?php if ($this->category['warningCount']) { ?>
+                    <div class="row error-tests">
+                        <div class="col-sm-12">
+                            <a href="#" class="link-error link-status">Warning:
+                                <strong><?php echo $this->category['warningCount']; ?></strong></a>
+
+                            <div class="results-description-container">
+                                <?php
+                                $errorTestCounter = 0;
+                                foreach ($this->category['tests'] as $errorTest) {
+                                    if ($errorTest['status'] != UnitTesting::WARNING_VALUE) {
+                                        continue;
+                                    }
+                                    $errorTestCounter++;
+                                    ?>
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            Test Name: <strong><?php echo $errorTest['test']; ?></strong> <br>
+                                            Execution Time: <strong><?php echo $errorTest['time']; ?></strong><br><br>
+                                            TRACE:<br>
+                                            Message: <strong><?php echo $errorTest['message'] ?></strong><br>
+                                            <?php foreach ($errorTest['trace'] as $trace) { ?>
+                                                &nbsp;File: <strong><?php echo $trace['file'] ?></strong><br>
+                                                &nbsp;Line: <strong><?php echo $trace['line'] ?></strong><br><br>
+                                            <?php } ?>
+                                        </div>
+                                    </div>
+                                    <?php if ($errorTestCounter < $this->category['warningCount']) { ?>
+                                        <hr>
+                                    <?php } ?>
+                                <?php } ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php } ?>
+            </div>
+        </div>
+    </div>
+</div>
+

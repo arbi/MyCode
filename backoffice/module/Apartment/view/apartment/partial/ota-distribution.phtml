@@ -1,0 +1,75 @@
+<?php
+use Library\Constants\Objects;
+use Library\Constants\Constants;
+?>
+<div class="row">
+    <div class="col-sm-12">
+        <fieldset name="ota_connection">
+            <legend>OTA Connection</legend>
+        </fieldset>
+
+        <div class="row">
+            <div class="col-sm-12">
+                <form id="ota-form" action="<?=$this->formAction?>">
+                    <table class="table table-striped table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Status</th>
+                                <th>Date Listed</th>
+                                <th>Date Edited</th>
+                                <th>Reference</th>
+                                <th>URL</th>
+                                <th colspan="2"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($this->OTAList as $ota) { ?>
+                            <tr>
+                                <td><?=$ota['partner_name']; ?></td>
+                                <td><?=Objects::getOTADistributionStatusList()[$ota['status']]; ?></td>
+                                <td><?=($ota['date_listed']) ? date(Constants::GLOBAL_DATE_FORMAT, strtotime($ota['date_listed'])) : ''?></td>
+                                <td><?=($ota['date_edited'] ? date(Constants::GLOBAL_DATE_FORMAT . ' H:i', strtotime($ota['date_edited'])) : '<span class="label label-warning">Not Edited</span>')?></td>
+                                <td><?=$ota['reference']; ?></td>
+                                <td>
+                                    <?php if ($ota['url']) { ?>
+                                    <a href="<?=$ota['url']?>" class="btn btn-sm btn-small btn-info" target="_blank">View <span class="glyphicon glyphicon-share"></span></a>
+                                    <?php } ?>
+                                </td>
+                                <td class="w1"><a href="#" data-url="<?php echo $this->url('apartment/channel-connection/remove-ota', ['apartment_id' => $this->itemId, 'ota_id' => $ota['id']]); ?>" data-loading-text="Deleting..." class="btn btn-sm btn-small btn-danger delete-ota" data-toggle="modal">Delete</a></td>
+                                <td class="w1"><a href="#" data-url="<?php echo $this->url('apartment/channel-connection/check-ota-connection', ['apartment_id' => $this->itemId, 'ota_id' => $ota['partner_id']]); ?>" class="btn btn-sm btn-small btn-primary check-button" data-loading-text="Checking...">Check</a></td>
+                            </tr>
+                            <?php } ?>
+                            <tr>
+                                <td>
+                                    <div class="form-group">
+                                    <select class="form-control input-md" name="ota_name">
+                                    <?php if ($this->partnerList->count()) { ?>
+                                        <option value="0">-- Please Select --</option>
+                                        <?php foreach ($this->partnerList as $ota) { ?>
+                                        <option value="<?=$ota['gid'] ?>"><?=$ota['partner_name']; ?></option>
+                                        <?php } ?>
+                                    <?php } ?>
+                                    </select>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group">
+                                    <select class="form-control input-md" name="ota_status" disabled>
+                                        <option value="1">Pending</option>
+                                    </select>
+                                    </div>
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td><div class="form-group"><input type="text" class="form-control input-md"  name="ota_ref"></div></td>
+                                <td><div class="form-group"><input type="text" class="form-control input-md"  name="ota_url" placeholder="http://example.com"></div></td>
+                                <td colspan="2"><a href="javascript:void(0)" class="btn btn-sm btn-primary btn-block" id="ota-button" data-loading-text="Adding...">Add</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

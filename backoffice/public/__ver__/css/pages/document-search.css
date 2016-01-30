@@ -1,0 +1,18 @@
+.btn-small {
+    padding: 2px 6px !important;
+}
+
+.top{
+    float: left;
+    width: 100%;
+}
+
+.status{
+    float: right !important;
+    padding-left: 20px;
+}
+
+.dataTables_info,
+.table-bordered{
+    float: left !important;
+}

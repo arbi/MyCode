@@ -1,0 +1,43 @@
+<?php
+
+	$this->layout()->viewTitle = 'Currency Management';
+    $this->headTitle()->setSeparator(' - ');
+    $this->headTitle($this->layout()->viewTitle);
+    $this->layout()->breadcrumb = $this->breadcrumb([
+	    ['Finance'],
+	    [$this->layout()->viewTitle]
+    ]);
+?>
+<table class="table table-striped table-condensed table-bordered" id="datatable_currencies">
+    <thead>
+        <tr>
+            <th>Currency <span class="hidden-xs">Name</span></th>
+            <th class="hidden-xs">Code</th>
+            <th>Symbol</th>
+            <th>Value</th>
+            <th style="width: 170px;">Last Update</th>
+            <th style="width: 1px;" class="nosort">&nbsp;</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach($this->currencies as $row) { ?>
+        <tr>
+            <td><?=$row->getName()?></td>
+            <td class="hidden-xs"><?=$row->getCode()?></td>
+            <td><?=$row->getSymbol()?></td>
+            <td><?=$row->getValue()?></td>
+            <td><?=date('M j, Y H:i:s', strtotime($row->getLastUpdated())) ?></td>
+            <td>
+                 <a href="<?= $this->url('backoffice/default',
+                        array('controller' => 'currency', 'action' => 'edit', 'id'=>$row->getId())) ?>" class="btn btn-xs btn-primary">Edit</a>
+            </td>
+        </tr>
+        <?php } ?>
+    </tbody>
+</table>
+<div class="container page-actions">
+    <div class="row text-right">
+        <a href="<?= $this->url('backoffice/default',
+            array('controller' => 'currency', 'action' => 'add'))?>" class="btn btn-primary pull-right col-sm-2 col-xs-12">Add New Currency</a>
+    </div>
+</div>

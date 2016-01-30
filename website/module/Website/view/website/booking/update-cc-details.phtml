@@ -1,0 +1,215 @@
+<?php
+
+use DDD\Service\Booking\BookingAddon;
+use DDD\Service\Taxes;
+use Library\Utility\Helper;
+
+$this->inlineScript()
+    ->appendFile($this->basePath() . '/js/vendor/jquery.validate.min.js')
+    ->appendFile($this->basePath() . '/js/checkout.update.validate.js');
+
+$this->headTitle('Update Payment Details');
+
+$general = $this->general;
+
+$this->headMeta()
+    ->appendName('robots', 'noindex');
+?>
+<div class="cc-update">
+
+    <div class="row">
+        <div class="col-sm-6 grid-sep">
+            <div class="row">
+                <div class="col-lg-11">
+                    <div class="row">
+                        <?php if (isset($general['image'])) { ?>
+                            <div class="col-xs-4 hidden-sm col-md-4">
+                                <div class="thumbnail">
+                                    <img alt="" src="<?= $general['image'] ?>" class="full-with" width="250">
+                                </div>
+                            </div>
+                        <?php } ?>
+                        <div class="col-xs-8 col-sm-12 col-md-8">
+                            <h2 class="margin-top-0"><?= $general['acc_name'] ?></h2>
+                            <p class="text-muted"><?= $general['acc_address'] . ', ' . $this->cityname($general['acc_city_id']) . ', ' . $this->countryname($general['acc_country_id']) ?></p>
+                            <p>
+                                <i class="glyphicon glyphicon-log-in"></i>
+                                <strong><?= $this->textline(599) ?>: </strong> <?= date('d M Y h:i A', strtotime($general['date_from'] . ' ' . $general['check_in'])) ?>
+                            </p>
+                            <p>
+                                <i class="glyphicon glyphicon-log-out"></i>
+                                <strong><?= $this->textline(601) ?>: </strong> <?= date('d M Y h:i A', strtotime($general['date_to'] . ' ' . $general['check_out'])) ?>
+                            </p>
+                            <p>
+                                <span class="cursor-pointer padding-0 text-muted" data-container="body" data-toggle="popover" data-placement="top" data-content="<?= $general['cancelation_policy'] ?>"><?= $general['cancelation_type'] ?> <i class="glyphicon glyphicon-info-sign text-small-90"></i></span>
+                            </p>
+                        </div>
+                        <div class="col-sm-12">
+                            <h2><?= $this->textline(1238) ?></h2>
+                            <p>
+                                <strong><?= $this->textline(1307) ?>:</strong> <span class="pull-right"><?= $general['guest_name'] ?></span>
+                            </p>
+                            <p>
+                                <strong><?= $this->textline(1267) ?>:</strong> <span class="pull-right"><?= $general['guest_email'] ?></span>
+                            </p>
+                            <p>
+                                <strong><?= $this->textline(1240) ?>:</strong> <span class="pull-right"><?= ($general['guest_phone']) ? '+' . $general['guest_phone'] : '' ?></span>
+                            </p>
+
+                            <h2><?= $this->textline(1230) ?></h2>
+
+                            <p>
+                                <strong><?= $this->textline(1306) ?>: </strong> <span class="pull-right"><?= $general['res_number'] ?></span>
+                            </p>
+                            <p>
+                                <strong><?= $this->textline(1234) ?>:</strong> <span class="pull-right"><?= $general['totalNigthCount'] ?></span>
+                            </p>
+                            <p>
+                                <strong><?= $this->textline(1205) ?>:</strong> <span class="pull-right"><?= $general['occupancy'] ?></span>
+                            </p>
+
+                            <h2><?= $this->textline(1242) ?></h2>
+
+                            <?= $this->partial('partial/payments', [
+                                'payments' => $general['paymentDetails']
+                            ])
+                            ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 grid-sep payment-details">
+            <div class="row">
+                <div class="col-lg-offset-1 col-lg-11">
+
+                    <h2 class="margin-top-0"><?= $this->textline(1433) ?></h2>
+                    <?php if ($this->viewSuccessMessage) { ?>
+                        <div class="alert-success alert"><?= $this->textline(1434) ?></div>
+                    <?php } else { ?>
+                    <?php if ($this->error) { ?>
+                            <div class="alert alert-danger">
+                                <p><?= $this->error ?></p>
+                            </div>
+                        <?php } ?>
+                        <?php
+                        $form = $this->ccUpdateForm;
+                        $form->prepare();
+                        echo $this->form()->openTag($form);
+                        echo $this->formInput($form->get('credit_card_type'));
+                        ?>
+                        <div class="row">
+                            <div class="col-sm-12 grid-sep">
+                                <label for="number"><?= $this->textline(1271) ?></label>
+                                <?= $this->formSelect($form->get('country')) ?>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-7 grid-sep">
+                                <label for="city"><?= $this->textline(1269) ?></label>
+                                <?php
+                                echo $this->formInput($form->get('city'));
+                                ?>
+                            </div>
+
+                            <div class="col-sm-5 grid-sep">
+                                <label for="zip"><?= $this->textline(1301) ?></label>
+                                <?php
+                                echo $this->formInput($form->get('zip'));
+                                ?>
+                            </div>
+                        </div>
+
+                        <h4><?= $this->textline(1296) ?></h4>
+                        <p><?= $this->textline(1297) ?></p>
+                        <div class="row">
+                            <div class="col-sm-12 col-md-6 grid-sep">
+                                <label for="number"><?= $this->textline(1279) ?></label>
+                                <?php
+                                echo $this->formInput($form->get('number'));
+                                ?>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12 col-md-12 grid-sep">
+                                <label for="cc" class="hidden-xs hidden-sm">&nbsp;</label>
+                                <ul class="credit-cards">
+                                    <li class="visa"><?= $this->textline(1275) ?></li>
+                                    <li class="mastercard"><?= $this->textline(1276) ?></li>
+                                    <li class="amex"><?= $this->textline(1277) ?></li>
+                                    <li class="discover"><?= $this->textline(1278) ?></li>
+                                    <li class="jcb"><?= $this->textline(1535) ?></li>
+                                    <li class="diners-club"><?= $this->textline(1534) ?></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-12 grid-sep">
+                                <label for="form-cc-holder-name"><?= $this->textline(1280) ?></label>
+                                <?= $this->formInput($form->get('holder')) ?>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-6 grid-sep">
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        <p><?= $this->textline(1281) ?></p>
+                                    </div>
+                                    <div class="col-xs-6">
+                                        <?= $this->formElement($form->get('month')) ?>
+                                    </div>
+                                    <div class="col-xs-6">
+                                        <?= $this->formElement($form->get('year')) ?>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="row">
+                                    <div class="col-xs-9 col-sm-8 grid-sep">
+                                        <p><?= $this->textline(1299) ?></p>
+                                        <?= $this->formElement($form->get('cvc')) ?>
+                                    </div>
+                                    <div class="col-xs-3 col-sm-4 grid-sep">
+                                        <p>&nbsp;</p>
+                                        <img alt="" src="<?= $this->basePath() ?>/img/cc_cvc.png" class="cvc">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12 grid-sep checkbox-booking">
+                                <input type="checkbox" id="icheckCard">
+                                <label for="icheckCard"><?= $this->textline(1436) ?></label>
+                            </div>
+                        </div>
+                        <a href="#" class="btn btn-lg btn-block btn-warning" id="make-reservation" tabindex="17"><?= $this->textline(1435) ?></a>
+                    <?= $this->form()->closeTag(); ?>
+                <?php } ?>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <hr>
+
+    <div class="row">
+        <div class="col-sm-9">
+            <h3><?= $this->textline(1283) ?></h3>
+            <p><?= $this->textline(1284) ?></p>
+        </div>
+        <div class="col-sm-3">
+            <table width="135" border="0" cellpadding="2" cellspacing="0" title="Click to Verify - This site chose Symantec SSL for secure e-commerce and confidential communications." align="right">
+                <tr>
+                    <td width="135" align="center" valign="top">
+                        <span id="siteseal"><script type="text/javascript" src="https://seal.godaddy.com/getSeal?sealID=s6OREtUcXqOvUl97gpK2ZQKfFOsDIRS6u9pZLGFyYQeJ3kavzcC34"></script></span><br />
+                        <a href="https://support.godaddy.com/help/article/542/what-are-ssl-certificates" target="_blank" class="ssl-sertificates">ABOUT SSL CERTIFICATES</a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+</div>

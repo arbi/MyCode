@@ -1,0 +1,133 @@
+<script>
+    var GLOBAL_USER_ACCOUNT_SAVE = '<?= $this->url('backoffice/default', ['controller' => 'user', 'action' => 'ajax-save-user-account'])?>';
+</script>
+
+<!-- Form opening tag -->
+<?= $this->form()->openTag($this->form); ?>
+<div class="container">
+    <div class="row">
+        <div class="col-md-10">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <div class="form-group">
+                                <label class="col-sm-6 control-label" for="name"><?= $this->form->get('name')->getOption('label') ?>: <?= $this->required(); ?></label>
+                                <div class="col-sm-6">
+                                    <?= $this->formInput($this->form->get('name'));?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="type"><?= $this->form->get('type')->getOption('label') ?>: <?= $this->required(); ?></label>
+                                <div class="col-sm-8">
+                                    <?= $this->formSelect($this->form->get('type'));?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="fullLegalName"><?= $this->form->get('fullLegalName')->getOption('label') ?>: <?= $this->required(); ?></label>
+                        <div class="col-sm-8">
+                            <?= $this->formInput($this->form->get('fullLegalName'));?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="billingAddress"><?= $this->form->get('billingAddress')->getOption('label') ?>:</label>
+                        <div class="col-sm-8">
+                            <?= $this->formInput($this->form->get('billingAddress'));?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="mailingAddress"><?= $this->form->get('mailingAddress')->getOption('label') ?>: <?= $this->required(); ?></label>
+                        <div class="col-sm-8">
+                            <?= $this->formInput($this->form->get('mailingAddress'));?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="bankAddress"><?= $this->form->get('bankAddress')->getOption('label') ?>:</label>
+                        <div class="col-sm-8">
+                            <?= $this->formInput($this->form->get('bankAddress'));?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="countryId"><?= $this->form->get('countryId')->getOption('label') ?>: <?= $this->required(); ?></label>
+                        <div class="col-sm-8">
+                            <?= $this->formSelect($this->form->get('countryId'));?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="user-account-iban"><?= $this->form->get('iban')->getOption('label') ?>:</label>
+                        <div class="col-sm-8">
+                            <?= $this->formInput($this->form->get('iban'));?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="user-account-swft"><?= $this->form->get('swft')->getOption('label') ?>:</label>
+                        <div class="col-sm-8">
+                            <?= $this->formInput($this->form->get('swft'));?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="user-account-is-default"><?= $this->form->get('isDefault')->getOption('label') ?>:</label>
+                        <div class="col-sm-8 checkbox">
+                            <?= $this->formInput($this->form->get('isDefault'));?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-sm-12">
+    <div class="page-actions container hidden-print">
+        <div class="row">
+            <div class="col-xs-12">
+                <?= $this->formInput($this->form->get('id'));?>
+                <?= $this->formInput($this->form->get('status'));?>
+                <?php if ($this->id > 0) : ?>
+                    <a href="javascript:void(0)" class="btn btn-primary edit-account-tab-btn pull-left user_account_archive"  data-toggle="modal" data-target="#delete_user_account" data-id="<?= $this->id ?>">Archive</a>
+                <?php endif; ?>
+                <a href="javascript:void(0)" class="btn btn-primary edit-account-tab-btn pull-right margin-left-10" id="save_user_account">Save Changes</a>
+                <a href="<?= $this->url('backoffice/default', ['controller' => 'user', 'action' => 'edit', 'id' => $this->userId]) ?>#salary" class="btn btn-default edit-account-tab-btn pull-right margin-left-10" id="cancel_user_account">Cancel</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Form close tag -->
+<?= $this->form()->closeTag(); ?>

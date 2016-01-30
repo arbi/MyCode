@@ -1,0 +1,67 @@
+<script>
+    var GLOBAL_SEARCH = '<?= $this->url('search', array('controller' => 'search', 'action' => 'ajax-search'))?>';
+</script>
+<form class="row search-general" data-today="<?=$this->options['current_date']?>">
+    <div class="col-sm-3 col-sm-offset-1 col">
+        <label class="text-muted">
+            <span style="font-size:1.2em">Destination</span>
+        </label>
+    </div>
+    <div class="col-sm-2 col">
+        <label class="text-muted">
+            <span style="font-size:1.2em">Arrival Date</span>
+        </label>
+    </div>
+    <div class="col-sm-2 col">
+        <label class="text-muted">
+            <span style="font-size:1.2em">Departure Date</span>
+        </label>
+    </div>
+    <div class="col-sm-1 col">
+        <label class="text-muted">
+            <span style="font-size:1.2em">Guests</span>
+        </label>
+    </div>
+    <div class="col-sm-2 col"></div>
+
+    <div class="col-sm-3 col-sm-offset-1 col">
+        <input type="hidden" id="destionation">
+        <input type="hidden" id="apartment_name">
+        <div class="dropdown input-destination">
+            <input data-toggle="dropdown" type="text" class="form-control input-lg" readonly value="<?php if (isset($this->setParams['']))?>">
+            <ul class="dropdown-menu" role="menu">
+                <?php foreach ($this->options['cities'] as $key => $city) { ?>
+                <li>
+                    <a href="#" data-url="<?=$city['city_url']?>" data-max-capacity="<?=$city['max_capacity']?>">
+                        <span style="font-size:1.2em"><?=$this->cityname($city['id'])?></span>
+                        <small class="text-muted"><?=$this->countryname($city['country_id'])?></small>
+                    </a>
+                </li>
+                <?php } ?>
+                <li class="divider"></li>
+                <li><a href="#" class="extended"><small>Search Apartment by Name</small></a></li>
+            </ul>
+        </div>
+        <i class="glyphicon glyphicon-map-marker text-muted"></i>
+    </div>
+    <div class="input-daterange">
+        <div class="col-sm-2 col">
+            <input type="text" class="form-control input-lg text-left" id="start" readonly>
+            <i class="glyphicon glyphicon-calendar text-muted"></i>
+        </div>
+        <div class="col-sm-2 col">
+            <input type="text" class="form-control input-lg text-left" id="end" readonly>
+            <i class="glyphicon glyphicon-calendar text-muted"></i>
+        </div>
+    </div>
+    <div class="col-sm-1 col">
+        <select class="form-control input-lg" id="capacity">
+            <?php foreach ($this->options['guest'] as $key => $guest) { ?>
+                <option value="<?=$key?>"><?=$guest?></option>
+            <?php } ?>
+        </select>
+    </div>
+    <div class="col-sm-2 col">
+        <input type="button" class="btn btn-lg btn-primary" id="update_search" value="Update Search">
+    </div>
+</form>

@@ -1,0 +1,68 @@
+<div class="row">
+    <div class="col-sm-12">
+        <table class="table table-striped table-bordered table-condensed">
+            <thead>
+                <tr>
+                    <th>City</th>
+                    <th>Commission (%)</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($this->partnerCityCommissionList as $partnerCity) { ?>
+                    <tr>
+                        <td><?=$partnerCity['name']?></td>
+                        <td class="text-right"><?=$partnerCity['commission']?></td>
+                        <td class="text-center"><a href="javascript:void(0)" data-url="<?= $this->url('partner_city_commission_delete',
+                                ['partner_id' => $this->partnerId, 'item_id' => $partnerCity['id']]); ?>" data-loading-text="Deleting..." class="btn btn-xs btn-danger deletePartnerCityCommissionCall" data-toggle="modal">Delete</a></td>
+                    </tr>
+                <?php } ?>
+                <tr>
+                    <td>
+                        <div class="form-group margin-0 col-xs-12">
+                        <select class="form-control" name="partner_city" id="partner_city">
+                            <option value="0">-- Select City --</option>
+                            <?php foreach ($this->cityList as $city) { ?>
+                            <option value="<?= $city['id'] ?>"><?= $city['name'] ?></option>
+                            <?php } ?>
+                        </select>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="form-group margin-0 col-xs-12">
+                            <select class="form-control" name="partner_city_commission" id="partner_city_commission">
+                                <option value="0">-- Select Commission --</option>
+                                <?php for ($i = 0; $i <= 100; $i++) { ?>
+                                    <option value="<?= $i ?>"><?= $i ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+                    </td>
+                    <td>
+                        <a href="javascript:void(0)" class="btn btn-primary btn-block btn-sm" id="partner-city-commission-button" data-loading-text="Adding...">Add</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <input type="hidden" name="partnerId" id="partnerId" value="<?=$this->partnerId?>">
+    </div>
+</div>
+
+<div id="partnerCityCommissionModal" class="modal fade" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-danger">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Delete City Commission<span id="delete_group"></span></h4>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <a class="btn btn-danger" href="#" id="deletePartnerCityCommission">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,42 @@
+<?php
+
+use Library\Constants\Roles;
+
+echo $this
+    ->navigation('mainNavigation')
+    ->menu()
+    ->setPartial('backoffice/partial/mainNavigation')
+    ->render();
+
+$omnibox = array_intersect(
+    $this->availableGroup, [
+        Roles::ROLE_APARTMENT_MANAGEMENT,
+        Roles::ROLE_PROFILE,
+        Roles::ROLE_BOOKING_MANAGEMENT,
+        Roles::ROLE_FRONTIER_MANAGEMENT
+    ]
+);
+
+if (!empty($omnibox)) { ?>
+    <form class="navbar-form navbar-left search-form" role="search">
+        <div class="form-group">
+            <select id="omnibox" placeholder="Search" style="display: none;"></select>
+        </div>
+    </form>
+<?php
+}
+
+echo $this
+    ->navigation('ProfileNavigation')
+    ->menu()
+    ->setPartial('backoffice/partial/profileNavigation')
+    ->render();
+
+echo $this
+    ->navigation('NotificationsNavigation')
+    ->menu()
+    ->setPartial('backoffice/partial/notificationsNavigation')
+    ->render();
+
+?>
+

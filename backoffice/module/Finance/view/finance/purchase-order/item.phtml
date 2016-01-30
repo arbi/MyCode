@@ -1,0 +1,270 @@
+<?php
+
+use \Library\Finance\Process\Expense\Helper as H;
+use \Library\Constants\Constants;
+
+$identity = $this->identity();
+$creator = $identity->firstname . ' ' . $identity->lastname;
+$creationDate = $data ? date(Constants::GLOBAL_DATE_FORMAT, strtotime($data['date_created'])) : date(Constants::GLOBAL_DATE_FORMAT);
+
+$data = $this->data;
+
+if ($data) {
+    $creator = $data['creator_name'];
+}
+
+$isEdit = (bool)$this->id;
+$isManager = $isEdit ? ($data['manager_id'] == $identity->id) : false;
+$isFinance = $this->isFinance;
+$labelClass = '';
+
+switch ($this->data['status']) {
+    case H::ITEM_STATUS_PENDING:
+        $labelClass = 'warning'; break;
+    case H::ITEM_STATUS_APPROVED:
+        $labelClass = 'success'; break;
+    case H::ITEM_STATUS_REJECTED:
+        $labelClass = 'danger'; break;
+    case H::ITEM_STATUS_COMPLETED:
+        $labelClass = 'purple';
+}
+if ($isEdit) {
+    $this->layout()->viewTitle = 'Edit Expense';
+} else {
+    $this->layout()->viewTitle = 'Submit your Financial Request';
+}
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($this->layout()->viewTitle);
+$this->layout()->breadcrumb = $this->breadcrumb([
+    ['Finance'],
+    [$this->layout()->viewTitle]
+]);
+
+$this->headLink()
+     ->appendStylesheet($this->basePath() . '/css/pages/finance.expense.css')
+     ->appendStylesheet($this->basePath() . '/css/plugins/selectize.bootstrap3.css');
+
+$this->InlineScript()
+     ->appendFile($this->basePath() . '/js/plugins/selectize/selectize.min.js')
+     ->appendFile($this->basePath() . '/js/module/finance/purchase-order/item.js');
+
+?>
+<script>
+    var EDITABLE = <?= (!$isEdit || $this->editable) ? 'true' : 'false' ?>;
+    var DELETE_ATTACHMENT_URL = "<?= $this->url('finance/item/delete-attachment') ?>";
+</script>
+<label class="labels">
+    <span class="label label-default">
+    <?= $this->info(
+        $creationDate,
+        'Creation Date'
+    ) ?>
+    </span>
+
+    <span class="label label-primary">
+    <?= $this->info(
+        $creator,
+        'Creator'
+    ) ?>
+    </span>
+
+    <?php if ($isEdit) { ?>
+        <?php if (trim($this->data['manager_firstname'] . ' ' . $this->data['manager_lastname']) !== '') { ?>
+        <span class="label label-purple">
+            <?=
+                $this->info(
+                    $this->data['manager_firstname'] . ' ' . $this->data['manager_lastname'],
+                    'Manager'
+                )
+            ?>
+        </span>
+        <?php } ?>
+
+        <span class="label label-<?= $labelClass ?>">
+            <?=
+                $this->info(
+                    H::getItemStatusById($this->data['status']),
+                    'Approval Status'
+                )
+            ?>
+        </span>
+    <?php } ?>
+</label>
+
+<br><br>
+
+<form id="item-form" name="item-form">
+    <div class="row">
+        <div class="col-sm-8 col-lg-6">
+        <?php
+            echo $this->partial('finance/partial/item-add', [
+                'form' => $this->form,
+                'data' => $data,
+                'costCenters' => $this->costCenters,
+                'creator' => $creator,
+                'itemization' => true,
+                'editable' => (!$isEdit || $this->editable),
+                'isFinance' => $isFinance
+            ]);
+        ?>
+        </div>
+
+        <div class="col-sm-4 col-lg-6">
+            <?php if ($isEdit && $isManager && $data['status'] != H::ITEM_STATUS_APPROVED) { ?>
+            <div class="row supporting soft-hide">
+                <div class="col-sm-12">
+                    <h3>Purchase Orders</h3>
+                </div>
+
+                <div class="col-sm-12">
+                    <select name="po_list" data-placeholder="-- Purchase Order --" data-po-list='<?php echo $this->poList;?>' class="form-control po-list"<?php if (!(count(json_decode($this->poList, true)))) { ?>disabled<?php } ?>>
+                    </select>
+                </div>
+                <div class="col-sm-12 show-expense-related-info hidden">
+                    <h3>Remaining After Expense</h3>
+                    <p><span class="commented-text" data-toggle="tooltip" data-original-title="(PO Limit)-(PO Item Balance)-(This Item Amount)" id="po-limit-minus-po-item-balance-minus-this-item-amount"></span> / <span class="commented-text" data-toggle="tooltip" data-original-title="PO Limit" id="po-limit"></span> <span id="po-currency-code"></span></p>
+                </div>
+            </div>
+            <?php } ?>
+
+            <?php if (!$isEdit && count($this->moneyAccountList)) { ?>
+            <div class="row soft-hide transfer">
+                <div class="col-sm-12">
+                    <h3>Prefered Money Account</h3>
+                </div>
+
+                <div class="col-sm-12">
+                    <select class="form-control money-accounts" data-placeholder="Money Account"></select>
+                </div>
+            </div>
+            <?php } ?>
+
+            <?php if (($isManager || count($this->moneyAccountList)) && $data['status'] != H::ITEM_STATUS_APPROVED) { ?>
+            <div class="row transaction" style="display:none">
+                <div class="col-sm-12">
+                    <h3>Transaction Details</h3>
+                </div>
+
+                <div class="col-sm-8">
+                    <select name="money_accounts" class="form-control money-accounts" data-placeholder="Money Account"
+                        data-id="<?php echo $data['tmp_money_account_id']; ?>"
+                        data-date="<?php echo date(Constants::GLOBAL_DATE_FORMAT, strtotime($data['tmp_transaction_date'])); ?>"
+                        data-name="<?php echo $data['money_account_name']; ?>"
+                        data-currency="<?php echo $data['money_account_currency']; ?>"
+                        data-bank="<?php echo $data['money_account_bank']; ?>"></select>
+                </div>
+
+                <div class="col-sm-4">
+                    <div class="input-group">
+                        <input type="text" class="form-control transaction-date" name="transaction_date" placeholder="Date">
+                        <div class="input-group-addon">
+                            <i class="glyphicon glyphicon-calendar"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php } ?>
+
+            <?php if (!$isManager && !count($this->moneyAccountList) && (!$isEdit || $data['status'] != H::ITEM_STATUS_APPROVED)) { ?>
+            <div class="row access-message">
+                <div class="col-sm-12">
+                    <div class="alert alert-warning">
+                        You do not have any Money Account that you are able to add transactions to. Please talk to Finance for more information.
+                    </div>
+                </div>
+            </div>
+            <?php } ?>
+        </div>
+    </div>
+
+    <div id="data"
+         data-account-url="<?php echo $this->url('finance/purchase-order/get-accounts'); ?>"
+         data-currency-url="<?php echo $this->url('finance/purchase-order/get-currencies'); ?>"
+         data-sub-category-url="<?php echo $this->url('finance/purchase-order/get-sub-categories'); ?>"
+         data-money-account-url="<?php echo $this->url('finance/purchase-order/get-money-accounts'); ?>"
+         data-cost-center-url="<?php echo $this->url('finance/purchase-order/get-cost-centers'); ?>"
+         data-affiliate-url="<?php echo $this->url('finance/purchase-order/get-affiliates'); ?>"
+         data-office-url="<?php echo $this->url('finance/purchase-order/get-offices'); ?>"
+         data-people-url="<?php echo $this->url('finance/purchase-order/get-people'); ?>"
+
+         data-item-id="<?php echo $this->id; ?>"
+         data-creation-date="<?php echo date('Y-m-d'); ?>"
+         data-status="<?php echo $data['status']; ?>"
+
+         data-money-accounts='<?php echo str_replace('\'', '’', json_encode($this->moneyAccountList)); ?>'
+
+         data-able-to-approve="<?php echo intval($isEdit && $isManager) ?>">
+    </div>
+
+    <div class="container page-actions">
+        <div class="row">
+            <?php if ($isEdit && $isFinance && $data['status'] == H::ITEM_STATUS_APPROVED && $data['type'] == H::TYPE_REQUEST_AN_ADVANCE) { ?>
+            <div class="pull-left">
+                <a href="<?php echo $this->url('finance/item/complete', ['id' => $this->id]); ?>" class="btn btn-success btn-block item-complete">Complete</a>
+            </div>
+            <?php } ?>
+
+            <?php if ($isManager && $data['status'] == H::ITEM_STATUS_PENDING && $data['type'] == H::TYPE_REQUEST_AN_ADVANCE) { ?>
+                <div class="pull-left">
+                    <a href="<?php echo $this->url('finance/item/approve', ['id' => $this->id]); ?>" class="btn btn-success btn-block item-approve">Approve</a>
+                </div>
+            <?php } ?>
+
+            <?php if ($isEdit && !$isManager && ($data['status'] == H::ITEM_STATUS_REJECTED || $data['status'] == H::ITEM_STATUS_PENDING)) { ?>
+            <div class="pull-left">
+                <a href="<?php echo $this->url('finance/item/remove', ['id' => $this->id]); ?>" class="btn btn-danger btn-block item-remove">Delete</a>
+            </div>
+            <?php } ?>
+
+            <div class="pull-right">
+                <?php if (!$isEdit || $this->editable) { ?>
+                <a href="<?php echo $this->url('finance/item/save', $this->id ? ['id' => $this->id] : []); ?>"
+                   data-text-initial="Save Changes"
+                   data-text-approval="Save & Approve"
+                   data-text-resubmit="Resubmit"
+                   class="btn btn-primary submit">
+                    <?php if ($this->id) { ?>Save Changes<?php } else { ?>Submit Request<?php } ?>
+                </a>
+                <?php } ?>
+            </div>
+            <?php if ($isEdit && $isManager && $data['status'] == H::ITEM_STATUS_PENDING) { ?>
+                <div class="pull-right margin-right-5">
+                    <a href="<?php echo $this->url('finance/item/reject', ['id' => $this->id]); ?>" class="btn btn-danger btn-block item-reject">Reject</a>
+                </div>
+            <?php } ?>
+
+            <?php if ($isEdit && $isManager && $data['type'] != H::TYPE_REQUEST_AN_ADVANCE && $data['status'] != H::ITEM_STATUS_APPROVED) { ?>
+                <div class="pull-left">
+                    <a href="#" class="btn btn-primary btn-block" id="change-manager-button">Change Manager</a>
+                </div>
+            <?php } ?>
+        </div>
+    </div>
+</form>
+
+<?php if ($isEdit && $isManager && $data['type'] != H::TYPE_REQUEST_AN_ADVANCE) { ?>
+    <div class="modal fade" id="modal_change_manager" tabindex="-1" role="dialog" aria-labelledby="changeManager" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-primary">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">
+                        Change Manager
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <p>Choose a manager</p>
+                    <select name="new_manager_id" id="new_manager_id" class="form-control">
+                         <?php foreach ($this->budgetHoldersList as $budgetHolderId => $budgetHolderName) { ?>
+                             <option value="<?= $budgetHolderId?>"><?= $budgetHolderName?></option>
+                        <?php } ?>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default" data-dismiss="modal">Close</button>
+                    <a class="btn btn-primary" id="btnChangeManagerSubmit" href="/finance/item/<?php echo $this->id?>/change-manager">Change</a>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php } ?>

@@ -1,0 +1,53 @@
+<?php
+/**
+ * @var \DDD\Domain\ApartmentGroup\Concierge\ConciergeWebsiteView[] $arrivals
+ */
+$arrivals  = $this->arrivals;
+$isExpired = $this->isExpired;
+
+$this->headTitle($this->title);
+
+$this->headLink()->appendStylesheet($this->basePath() . '/css/arrivals.css');
+
+?>
+
+<div class="col-md-12 col-lg-12">
+    <?php if ($isExpired) {
+        echo '<h3>'.$this->title.'</h3>';
+        echo '<h3><b>' . $this->textline(1614) . '</b></h3>';
+    } else {
+        if ($this->when == 'Today') {
+            $this->title .= '&nbsp;<p class="today"><b>(' . $this->when . ')</b></p>';
+        } else {
+            $this->title .= '&nbsp;<p class="yesterday"><b>(' . $this->when . ')</b></p>';
+        }
+    ?>
+	<h3><?= $this->title ?></h3>
+    <?php
+        if (!$arrivals->count()) {
+            echo '<h3><b>No Expected arrivals.</b></h3>';
+        } else { ?>
+        	<table class="table">
+                <thead>
+                    <th>Reservation</th>
+                    <th>Apartment (Unit)</th>
+                    <th>Guest</th>
+                    <th>Check-out</th>
+                </thead>
+                <tbody>
+            <?php
+                foreach ($arrivals as $arrival) {
+                    echo("<tr>");
+                    echo("<td>" . $arrival->getReservationNumber() . "</td>");
+                    echo("<td>" . $arrival->getApartmentNameWithUnitNumber() . "</td>");
+                    echo("<td>" . $arrival->getGuestFullName() . "</td>");
+                    echo("<td>" . $arrival->getCheckOutDate() . "</td>");
+                    echo("</tr>");
+                }
+            }
+            ?>
+        </tbody>
+        <tfoot></tfoot>
+	</table>
+    <?php } ?>
+</div>

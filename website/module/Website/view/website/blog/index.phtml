@@ -1,0 +1,101 @@
+<?php
+
+$this->headTitle($this->textline(1370));
+$this->headMeta($this->textline(1463), 'description');
+$this->inlineScript()
+	->appendFile($this->basePath() . '/js/blog.search.js');
+
+$this->headLink([
+    'rel' => 'canonical',
+    'href' => $this->url('blog', [], ['force_canonical' => true])]);
+
+?>
+
+<div class="col-sm-9">
+	<h1><?=$this->textline(1331)?></h1>
+
+	<div class="row">
+		<div class="col-sm-12">
+			<?php foreach ($this->paginator as $row) { ?>
+				<div class="blog-item">
+					<h2><a href="/blog/<?=$row["slug"]?>"><?=$row['title']?></a></h2>
+					<p class="text-muted"><i class="glyphicon glyphicon-calendar"></i> <?=$row["date"]?></p>
+
+					<div class="row">
+						<div class="col-sm-3">
+							<?php if ($row['img'] && file_exists($this->realPath . $row['img'])) { ?>
+								<div class="thumbnail">
+									<img alt="" src="<?=$this->imgPath . $row['img']?>" class="full-with">
+								</div>
+							<?php } ?>
+						</div>
+						<div class="col-sm-9">
+							<p><?=Library\Utility\Helper::getBlogShort($row['content'])?></p>
+							<div class="text-right">
+								<div class="socialButtons pull-left">
+									<div class="facebook">
+										<iframe src="https://www.facebook.com/plugins/like.php?href=<?=$this->liveServerUrl?>/<?=$row["slug"]?>&amp;send=false&amp;layout=button_count&amp;width=100&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;font&amp;height=20" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:100px; height:20px;"allowTransparency="true"></iframe>
+									</div>
+									<div class="twitter">
+										<a href="https://twitter.com/share" class="twitter-share-button" data-url="<?=$this->liveServerUrl?>/<?=$row["slug"]?>"></a>
+										<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+									</div>
+									<div class="google">
+										<script src="https://apis.google.com/js/platform.js" async defer></script>
+										<g:plusone size="medium" annotation="bubble" href="<?=$this->liveServerUrl?>/<?=$row["slug"]?>"></g:plusone>
+									</div>
+								</div>
+								<a class="pull-right" href="/blog/<?=$row["slug"]?>"><?=$this->textline(1332)?><i class="icon-angle-right"></i></a>
+								<div class="clearfix"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			<?php } ?>
+		</div>
+	</div>
+    <div class="row">
+        <div class="col-sm-12">
+        <?php
+        // add at the end of the file after the table
+        echo $this->paginationControl(
+            // the paginator object
+            $this->paginator,
+            // the scrolling style;
+            'sliding',
+            // the partial to use to render the control
+            ['partial/paginator.phtml', ''],
+            // the route to link to when a user clicks a control link
+            ['route' => 'blog']
+        );
+        ?>
+       </div>
+    </div>
+</div>
+
+<div class="col-sm-3">
+	<div id="greybar">
+		<div class="subscribe">
+			<?=$this->textline(1651)?>
+			<div class="clearfix"></div>
+		</div>
+		<h4><?=$this->textline(1322)?></h4>
+		<form method="post" class="row search search-blog">
+			<div class="col-md-12 col grid-sep">
+				<div class="dropdown input-destination">
+					<input data-toggle="dropdown" type="text" class="form-control input-lg" placeholder="<?=$this->textline(1329)?>" value="" readonly>
+					<ul class="dropdown-menu" role="menu">
+						<?php foreach ($this->cities as $key => $city) { ?>
+							<li><a href="javascript:void(0)" data-url="<?=$city['city_url']?>"><span style="font-size:1.2em"><?=$this->cityname($city['id'])?></span> <small class="text-muted"><?=$this->countryname($city['country_id'])?></small></a></li>
+						<?php } ?>
+					</ul>
+				</div>
+				<i class="glyphicon glyphicon-map-marker text-muted"></i>
+			</div>
+
+			<div class="col-md-12 col grid-sep">
+				<input type="submit" name="search" value="<?=$this->textline(1322)?>" class="searchButton btn-block btn-lg">
+			</div>
+		</form>
+	</div>
+</div>

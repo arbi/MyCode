@@ -1,0 +1,54 @@
+<?php
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle('Group Inventory');
+
+$this->layout()->breadcrumb = '<li>Parking</li>
+                                   <li class="active">Inventory</li>';
+$this->layout()->viewTitle = 'Parking Inventory';
+
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/module/parking/inventory.js');
+$this->headLink()
+    ->appendStylesheet($this->basePath() . '/css/pages/parking.inventory.css');
+?>
+<div class="visible-print-block pi-ginosi-icon-print"><img src="<?=$this->basePath()?>/img/logo.png" width="90"></div>
+<div class="visible-print-block pi-lot-name" id="lot_name_print_view"></div>
+<form class="hidden-print" method="post" action="<?= $this->url('parking_inventory', ['controller' => 'inventory', 'action' => 'ajax-view']) ?>" name="parking-inventory-from" id="parking-inventory-from">
+    <div class="row form-group">
+        <div class="col-sm-4">
+            <select name="lots"  id="lots" class="form-control required" placeholder="Lots">
+                <?php foreach ($this->lots as $lot) { ?>
+                    <option value="<?= $lot['id']?>">
+                        <?= $lot['name'] ?>
+                    </option>
+                <?php } ?>
+            </select>
+        </div>
+        <div class="col-sm-3">
+            <div class="input-group">
+                <label class="input-group-addon" for="inventory_date_range">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                </label>
+                <input type="text" name="inventory_date_range" placeholder="Date Range" class="pull-right form-control" id="inventory_date_range">
+            </div>
+        </div>
+        <div class="col-sm-1">
+            <input type="button" value="Show" id="parking_inventory_show" class="btn btn-primary btn-block">
+        </div>
+        <div class="col-sm-1 soft-hide">
+           <a class="btn btn-block btn-default" href="javascript:void(0)" id="print-spots"><i class="glyphicon-print glyphicon"></i></a>
+        </div>
+    </div>
+</form>
+
+</div>
+</div>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        <div id="result_view" class="well-sm"></div>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12">

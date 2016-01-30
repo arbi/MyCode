@@ -1,0 +1,75 @@
+<?php
+	$this->layout()->viewTitle = $this->pageTitle;
+    $this->headTitle()->setSeparator(' - ');
+    $this->headTitle($this->pageTitle);
+	$this->layout()->breadcrumb = $this->breadcrumb([
+		['Finance'],
+		['Legal Entities Management', $this->url('finance/legal-entities', ['controller' => 'legal-entities'])],
+		[$this->pageTitle]
+	]);
+
+	$form = $this->form;
+    $this->InlineScript()
+        ->appendFile($this->basePath() . '/js/validation/legal.entities.js')
+		->appendFile($this->basePath() . '/js/pages/legal.entities.edit.js');
+?>
+<script>
+    var GLOBAL_NOT_UNIQUE_NAME = <?= $hasNotUniqueName ?>;
+</script>
+<div class="row">
+    <div class="col-sm-6">
+        <fieldset name="General">
+            <legend>General</legend>
+            <?php
+                echo $this->form()->openTag($form);
+                echo $this->formHidden($form->get('id'));
+            ?>
+            <div class="form-group">
+                <label for="<?php echo $form->get('name')->getAttribute('id'); ?>" class="col-sm-4 control-label">
+                    <?php echo $form->get('name')->getLabel(); ?> <?php echo $this->required()?>
+                </label>
+                <div class="col-sm-8">
+                    <?php echo $this->formInput($form->get('name')); ?>
+                </div>
+                <?php echo $this->formElementErrors($form->get('name'), array('class' => 'col-sm-3 text-danger list-unstyled')); ?>
+            </div>
+            <div class="form-group">
+                <label for="<?php echo $form->get('country_id')->getAttribute('id'); ?>" class="col-sm-4 control-label">
+                    <?php echo $form->get('country_id')->getLabel();?> <?php echo $this->required();?>
+                </label>
+                <div class="col-sm-8">
+                    <?php echo $this->formSelect($form->get('country_id')); ?>
+                </div>
+                <?php echo $this->formElementErrors($form->get('country_id'), array('class' => 'col-sm-3 text-danger list-unstyled')); ?>
+            </div>
+            <div class="form-group">
+                <label for="<?php echo $form->get('description')->getAttribute('id'); ?>" class="col-sm-4 control-label">
+                    <?php echo $form->get('description')->getLabel(); ?>
+                </label>
+                <div class="col-sm-8">
+                    <?php echo $this->formTextarea($form->get('description')); ?>
+                </div>
+                <?php echo $this->formElementErrors($form->get('description'), array('class' => 'col-sm-3 text-danger list-unstyled')); ?>
+            </div>
+            <div class="container page-actions">
+                <div class="row text-right">
+                    <?php echo $this->formSubmit($form->get('submit')); ?>
+                    <?php
+                    if($this->legalEntityId) {
+                        $activationUrl = '/finance/legal-entities/activate/' . $this->legalEntityId . '/' . (int)!$this->isActive;
+                        $buttonClass = 'btn-success';
+                        $buttonName = 'Activate';
+                        if($this->isActive) {
+                            $buttonClass = 'btn-danger';
+                            $buttonName = 'Deactivate';
+                        }?>
+                        <a href="<?=$activationUrl?>" class="btn col-sm-2 col-xs-12 margin-left-10 pull-right <?=$buttonClass?>"><?=$buttonName?></a>
+                    <?php } ?>
+                </div>
+            </div>
+            <?php
+                echo $this->form()->closeTag();
+            ?>
+        </fieldset>
+    </div>
+</div>

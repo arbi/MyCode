@@ -1,0 +1,29 @@
+<div class="row">
+    <div class="col-xs-12">
+        <span style="font-size: 24px">
+            <a href="/concierge/edit/<?= $this->apartment_group_id?>" target="_blank"><?= $this->name ?></a><span class="text-muted" style="font-size: 16px">, <?= $this->country_name ?></span>
+        </span>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xs-12">
+    <?php foreach ($this->badges as $badges) {?>
+        <span class="label <?=$badges['class']?>"><?=$badges['text']?></span>
+    <?php } ?>
+    <?php if (isset($this->reservations_link)) {?>
+        <a href="<?php echo $this->reservations_link; ?>" class="action-item label label-info margin-left-5 pull-right" target="blank">
+            Reservations <span class="glyphicon glyphicon-share"></span>
+        </a>
+    <?php } ?>
+    <?php if (isset($this->ws_link)) {?>
+        <a href="<?php echo $this->ws_link; ?>" class="action-item label label-info pull-right margin-left-5" target="_blank">
+            See on website <span class="glyphicon glyphicon-share"></span>
+        </a>
+    <?php } ?>
+    </div>
+</div>
+
+<hr>
+<?= $this->apartelNavigation($this->id)?>
+

@@ -1,0 +1,57 @@
+<?php
+    $discountValue = $totalValue = $nightPrice = 0;
+    $payments = $this->payments;
+?>
+<div class="<?= $this->checkoutPage ? 'col-lg-offset-1 col-lg-11 price-calculation' : '' ?>">
+   <?php foreach ($payments['payments'] as $payment) {
+         if ($payment['type'] == 'night') {
+             $nightPrice = $payment['price'];
+             ?>
+             <p class="night-price">
+                 <?= $payment['label'] ?> <span class="pull-right"><?= $payment['price_view'] ?></span>
+             </p>
+   <?php } elseif ($payment['type'] == 'fee') { ?>
+             <p>
+                 <span class="text-primary cursor-pointer cleaning-fee" data-price="<?= $payment['price']?>" data-container="body" data-toggle="popover" data-placement="top" data-content="<?= $payment['description'] ?>">
+                     <?= $payment['label'] ?></span> <span class="pull-right"><?= $payment['price_view'] ?>
+                 </span>
+             </p>
+   <?php } elseif ($payment['type'] == 'tax') {
+             $flexibleClass = !$payment['tax_included'] ? ' flexible-tax' : '';
+             ?>
+             <p>
+                <span
+                    class="text-primary cursor-pointer<?= $flexibleClass ?>"
+                    data-container="body"
+                    data-toggle="popover"
+                    data-placement="top"
+                    data-content="<?= $payment['description'] ?>"
+                    data-tax-percent="<?= $payment['percent']?>"
+                    data-price="<?= $payment['price'] ?>"
+                    data-duration="<?= isset($payment['duration']) ? $payment['duration'] : '0' ?>"
+                    >
+                    <?= $payment['label'] ?>
+                </span>
+                 <span class="pull-right"><?= $payment['price_view'] ?></span>
+             </p>
+   <?php } elseif ($payment['type'] == 'discount') {
+             $discountValue = $payment['price'];
+             ?>
+             <p id="calculated-discount">
+                <?= $payment['label'] ?> <span class="pull-right"> <?= $payment['price_view'] ?></span>
+             </p>
+   <?php } elseif ($payment['type'] == 'total') {
+             $totalValue = $payment['price'];
+             ?>
+             <p class="total-price" id="total-price">
+                <b><?= $payment['label'] ?> <span class="pull-right" id="total-price-amount"><?= $payment['price_view'] ?></span></b>
+             </p>
+   <?php }
+   } ?>
+    <?php if ($this->checkoutPage) { ?>
+        <span class="hidden" id="currency"><?= isset($payments['symbol']) ? $payments['symbol'] : '' ?></span>
+        <span class="hidden" id="accommodation-price"><?= $nightPrice ?></span>
+        <span class="hidden" id="total-amount"><?= $totalValue ?></span>
+        <span class="hidden" id="discount-amount"><?= $discountValue ?></span>
+    <?php } ?>
+</div>

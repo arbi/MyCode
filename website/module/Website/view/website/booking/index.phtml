@@ -1,0 +1,376 @@
+<?php
+
+use Library\Utility\Helper;
+use Zend\Session\Container;
+
+$general = $this->general;
+
+$this->headTitle('Payment: ' . $general['prod_name'] . ' Apartment');
+
+$this->inlineScript()
+    ->appendFile($this->basePath() . '/js/vendor/jquery.validate.min.js')
+    ->appendFile($this->basePath() . '/js/checkout.validate.js')
+    ->appendFile($this->basePath() . '/js/checkout.js')
+    ->appendFile($this->basePath() . '/js/checkout.page.js');
+
+$this->headMeta()->appendName('robots', 'noindex');
+?>
+<script type="text/javascript">
+    var URL_CHECK_DISCOUNT   = '<?php echo $this->checkDiscountUrl; ?>';
+    var TXT_GINOSIK_DISCOUNT = '<?php echo $this->textline(1504); ?>';
+    var TXT_GINOSIK_DISCOUNT_SECONDARY = '<?php echo $this->textline(1582); ?>';
+    var GINOSIK_DISCOUNT_ID  = '<?php echo $this->ginosikDiscountId; ?>';
+    var CHECK_GINOSIK_EMAIL  = '<?= $this->url('booking', ['controller' => 'booking', 'action' => 'ajax-check-ginosik-email'])?>';
+    var IS_AFFILIATE_CHOOSER = '<?= $this->isAffiliateChooser ?>';
+    var NIGHT_COUNT          = '<?= $general["night_count"] ?>';
+</script>
+<div class="col-sm-12 page-checkout" data-bu="<?= Helper::isBackofficeUser() ?>">
+    <div class="row" id="reservation-data">
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-xs-12 hidden-sm col-md-4">
+                    <h1 class="visible-xs-block">
+                        <?= $general['prod_name'] ?>
+                    </h1>
+                    <div class="thumbnail">
+                        <?php if (isset($general['image'])) { ?>
+                            <img alt="" src="<?= $general['image'] ?>" class="full-with" width="250">
+                        <?php } ?>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-12 col-md-8">
+                    <h1 class="hidden-xs">
+                        <?= $general['prod_name'] ?>
+                    </h1>
+                    <p class="text-muted">
+                        <i class="glyphicon glyphicon-map-marker text-muted"></i>
+                        <?= $general['address'] . ', ' . $this->cityname($general['city_id']) . ', ' . $this->countryname($general['country_id']) ?>
+                    </p>
+                    <p>
+                        <i class="glyphicon glyphicon-log-in"></i>
+                        <strong><?= $this->textline(599) ?> </strong> <span class="pull-right"><?= $general['from'] . ' ' . date("h:i A", strtotime($general['check_in'])) ?></span>
+                    </p>
+                    <p>
+                        <i class="glyphicon glyphicon-log-out"></i>
+                        <strong><?= $this->textline(601) ?> </strong> <span class="pull-right"><?= $general['to'] . ' ' . date("h:i A", strtotime($general['check_out'])) ?></span>
+                    </p>
+                    <p>
+                        <span class="cursor-pointer padding-0 text-muted" data-container="body" data-toggle="popover" data-placement="top" data-content="<?= $general['cancelation_policy'] ?>"><?= $general['cancelation_type'] ?> <i class="glyphicon glyphicon-info-sign text-small-90"></i>, <?= $general['capacity'] . ' ' . $this->textline(1216) ?></span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6">
+            <div class="row">
+                <div id="price-calculation">
+                    <?= $this->partial('partial/payments', [
+                            'payments' => $general,
+                            'checkoutPage' => true,
+                        ])
+                    ?>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <?php if ($this->error) { ?>
+            <div class="alert alert-danger col-sm-6 col-sm-offset-3"><?= $this->error ?></div>
+        <?php } ?>
+        <div class="col-sm-6">
+            <div class="guest-details">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h2><?= $this->textline(1265) ?></h2>
+
+                        <form id="guest-details">
+                            <div class="row">
+                                <div class="col-sm-12 grid-sep">
+                                    <label for="name"><?= $this->textline(1554) ?></label>
+                                    <input type="text" name="name" class="input-lg form-control" tabindex="1" placeholder="<?= $this->textline(1264) ?>" autofocus required maxlength="250">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-12 grid-sep">
+                                    <label for="email"><?= $this->textline(1555) ?></label>
+                                    <input type="email" name="email" id="email" class="input-lg form-control" tabindex="3" placeholder="<?= $this->textline(1267) ?>" required>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-6 grid-sep">
+                                    <label for="phone"><?= $this->textline(1553) ?></label>
+                                    <select name="phone-code" class="input-lg form-control phone-code" tabindex="4" required>
+                                        <option value="0" data-code="0"><?= $this->textline(1290) ?></option>
+                                        <?php foreach ($this->options['countris'] as $phonecode) { ?>
+                                            <option value="<?= $phonecode->getPhoneCode() ?>" data-code="<?= $phonecode->getPhoneCode() ?>" <?php if (!Helper::isBackofficeUser() && isset($this->options['userCountryData']['country_iso']) && strtolower($phonecode->getIso()) == strtolower($this->options['userCountryData']['country_iso'])) { echo 'selected="selected"'; } ?>>
+                                                <?= $phonecode->getName() ?>
+                                            </option>
+                                        <?php } ?>
+                                    </select>
+                                </div>
+
+                                <div class="col-sm-6 grid-sep">
+                                    <div class="input-group input-phone">
+                                        <span class="input-group-addon phone-code-prefix"></span>
+                                        <label for="phone"><?= $this->textline(1552) ?></label>
+                                        <input name="phone" class="input-lg form-control" tabindex="5" placeholder="<?= $this->textline(1556) ?>">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-12 grid-sep">
+                                    <label for="remarks"><?= $this->textline(1561) ?></label>
+                                    <textarea name="remarks" rows="5" class="form-control" tabindex="6" maxlength="1000" placeholder="<?= $this->textline(1292) ?>"></textarea>
+                                </div>
+                            </div>
+                            <?php if (Helper::isBackofficeUser()) { ?>
+                                <div class="row">
+                                    <div class="col-sm-5 grid-sep">
+                                        <select name="aff-id" class="input-lg form-control" required id="aff-id">
+                                            <?php
+                                            $visitor = new Container('visitor');
+
+                                            if (!is_null($visitor->partnerId) && (int) $visitor->partnerId) {
+                                                $defaultPartner = (int) $visitor->partnerId;
+                                            } else {
+                                                $defaultPartner = 1; // Ginosi Website
+                                            }
+                                            foreach ($this->options['partners'] as $partners) {
+                                                ?>
+                                                <option value="<?= $partners['id'] ?>"
+                                                <?php
+                                                if ($partners['id'] == $defaultPartner) {
+                                                    echo 'selected="selected"';
+                                                }
+                                                ?>>
+                                                            <?= $partners['partner_name'] ?>
+                                                </option>
+                                            <?php } ?>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-sm-7 grid-sep">
+                                        <label for="aff-ref"><?= $this->textline(1293) ?></label>
+                                        <input type="text" name="aff-ref" id="aff-ref" class="input-lg form-control" placeholder="<?= $this->textline(1293) ?>" maxlength="200">
+                                    </div>
+                                </div>
+                                <?php if ($this->isAffiliateChooser) { ?>
+                                <div class="row checkbox-booking">
+                                    <div class="col-sm-5 grid-sep">
+                                        <label for="notSendMail">Do Not Send Mail</label>
+                                        <input type="checkbox" id="notSendMail" class="col-sm-1">
+                                    </div>
+                                    <div class="col-sm-7 grid-sep" style="display: none">
+                                        <select class="form-control apartel-id" id="apartel" name="apartel">
+                                            <option value="0">
+                                                Non Apartel
+                                            </option>
+                                            <?php if ($this->apartels) { ?>
+                                                <?php foreach ($this->apartels as $apartel) { ?>
+                                                    <option value="<?= $apartel->getId() ?>" <?php
+                                                        if ($this->apartelId && $apartel->getId() == $this->apartelId) {
+                                                            echo 'selected';
+                                                        }
+                                                    ?>><?= $apartel->getName() ?></option>
+                                                <?php } ?>
+                                            <?php } ?>
+                                        </select>
+                                    </div>
+                                </div>
+                                <?php } elseif ($this->apartelId) { ?>
+                                    <input type="hidden" name="apartel" value="<?=$this->apartelId?>" class="apartel-id">
+                                <?php }?>
+                                <?php if ($this->backofficeUserName) { ?>
+                                <div class="row">
+                                    <div class="col-sm-7 grid-sep">
+                                        <span class="cursor-pointer text-muted" data-container="body" data-toggle="popover" data-placement="top" data-content="This reservation will be recorded as entered by the person logged into Backoffice, if the mentioned user is not you, ensure to log in to Backoffice yourself.">
+                                            <i class="glyphicon glyphicon-info-sign"></i> Reservation by
+                                            <span class="text-primary cursor-pointer">
+                                                <?php echo $this->backofficeUserName; ?>
+                                            </span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <?php } ?>
+                            <?php } ?>
+
+                            <button type="button" class="searchButton btn-block grid-sep" tabindex="7" id="submit-guest-details"><?= $this->textline(1294) ?></button>
+                            <button type="button" class="btn btn-default btn-lg btn-block grid-sep smallButton" tabindex="7" id="change-guest-details" style="display:none"><?= $this->textline(1295) ?></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6">
+            <div class="payment-details" style="display: none;">
+                <div class="row">
+                    <div class="col-md-12 col-lg-11 col-lg-offset-1">
+                        <h2><?= $this->textline(1242) ?></h2>
+                        <?php
+                        $form = $this->bookingForm;
+                        $form->prepare();
+
+                        echo $this->form()->openTag($form);
+
+                        echo $this->formInput($form->get('first-name'));
+                        echo $this->formInput($form->get('last-name'));
+                        echo $this->formInput($form->get('email'));
+                        echo $this->formInput($form->get('phone'));
+                        echo $this->formInput($form->get('remarks'));
+                        echo $this->formInput($form->get('aff-id'));
+                        echo $this->formInput($form->get('aff-ref'));
+                        echo $this->formInput($form->get('credit_card_type'));
+                        echo $this->formInput($form->get('not_send_mail'));
+                        ?>
+
+                        <input type="hidden" class="hide apartel-id" name="apartel">
+
+                        <div class="row">
+                            <div class="col-sm-12 grid-sep">
+                                <label for="address"><?= $this->textline(1557) ?></label>
+                                <?php
+                                $billingaddress = $form->get('address');
+                                $billingaddress->setattribute('placeholder', $this->textline(1300));
+                                echo $this->formInput($billingaddress);
+                                ?>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-12 grid-sep">
+                                <label for="address"><?= $this->textline(1558) ?></label>
+                                <?= $this->formSelect($form->get('country')) ?>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-7 grid-sep">
+                                <label for="city"><?= $this->textline(1559) ?></label>
+                                <?php
+                                $city           = $form->get('city');
+                                $city->setattribute('placeholder', $this->textline(1269));
+                                echo $this->formInput($city);
+                                ?>
+                            </div>
+
+                            <div class="col-sm-5 grid-sep">
+                                <label for="zip"><?= $this->textline(1560) ?></label>
+                                <?php
+                                $zip            = $form->get('zip');
+                                $zip->setattribute('placeholder', $this->textline(1301));
+                                echo $this->formInput($zip);
+                                ?>
+                            </div>
+                        </div>
+                        <?php if (Helper::isBackofficeUser()) { ?>
+                            <div class="row grid-sep checkbox-booking">
+                                <div class="col-sm-12">
+                                    <label for="noCreditCard" style="opacity: 1">No Credit Card</label>
+                                    <?= $this->formInput($form->get('noCreditCard')) ?>
+                                </div>
+                            </div>
+                        <?php } ?>
+                        <div id="creditCardPart">
+                            <h4><?= $this->textline(1296) ?></h4>
+                            <p class="margin-bottom-15"><?= $this->textline(1297) ?></p>
+                            <div class="row">
+                                <div class="col-sm-12 col-md-6 grid-sep">
+                                    <label for="number"><?= $this->textline(1279) ?></label>
+                                    <?php
+                                    $number = $form->get('number');
+                                    $number->setattribute('placeholder', $this->textline(1279));
+                                    echo $this->formInput($number);
+                                    ?>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12 col-md-12 grid-sep">
+                                    <ul class="credit-cards">
+                                        <li class="visa off"><?= $this->textline(1275) ?></li>
+                                        <li class="mastercard off"><?= $this->textline(1276) ?></li>
+                                        <li class="amex off"><?= $this->textline(1277) ?></li>
+                                        <li class="discover off"><?= $this->textline(1278) ?></li>
+                                        <li class="jcb off"><?= $this->textline(1535) ?></li>
+                                        <li class="diners-club off"><?= $this->textline(1534) ?></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <h4><?= $this->textline(1280) ?> <small>(<?= $this->textline(1298) ?>)</small></h4>
+
+                            <div class="row">
+                                <div class="col-sm-12 grid-sep">
+                                    <?= $this->formInput($form->get('holder')) ?>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-6 grid-sep">
+                                    <div class="row">
+                                        <div class="col-xs-12">
+                                            <p><?= $this->textline(1281) ?></p>
+                                        </div>
+                                        <div class="col-xs-6">
+                                            <?= $this->formElement($form->get('month')) ?>
+                                        </div>
+                                        <div class="col-xs-6">
+                                            <?= $this->formElement($form->get('year')) ?>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="row">
+                                        <div class="col-xs-9 col-sm-8 grid-sep">
+                                            <p><?= $this->textline(1299) ?></p>
+                                            <?= $this->formElement($form->get('cvc')) ?>
+                                        </div>
+                                        <div class="col-xs-3 col-sm-4 grid-sep">
+                                            <p>&nbsp;</p>
+                                            <img alt="" src="<?php echo $this->basePath(); ?>/img/cc_cvc.png" class="cvc">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="#" class="searchButton btn-lg btn-block" id="make-reservation" tabindex="17" style="display: none"><?= $this->textline(1282) ?></a>
+
+                        <?= $this->form()->closeTag(); ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="row">
+        <div class="col-sm-9">
+            <h3><?= $this->textline(1283) ?></h3>
+            <p><?= $this->textline(1284) ?></p>
+        </div>
+        <div class="col-sm-3">
+            <table width="135" border="0" cellpadding="2" cellspacing="0" title="Click to Verify - This site chose Symantec SSL for secure e-commerce and confidential communications." align="right">
+                <tr>
+                    <td width="135" align="center" valign="top">
+                        <span id="siteseal"><script type="text/javascript" src="https://seal.godaddy.com/getSeal?sealID=s6OREtUcXqOvUl97gpK2ZQKfFOsDIRS6u9pZLGFyYQeJ3kavzcC34"></script></span><br />
+                        <a href="https://support.godaddy.com/help/article/542/what-are-ssl-certificates" target="_blank" class="ssl-sertificates">ABOUT SSL CERTIFICATES</a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+<?php if ($this->error) { ?>
+        $(function () {
+            checkout.step = 2;
+            checkout.setup();
+            checkout.implementLogic();
+        });
+<?php } ?>
+    var zipJson = $.parseJSON('<?= $this->zipCodeStatusJson ?>');
+</script>

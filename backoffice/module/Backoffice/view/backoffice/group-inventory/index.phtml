@@ -1,0 +1,97 @@
+<script>
+    var GLOBAL_SAVE_MOVES = '<?= $this->url('backoffice/default', array('controller' => 'group-inventory', 'action' => 'ajax-save-moves')) ?>';
+    var GLOBAL_ROOM_TYPE = '<?= $this->url('backoffice/default', array('controller' => 'group-inventory', 'action' => 'ajax-get-room-type')) ?>';
+</script>
+<?php
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle('Group Inventory');
+
+$this->layout()->breadcrumb = '<li>Apartment</li>
+                                   <li class="active">Group Inventory</li>';
+$this->layout()->viewTitle = 'Group Inventory';
+
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/pages/group_inventory.js');
+
+$this->headLink()
+    ->appendStylesheet($this->basePath() . '/css/pages/group_inventory.css');
+?>
+<form method="post" action="<?= $this->url('backoffice/default', array('controller' => 'group-inventory', 'action' => 'ajax-view')) ?>" name="group-inventory-from" id="group-inventory-from">
+    <div class="row form-group">
+        <div class="col-sm-6">
+            <select name="apartment_group_id"  id="apartment_group_id" class="form-control required" placeholder="All Groups, Country">
+                <?php foreach ($groups as $country => $countryGroups) { ?>
+                <optgroup label="<?= $country ?>">
+                    <?php foreach ($countryGroups as $groupId => $group) { ?>
+                    <option value="<?= $groupId?>" data-country="<?= $group['country'] ?>">
+                        <?= $group['name'] ?>
+                    </option>
+                    <?php } ?>
+                </optgroup>
+                <?php } ?>
+            </select>
+        </div>
+        <div class="col-sm-3">
+            <div class="input-group">
+                <label class="input-group-addon" for="inventory_date_range">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                </label>
+                <input type="text" name="inventory_date_range" placeholder="Date Range" class="pull-right form-control" id="inventory_date_range">
+            </div>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-sm-3">
+            <input type="text" name="room_count" placeholder="Room Count" id="date_to" class="form-control">
+        </div>
+        <div class="col-sm-3">
+            <select name="sort" class="form-control" id="sort">
+                <option value="max_capacity">Sort by PAX</option>
+                <option value="bedroom_count">Sort by Room</option>
+                <option value="building_name">Sort by Building</option>
+            </select>
+        </div>
+        <div class="col-sm-3">
+            <select name="room_type" id="room_type" class="form-control" disabled><option value="0">Room Type</option></select>
+        </div>
+        <div class="col-sm-3">
+            <input type="submit" value="Show" id="apartel_inventory_go" class="btn btn-primary btn-block">
+        </div>
+    </div>
+</form>
+
+<div id="warningModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-warning">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel2">Warning</h4>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to change the status of reservation(s) as Overbooking?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <button class="btn btn-warning" id="move-reservation">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        <div id="result_view" class="well-sm"></div>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="page-actions container">
+                <div class="row text-right">
+                    <!-- <a type="button" class="btn btn-primary col-sm-2 col-xs-12 pull-right" id="save-btn">Save</button> -->
+                    <a class="btn btn-primary personal-tab-btn administration-tab-btn permission-tab-btn col-sm-2 col-xs-12 margin-left-10 pull-right" id="save-btn"> Save </a>
+                    <a href='#warningModal' data-toggle="modal" class="hidden btn btn-primary personal-tab-btn administration-tab-btn permission-tab-btn col-sm-2 col-xs-12 margin-left-10 pull-right" id="save-warning-btn"> Save </a>
+                </div>
+            </div>

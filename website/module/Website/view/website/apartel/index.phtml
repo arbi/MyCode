@@ -1,0 +1,350 @@
+<?php
+
+use Library\Utility\Helper;
+
+$this->inlineScript()
+    ->appendFile($this->basePath() . '/js/vendor/bootstrap-datepicker.min.js')
+    ->appendFile($this->basePath() . '/js/vendor/jquery.royalslider.min.js')
+    ->appendFile($this->basePath() . '/js/apartel.page.js');
+
+$this->headLink()
+    ->appendStylesheet($this->basePath() . '/css/vendor/datepicker3.min.css')
+    ->appendStylesheet($this->basePath() . '/css/royalslider.css')
+    ->appendStylesheet($this->basePath() . '/css/rs-default.css')
+    ->appendStylesheet($this->basePath() . '/css/apartel.css');
+
+$data = $this->data;
+$cityName = $this->cityName($data['city_id']);
+$apartelName = $data['name'];
+$this->headTitle(
+    Helper::evaluateTextline($this->textline(1634), [
+        '{{APARTMENT_NAME}}' => $apartelName,
+        '{{CITY}}' => $cityName,
+        '{{SHORT_PROVINCE}}' => $data['short_name']
+    ])
+);
+
+$this->headLink([
+    'rel'  => 'canonical',
+    'href' => $this->url('apartel', ['apartel-route' => $data['apartel_slug'] . '--' . $data['city']], ['force_canonical' => true]),
+]);
+
+$this->headMeta()
+    ->appendHttpEquiv('Content-Type', 'text/html;charset=utf-8')
+    ->appendName('description', strip_tags($this->productTextline($data['meta_description_textline_id'])));
+
+?>
+</div>
+</div>
+
+<script>
+    var GLOBAL_MORE_REVIEW_URL = '<?=$this->url('apartel-get-more-reviews')?>';
+    var showReviews = '<?= $this->showReviews ?>';
+</script>
+
+<div class="container-fluid apartel-top">
+    <input id="apartel-id" class="hidden" value="<?=$data['id']?>">
+
+    <div class="row">
+        <div class="directory-cover" style="background-image: url(<?=$data['img']?>);">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="apartel-box">
+                            <h1 class="text-center"><?=$apartelName?></h1>
+                            <div class="text-center"><?=$this->productTextline($data['moto_textline_id'])?></div>
+
+                            <script type="application/ld+json">
+                            {
+                                "@context": "http://schema.org",
+                                "@type": "LodgingBusiness",
+                                "name": "<?=$apartelName?>",
+                                "description": "<?=strip_tags($this->productTextline($data['meta_description_textline_id']))?>",
+                                <?php if (isset($this->roomTypes[0])) { ?>
+                                "priceRange": "<?=strip_tags(Helper::evaluateTextline($this->textline(1207), ['{{PRICE}}' => $this->roomTypes[0]['symbol'] . number_format($this->roomTypes[0]['price'], 2, '.', '')]))?>",
+                                <? } ?>
+                                "address": {
+                                    "@type": "PostalAddress",
+                                    "streetAddress": "<?=$data['address']?>",
+                                    "addressLocality": "<?=$data['city_name']?>",
+                                    "addressRegion": "<?=$data['short_name']?>",
+                                    "postalCode": "<?=$data['postal_code']?>",
+                                    "addressCountry": "<?=$data['country_name']?>"
+                                },
+                                "aggregateRating": {
+                                    "@type": "AggregateRating",
+                                    "ratingValue": "<?=round($this->reviewsScore, 1)?>",
+                                    "reviewCount": "<?=$this->reviewCount?>"
+                                }
+                            }
+                            </script>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="search-container">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-12 mobile-top-minus-10 margin-top-15">
+                            <form class="search search-general" data-today="<?=$this->options['current_date']?>" action="<?=$this->options['url']?>">
+                                <input type="hidden" value="<?=$data['apartel_slug']?>" name="apartel">
+                                <div class="input-daterange">
+                                    <div class="col-xs-6 col-sm-3 col-md-3 grid-sep col padding-right-12 left-column">
+                                        <input type="text" name="arrival" class="form-control input-lg text-left" readonly  placeholder="<?=$this->textline(1222)?>">
+                                        <i class="glyphicon glyphicon-calendar text-muted"></i>
+                                    </div>
+                                    <div class="col-xs-6 col-sm-3 col-md-3 grid-sep col padding-right-12">
+                                        <input type="text" name="departure" class="form-control input-lg text-left" readonly placeholder="<?=$this->textline(1223)?>">
+                                        <i class="glyphicon glyphicon-calendar text-muted"></i>
+                                    </div>
+                                </div>
+                                <div class="col-xs-6 col-sm-2 col-md-2 grid-sep col padding-right-12 left-column">
+                                    <select class="form-control input-lg" name="guest">
+                                        <?php foreach ($this->options['guest'] as $key => $guest) { ?>
+                                            <option value="<?=$key?>" <?php if (2 == $key) echo 'selected="selected"'?>><?=$guest?></option>
+                                        <?php } ?>
+                                    </select>
+                                </div>
+                                <div class="col-xs-6 col-sm-2 col-md-2 grid-sep col padding-right-12">
+                                    <select class="form-control input-lg" name="roomType" id="roomType">
+                                        <option value="0"><?=$this->textline(1637)?></option>
+                                        <?php foreach ($this->roomTypes as $roomType) { ?>
+                                            <option value="1" data-search-name="<?=$roomType['search_name']?>"><?=$roomType['name']?></option>
+                                        <?php } ?>
+                                    </select>
+                                </div>
+                                <div class="col-xs-12 col-sm-2 col-md-2 col grid-sep text-right go-search-div">
+                                    <input type="button" class="btn-block searchButton go-search height46" value="<?=$this->textline(1322)?>" >
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container-fluid apartel-content">
+    <div class="apartel-content-bg-separator"></div>
+    <div class="container">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="row apartel-content-main">
+
+                <div class="col-md-8 col-sm-12 apartel-content-left">
+                    <div class="wrapper">
+                        <?=$this->productTextline($data['content_textline_id'])?>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-sm-12 apartel-review apartel-content-right">
+                    <div class="wrapper">
+                        <h2><?=$this->textline(1635)?></h2>
+
+                        <?php
+                        $reviewCounter = 0;
+                        $reviewNeeded = 5;
+
+                        foreach ($this->reviews as $review) {
+                            if ($reviewCounter >= $reviewNeeded) {
+                                break;
+                            }
+                        ?>
+                            <div class="box">
+
+                                <script type="application/ld+json">
+                                {
+                                    "@context": "http://schema.org",
+                                    "@type": "Review",
+                                    "itemReviewed": "<?=$apartelName?>",
+                                    "reviewRating": {
+                                        "@type": "Rating",
+                                        "bestRating": "5",
+                                        "ratingValue": "<?=$review['score']?>"
+                                    },
+                                    "datePublished": "<?=date("Y-m-d", strtotime($review['date']))?>",
+                                    "author": "<?=ucwords($review['user_name'])?>",
+                                    "reviewBody": "<?=trim(preg_replace('/\s\s+/', ' ', strip_tags($review['liked'])))?>"
+                                }
+                                </script>
+
+                                <div class="review-arrow hidden-sm hidden-xs"></div>
+                                <div class="row">
+                                    <div class="col-xs-12 font-weight-100">
+                                        <strong><?=ucwords($review['user_name'])?></strong>
+                                    </div>
+                                    <div class="col-xs-12 text-muted font-weight-100">
+                                        <?php
+                                        echo Helper::getReadableDifferenceBetweenDates($review['date']) . ', '
+                                            . ucfirst($review['city'])
+                                            . ($review['country_id']
+                                                ? ', ' . ucfirst($this->countryname($review['country_id']))
+                                                : '');
+                                        ?>
+                                    </div>
+                                    <div class="col-xs-12 margin-top-5">
+                                        <span class="inline-stars">
+                                            <?php
+                                                $goodScore = $review['score'];
+                                                $badScore = 5 - $review['score'];
+
+                                                if ($goodScore) {
+                                                    for ($i = 0; $i < $goodScore; $i++) {
+                                                        echo '<i class="star_good"></i>';
+                                                    }
+                                                }
+
+                                                if ($badScore) {
+                                                    for ($j = 0; $j < $badScore; $j++) {
+                                                        echo '<i class="star_bad"></i>';
+                                                    }
+                                                }
+                                            ?>
+                                        </span>
+                                        <?=$review['liked']?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php
+                            $reviewCounter++;
+                        }
+                        ?>
+                        <div class="col-sm-12 padding-bottom-15">
+                            <a href="javascript:void(0)" id="show-all-reviews">
+                                <?=Helper::evaluateTextline($this->textline(1657), ['{{REVIEWS_COUNT}}' => $this->reviewCount])?>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="row">
+                <div class="col-xs-3 room-type"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<div class="container-fluid apartel-bottom">
+    <div class="container">
+        <div class="row">
+            <div class="text-center">
+                <?php foreach ($this->roomTypes as $roomType) { ?>
+                    <div class="box-room-type text-center">
+                        <h2 class="text-center"><?=$roomType['name']?></h2>
+                        <p class="text-muted"><?=Helper::evaluateTextline($this->textline(1207), ['{{PRICE}}' => '<sup>' . $roomType['symbol'] . '</sup>' . number_format($roomType['price'], 2, '.', '')])?></p>
+                        <img src="<?=$this->basePath()?>/img/<?=$roomType['img']?>" class="margin-top-15">
+                        <p class="text-muted margin-top-15">
+                            <?=Helper::evaluateTextline($this->textline(1631), [
+                                '{{SLEEP}}' =>$roomType['bathroom_count'],
+                                '{{BEDROOM}}' =>$roomType['bedroom_count'],
+                                '{{AREA}}' =>$roomType['square_meters'],
+                            ])?>
+                        </p>
+                        <a href="<?=$roomType['search_url']?>" class="btn btn-lg searchButton margin-top-15"><?=$this->textline(1632)?></a>
+                    </div>
+                <?php } ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="all-reviews" style="display: none;" tabindex='-1'>
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <img class="icon icons8-Delete" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAABiUlEQVRoQ+3Z/U3DMBAF8NcN2ISOABt0kzICTMQIMAJs0hGqk4gUVUl8H+/ZpUr+jBI7P5/t+HQHPMh1eBAHdsi9RXKPyH+LyAnAN4DL4A9/AnAG8LH2HVtTyxCfAH4AvA7EGOILwPEP8r6E2YJYAxaN54GYOeIXwMvagLYW+0iMG2ERakHsmRGYEMIL6Y0JIyKQXpgUIgpRY9KIDESFKSGyEDamjKhAWBgKogqpYmgIBiSLoSJYkCiGjmBCvBgJgg1pYWQIBWQNY/eno/jmKTab93gOjZm2bw+a1oblExKEKiITfI6xezJED8g0nawvaaapnFrzNWEQaaapgCztTgaRps1syNYWK800mRDPf0KGYUE8iKXdjLYBMCARhAxThWQQEkwFUkHQMVkIA0HFZCBMBA0ThSgQFEwEokSUMV5ID0QJ44H0RKQxLcgIRArTKvRI01NH6uk+m3lKb9LMLoixGmK49GZ93FMx9G0NoU51HYPNe6S12Hk9iVvaIeIBDje/RyQ8ZOIXriZt0DO01u6oAAAAAElFTkSuQmCC" width="30" height="30">
+                    <span class="sr-only">Close</span>
+                </button>
+                <div class="row all-reviews-header">
+                    <div class="col-sm-12 all-reviews-title">
+                        <h2 style="font-weight: 400;">
+                            <?=$apartelName?>
+                        </h2>
+                        <span class="text-muted">
+                            <?=$data['address']?>, <?=$data['city_name']?>, <?=$data['short_name']?>, <?=$data['postal_code']?>
+                        </span>
+                        <h3 class="all-reviews-count">
+                            <?=$this->reviewCount?> <?=$this->textline(1199)?>
+                        </h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-body" id="all-reviews-body">
+                <input id="reviews-current-count" class="hidden" value="<?=count($this->reviews)?>">
+
+                <?php foreach ($this->reviews as $review) { ?>
+                    <div class="row">
+
+                        <script type="application/ld+json">
+                        {
+                            "@context": "http://schema.org",
+                            "@type": "Review",
+                            "itemReviewed": "<?=$apartelName?>",
+                            "reviewRating": {
+                                "@type": "Rating",
+                                "bestRating": "5",
+                                "ratingValue": "<?=$review['score']?>"
+                            },
+                            "datePublished": "<?=date("Y-m-d", strtotime($review['date']))?>",
+                            "author": "<?=ucwords($review['user_name'])?>",
+                            "reviewBody": "<?=trim(preg_replace('/\s\s+/', ' ', strip_tags($review['liked'])))?>"
+                        }
+                        </script>
+
+                        <div class="col-xs-12 font-weight-100">
+                            <strong><?=ucwords($review['user_name'])?></strong>
+                        </div>
+                        <div class="col-xs-12 text-muted font-weight-100">
+                            <?php
+                            echo Helper::getReadableDifferenceBetweenDates($review['date']) . ', '
+                                . ucfirst($review['city'])
+                                . ($review['country_id']
+                                    ? ', ' . ucfirst($this->countryname($review['country_id']))
+                                    : '');
+                            ?>
+                        </div>
+                        <div class="col-xs-12 margin-bottom-30">
+                            <span class="inline-stars">
+                                <?php
+                                $goodScore = $review['score'];
+                                $badScore = 5 - $review['score'];
+
+                                if ($goodScore) {
+                                    for ($i = 0; $i < $goodScore; $i++) {
+                                        ?>
+                                        <i class="star_good"></i>
+                                        <?php
+                                    }
+                                }
+
+                                if ($badScore) {
+                                    for ($j = 0; $j < $badScore; $j++) {
+                                        ?>
+                                        <i class="star_bad"></i>
+                                        <?php
+                                    }
+                                }
+                                ?>
+                            </span>
+                            <?=$review['liked']?>
+                        </div>
+                    </div>
+                <?php } ?>
+
+                <div class="col-sm-12 text-center" id="reviews-loader" style="display: none;">
+                    <img src="<?=$this->basePath()?>/img/loader.gif" alt="loading...">
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

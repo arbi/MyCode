@@ -1,0 +1,291 @@
+<?php
+
+use \DDD\Service\Finance\Expense\ExpenseTicket as ExpenseTicket;
+use Library\Finance\Process\Expense\Helper as FinanceHelper;
+use \Library\Constants\Roles;
+
+if (count($this->items)) {
+    foreach ($this->items as $item) {
+        $costCenterCount = count($this->costCenters[$item['id']]);
+        $transactionClass = '';
+        $itemFeatures = '';
+        $userId = $this->auth->getIdentity()->id;
+        $hasFinanceRole = $this->auth->hasRole(Roles::ROLE_PO_AND_TRANSFER_MANAGER_GLOBAL);
+
+        if ($item['is_refund']) {
+            $itemFeatures .= ' refund';
+        }
+
+        if ($item['is_deposit']) {
+            $itemFeatures .= ' deposit';
+        }
+
+        if ($item['is_startup']) {
+            $itemFeatures .= ' startup';
+        }
+
+        if (!empty($item['transaction_id'])) {
+            $transactionClass = ' transaction-' . $item['transaction_id'];
+        }
+
+        // Conditions for item to be editable and removable
+        $editable =
+            // PO is not settled
+            !($item['finance_status'] == FinanceHelper::FIN_STATUS_SETTLED) &&
+            (
+                // logged in user is from final team and has corresponding role
+                $hasFinanceRole
+                ||
+                (
+                    // logged in user is PO manager
+                    ($item['po_manager_id'] == $userId)
+                    &&
+                    // PO is not closed for review
+                    ($item['finance_status'] != FinanceHelper::FIN_STATUS_READY)
+                )
+                ||
+                // Item is not approved
+                ($item['status'] != FinanceHelper::ITEM_STATUS_APPROVED)
+            );
+
+?>
+<div class="template item item-<?php echo $item['id']; echo $transactionClass ?> transition not-editable<?php echo $itemFeatures; ?>"
+     data-date="<?php echo date('Y-m-d', strtotime($item['date_created'])); ?>"
+     data-item-id="<?php echo $item['id']; ?>"
+     data-delete-url="<?php echo $this->url('finance/purchase-order/item/remove', ['id' => $item['id']]); ?>"
+     data-attach-transaction-url="<?php echo $this->url('finance/purchase-order/item/attach-transaction', ['id' => $item['id']]); ?>"
+     data-detach-transaction-url="<?php echo $this->url('finance/purchase-order/item/detach-transaction', ['id' => $item['id']]); ?>">
+    <?php
+    $additionalMessageOnItemDelete = '';
+
+    if (isset($this->itemAttachments[$item['id']])) {
+        $additionalMessageOnItemDelete = 'You are about to delete an item which has an attachment. The attachment will also be deleted.&lt;br&gt;';
+    }
+    ?>
+
+    <?php if ($editable) { ?>
+    <div class="item-actions">
+        <a class="btn-edit-item transition noselect" target="_blank" href="/finance/item/<?= $item['id'] ?>" title="Edit Item">
+            <span class="glyphicon glyphicon-edit text-primary"></span>
+        </a>
+        <a class="remove transition noselect" title="Remove Item"
+           data-toggle="modal" data-target="#areYouSure"
+           data-context="ticket-element"
+           data-action="delete"
+           data-action-name="Delete"
+           data-action-state="danger"
+           data-body="<?php echo $additionalMessageOnItemDelete; ?>Are you sure?"
+           data-title="Delete ticket item">
+            <small class="glyphicon glyphicon-trash text-danger"></small>
+        </a>
+    </div>
+    <?php } ?>
+
+    <section class="row">
+        <?php if ($item['account_type']) { ?>
+        <div class="col-sm-5">
+            <span class="label label-primary">
+                <?php echo \Library\Finance\Base\TransactionBase::getAccountTypeById($item['account_type']); ?>
+            </span> &nbsp;<?php echo $item['account_name']; ?>
+        </div>
+        <?php } ?>
+
+        <?php if ($item['account_reference']) { ?>
+        <div class="col-sm-5">
+            <div>
+                <span class="text-muted">Reference:</span> <strong><?php echo $item['account_reference']; ?> </strong>
+            </div>
+        </div>
+        <?php } ?>
+    </section>
+
+    <?php if ($costCenterCount) { ?>
+    <hr class="margin-top-2 margin-bottom-5">
+    <section class="cost-center row">
+        <div class="col-sm-12">
+            <div class="text-muted">Cost Centers</div>
+
+            <div>
+                <div class="selectize-control multi">
+                    <div class="selectize-input">
+                        <?php
+                            $i = 0;
+
+                            foreach ($this->costCenters[$item['id']] as $costCenter) {
+                                $hide = '';
+
+                                if (++$i >= ExpenseTicket::MAX_COST_CENTERS_PER_ITEM) {
+                                    $hide = ' hide';
+                                }
+                        ?>
+                            <div class="not-pointer<?php echo $hide; ?>">
+                                <span class="label label-primary"><?php echo $costCenter['label'];?></span>
+                                <?php echo $costCenter['name']; ?>
+                            </div>
+                        <?php
+                            }
+
+                            if ($costCenterCount > ExpenseTicket::MAX_COST_CENTERS_PER_ITEM) {
+                        ?>
+                            <div class="see-all">
+                                <span class="label label-info">+ <?php echo $costCenterCount - ExpenseTicket::MAX_COST_CENTERS_PER_ITEM; ?> items</span>
+                            </div>
+                        <?php
+                            }
+                        ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <?php } ?>
+
+    <section class="row">
+        <div class="col-sm-5">
+            <div class="text-muted">Amount</div>
+            <div>
+                <strong><?php echo number_format($item['amount'], 2) . ' ' . $item['currency']; ?></strong>
+            </div>
+        </div>
+
+        <?php if ($item['category_name']) { ?>
+        <div class="col-sm-7">
+            <div class="text-muted">Category</div>
+            <div>
+                <strong><?php echo $item['category_name']; ?></strong>
+            </div>
+        </div>
+        <?php } ?>
+    </section>
+
+    <?php
+        $createdDate = date('Y-m-d', strtotime($item['date_created']));
+        $showPeriod = ($createdDate != $item['period_from'] || $createdDate != $item['period_to']);
+        $dateString = ($showPeriod ? $this->period->transform($item) : false);
+    ?>
+    <hr class="margin-top-2 margin-bottom-5">
+    <section class="row">
+        <?php
+        if ($dateString) {
+            ?>
+        <div class="col-sm-5">
+            <div class="text-muted">Period</div>
+            <div>
+                <strong><?php echo $dateString ?></strong>
+            </div>
+        </div>
+        <?php } else { ?>
+            <div class="col-sm-5">
+                <div class="text-muted">Type</div>
+                <div>
+                    <strong><?php echo  FinanceHelper::$types[$item['type']]?></strong>
+                </div>
+            </div>
+            <?php } ?>
+
+        <?php
+        if ($item['sub_category_name']) {
+            ?>
+        <div class="col-sm-7">
+            <div class="text-muted">Subcategory</div>
+            <div>
+                <strong><?php echo $item['sub_category_name'] ?></strong>
+            </div>
+        </div>
+        <?php } ?>
+    </section>
+
+    <?php if ($dateString) { ?>
+    <hr class="margin-top-2 margin-bottom-5">
+    <section class="row">
+        <div class="col-sm-5">
+            <div class="text-muted">Type</div>
+            <div>
+                <strong><?php echo  FinanceHelper::$types[$item['type']]?></strong>
+            </div>
+        </div>
+    </section>
+    <?php } ?>
+
+    <?php if ($item['comment']) { ?>
+    <hr class="margin-top-2 margin-bottom-5">
+    <section class="row comment">
+        <div class="col-sm-12">
+            <div class="well"><?php echo nl2br($item['comment']); ?></div>
+        </div>
+    </section>
+    <?php } ?>
+
+    <?php if (!empty($this->itemAttachments[$item['id']])) { ?>
+    <section class="row">
+        <div class="col-sm-6">
+            <div class="attachments-items-preview">
+                <ul class="list-inline">
+                    <li class="transition predefined" data-id="229" style="background:url(<?php echo $this->url('finance/purchase-order/preview'); ?>?id=<?php echo $this->itemAttachments[$item['id']]['id']; ?>&amp;type=2) no-repeat center center;">
+                        <?php if (!$this->itemAttachments[$item['id']]['isImage']) { ?>
+                        <strong class="transition"><?php echo $this->itemAttachments[$item['id']]['extension']; ?></strong>
+                        <?php } ?>
+                        <div class="size transition"><?php echo $this->itemAttachments[$item['id']]['size']; ?></div>
+                        <a class="download transition" title="Download" href="<?php echo $this->url('finance/item/download-attachment', ['id' => $this->itemAttachments[$item['id']]['id']]); ?>">
+                            <i class="glyphicon glyphicon-download"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+    <?php } ?>
+
+    <div class="footer">
+        <div class="row">
+            <div class="col-sm-3 col">
+                <?php if (!empty($item['transaction_id'])) { ?>
+                <a href="#" class="linked-element linked-items text-primary" title="Find Connected Transactions"><i class="glyphicon glyphicon-random"></i></a>
+                <?php } ?>
+
+                <div class="item-transaction-container">
+                    <select name="transaction_id" class="form-control item-transaction-id selectize">
+                        <?php if (!empty($item['transaction_id'])) { ?>
+                            <option value="<?php echo $item['transaction_id']; ?>"><?php echo $item['transaction_id']; ?></option>
+                        <?php } ?>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-sm-4 col">
+                <label>
+                    <span class="user-icon text-muted item-creator">
+                        <img src="<?php echo $this->basePath(); ?>/img/ios-user.png">
+                        <?php echo $item['creator_name']; ?>
+                    </span>
+                </label>
+            </div>
+
+            <div class="col-sm-3 col">
+                <span class="text-muted date"><?php echo date(\Library\Constants\Constants::GLOBAL_DATE_TIME_FORMAT, strtotime($item['date_created'])); ?></span>
+            </div>
+
+            <div class="col-sm-2 text-right text-muted">
+                <?php if ($item['is_startup']) { ?>
+                    <i class="glyphicon glyphicon-gift" data-toggle="tooltip" title="Startup"></i>
+                <?php } ?>
+                <?php if ($item['is_refund']) { ?>
+                    &nbsp;
+                    <i class="glyphicon glyphicon-arrow-left" data-toggle="tooltip" title="Refund"></i>
+                <?php } ?>
+                <?php if ($item['is_deposit']) { ?>
+                    &nbsp;
+                    <i class="glyphicon glyphicon-piggy-bank" data-toggle="tooltip" title="Deposit"></i>
+                <?php } ?>
+            </div>
+        </div>
+    </div>
+</div>
+<?php
+    }
+} else {
+?>
+    <div class="alert alert-danger" role="alert"><strong>Oh snap!</strong> Nothing found.</div>
+<?php
+}
+

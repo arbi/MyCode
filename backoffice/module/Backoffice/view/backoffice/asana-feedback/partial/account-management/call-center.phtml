@@ -1,0 +1,16 @@
+<div class="form-group">
+    <select id="feedback-department" name="feedback-department" class="form-control">
+        <option value=""> -- Choose Department -- </option>
+        <?php foreach ($this->departments as $department) { ?>
+            <option value="<?= $department->getName() ?>"><?= $department->getName() ?></option>
+        <?php } ?>
+    </select>
+</div>
+
+<div class="form-group">
+    <input type="text" name="feedback-full-name" id="feedback-full-name" class="form-control" placeholder="Full name of the account" value="">
+</div>
+
+<div class="form-group">
+    <textarea name="feedback-reason" id="feedback-reason" class="form-control" placeholder="Please describe your request" rows="4"></textarea>
+</div>

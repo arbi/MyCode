@@ -1,0 +1,604 @@
+<?php
+
+use Library\Finance\Process\Expense\Ticket;
+use Library\Finance\Process\Expense\Helper;
+use DDD\Service\Finance\Expense\ExpenseTicket;
+use \Library\Constants\Constants;
+
+/**
+ * @var \Library\Authentication\BackofficeAuthenticationService $auth
+ * @var \Zend\Form\Form $form
+ */
+$isEdit = $form->get('id')->getValue();
+
+$title = 'Purchase Order';
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($title);
+$this->layout()->breadcrumb = $this->breadcrumb([
+    ['Finance'],
+    ['PO Management', $this->url('finance/default', ['controller' => 'purchase-order'])],
+    [$title]
+]);
+
+$form = $this->form;
+$data = $this->data;
+$auth = $this->auth;
+$identity = $this->identity();
+$statusId = $form->get('status')->getValue();
+
+// Permissions
+$isUnlocker = intval($auth->hasRole(\Library\Constants\Roles::ROLE_EXPENSE_UNLOCKER));
+$isFinance = intval($auth->hasRole(\Library\Constants\Roles::ROLE_PO_AND_TRANSFER_MANAGER_GLOBAL));
+$isSettler = intval($auth->hasRole(\Library\Constants\Roles::ROLE_PO_SETTLER));
+$isApprover = intval($auth->hasRole(\Library\Constants\Roles::ROLE_PO_APPROVER));
+$isManager = intval($form->get('ticket_manager')->getValue() == $identity->id);
+
+$isApproved = $statusId == \Library\Finance\Process\Expense\Ticket::STATUS_GRANTED;
+$isRejected = $statusId == \Library\Finance\Process\Expense\Ticket::STATUS_DECLINED;
+$status = \Library\Finance\Process\Expense\Ticket::getStatusById($statusId);
+$editor = $identity->firstname . ' ' . $identity->lastname;
+$statusClass = '';
+
+if ($isEdit) {
+    $ticketCreator = $form->get('ticket_creator')->getValue();
+    $dateCreated = $form->get('date_created')->getValue();
+    $financStatusId = $data['ticket']['finance_status'];
+    $financeStatus = Helper::$financeStatuses[$financStatusId];
+
+    switch ($statusId) {
+        case Ticket::STATUS_CLOSED: $statusClass = 'default'; break;
+        case Ticket::STATUS_PENDING: $statusClass = 'warning'; break;
+        case Ticket::STATUS_GRANTED: $statusClass = 'success'; break;
+        case Ticket::STATUS_DECLINED: $statusClass = 'danger'; break;
+    }
+} else {
+    $ticketCreator = $identity->firstname . ' ' . $identity->lastname;
+    $dateCreated = date('Y-m-d H:i:s');
+    $financStatusId = '';
+    $financeStatus = '';
+}
+
+$initialBalance = !empty($data['ticket']['ticket_balance']) ? $data['ticket']['ticket_balance'] : '0.00';
+$initialDepositBalance = !empty($data['ticket']['deposit_balance']) ? $data['ticket']['deposit_balance'] : '0.00';
+$initialItemBalance = !empty($data['ticket']['item_balance']) ? $data['ticket']['item_balance'] : '0.00';
+$initialTransactionBalance = !empty($data['ticket']['transaction_balance']) ? $data['ticket']['transaction_balance'] : '0.00';
+
+$this->headLink()
+    ->appendStylesheet($this->basePath() . '/css/pages/finance.expense.css')
+    ->appendStylesheet($this->basePath() . '/css/plugins/selectize.bootstrap3.css');
+
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/plugins/selectize/selectize.min.js')
+    ->appendFile($this->basePath() . '/js/pages/expense.manage.js');
+
+?>
+<?php echo $this->form()->openTag($form); ?>
+<div class="main-title">
+    <h1>
+        <?php if ($isEdit) { ?>PO #<?php echo $isEdit . ' - '; } ?>
+        <?php echo $this->formInput($form->get('title')); ?>
+    </h1>
+</div>
+<label class="labels">
+    <span class="label label-default">
+    <?= $this->info(
+        date(Constants::GLOBAL_DATE_FORMAT, strtotime($dateCreated)),
+        'Creation Date'
+    ) ?>
+    </span>
+
+    <span class="label label-default">
+    <?= $this->info(
+        $ticketCreator,
+        'Creator'
+    ) ?>
+    </span>
+
+    <?php if ($isEdit) { ?>
+    <span class="label label-<?= $statusClass ?>">
+    <?= $this->info(
+        $status,
+        'Approval Status'
+    ) ?>
+    </span>
+
+    <span class="label label-primary financial-status">
+    <?= $this->info(
+        $financeStatus
+        ,
+        'Financial Status'
+    ) ?>
+    </span>
+
+    <?php } ?>
+</label>
+
+<div class="balance-container" id="balance-container">
+    <div class="row">
+        <div class="col-sm-10 balance-col col-xs-10">
+            <div class="balances" data-spy="affix"
+                data-initial-currency="<?php echo $data['ticket']['currency']; ?>"
+                data-initial-balance="<?php echo $initialBalance; ?>"
+                data-initial-deposit-balance="<?php echo $initialDepositBalance; ?>">
+                <div class="balance"><span class="balance-amount"><?php echo $initialBalance; ?></span></div>
+                <?php
+                  if ($initialDepositBalance > 0) {
+                      $depositClass = 'color-success';
+                  } elseif ($initialDepositBalance < 0) {
+                      $depositClass = 'color-danger';
+                  } else {
+                      $depositClass = 'hidden';
+                  }
+                ?>
+                <div class="deposit-balance  <?php echo $depositClass;?>">Deposit <span class="balance-amount <?php echo $depositClass;?>"><?php echo $initialDepositBalance; ?></span></div>
+                <div class="limit-balance">Remaining
+                    <span class="limit-minus-item-balance"><?php echo $data['ticket']['limit'] - $initialItemBalance; ?></span> /
+                    <span class="balance-amount"><?php echo $data['ticket']['limit']; ?></span>
+
+
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-2 col-xs-2">
+            <div class="custom-select expense-currency transition" data-value="" data-currency-id="<?php echo $data['ticket']['currency_id']; ?>">
+                <button type="button" class="btn btn-lg btn-default dropdown-toggle" data-toggle="dropdown">
+                    <span class="display text-primary"></span>
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right" role="menu"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-7 left-side-container">
+        <div class="row">
+            <div class="col-sm-4">
+                <label for="ticket-manager">Manager <?php echo $this->required(); ?></label>
+                <?php echo $this->formSelect($form->get('ticket_manager')); ?>
+            </div>
+
+            <div class="col-sm-4">
+                <label for="expected-completion-date">Validity</label>
+                <div>
+                    <div class="input-group">
+                        <?php echo $this->formInput($form->get('expected_completion_date')); ?>
+                        <div class="input-group-addon">
+                            <i class="glyphicon glyphicon-calendar"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-4">
+                <label for="budget">Limit <?php echo $this->required(); ?></label>
+                <div class="input-group">
+                    <input name="limit" class="form-control limit" placeholder="Limit" type="text" value="<?php echo $data['ticket']['limit']; ?>"
+                           data-currency="<?php echo $data['ticket']['currency']; ?>">
+                    <div class="input-group-addon limit-currency">
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <?php echo $this->formTextarea($form->get('purpose')); ?>
+
+        <div class="row hide">
+            <div class="col-sm-12">
+                <?php echo $this->formFile($form->get('attachments')); ?>
+            </div>
+        </div>
+
+        <div class="attachments-preview"
+             data-download-url="<?php echo $this->url('finance/purchase-order/download-attachment'); ?>"
+             data-preview-url="<?php echo $this->url('finance/purchase-order/preview'); ?>"
+             data-attachments='<?php echo json_encode($this->attachments); ?>'>
+         </div>
+    </div>
+
+    <div class="col-sm-5 right-side-container">
+        <div class="row">
+            <div class="col-sm-12">
+                <label for="budget">Budget <?php echo $this->required(); ?></label>
+                <?php echo $this->formSelect($form->get('budget')); ?>
+            </div>
+        </div>
+
+        <?php if ($isEdit) { ?>
+        <div class="comments">
+            <?= $data['ticket']['comment']; ?>
+        </div>
+        <?php } ?>
+        <?php echo $this->formInput($form->get('comment_writer')); ?>
+    </div>
+</div>
+
+<hr>
+
+<div class="row search-filters"
+    data-get-items-url="<?php echo $this->url('finance/purchase-order/get-items'); ?>"
+    data-get-transactions-url="<?php echo $this->url('finance/purchase-order/get-transactions'); ?>">
+    <div class="col-sm-6 item-container">
+        <legend>Item
+            <?php if ($isEdit) { ?>
+            (<span class="item-search-count">0</span>
+            <span class="text-muted">/</span>
+            <span class="item-count"><?php echo $data['itemCount']; ?></span>)
+            <?php } ?>
+
+            <?php if ($financStatusId == Ticket::FIN_STATUS_NEW || ($isFinance && $financStatusId == Ticket::FIN_STATUS_READY)) { ?>
+                <a href="#" class="btn btn-xs btn-primary item-add pull-right" title="Add new Item">
+                    <i class="glyphicon glyphicon-plus"></i> Add
+                </a>
+            <?php } ?>
+
+
+            <small class="form-control-static pull-right limit-block">
+                <small>
+                    <span class="item-balance commented-text text-success" title="Item balance"
+                          data-initial-amount="<?php echo $initialItemBalance; ?>"
+                          data-amount="<?php echo $initialItemBalance; ?>"
+                          data-toggle="tooltip">
+                        <?php echo number_format($data['ticket']['item_balance'], 2); ?>
+                    </span>
+                    <span class="expense-ticket-currency"></span>
+                </small>
+            </small>
+            <small class="pull-right" style="line-height: 35px;">/</small>
+            <small class="form-control-static pull-right limit-block">
+                <small>
+                    <span class="commented-text text-success item-search-balance" title="Item search balance" data-toggle="tooltip" data-value="0">0</span>
+                </small>
+            </small>
+
+        </legend>
+
+        <?php if ($isEdit) { ?>
+        <div class="search-filter">
+            <div class="row">
+                <div class="col-sm-6">
+                    <select name="item-search-supplier" class="form-control item-search-supplier" data-placeholder="Supplier"></select>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="input-group">
+                        <input name="item-search-period" class="form-control item-search-period drp" placeholder="Period" type="text">
+                        <div class="input-group-addon">
+                            <i class="glyphicon glyphicon-calendar"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-7">
+                    <select name="item-search-cost-center" class="form-control item-search-cost-center" data-placeholder="Cost Center"></select>
+                </div>
+
+                <div class="col-sm-5">
+                    <select name="item-search-category" class="form-control item-search-category" data-placeholder="Category"></select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="input-group">
+                        <input name="item-search-creation-date" class="form-control item-search-creation-date dp" placeholder="Creation Date" type="text">
+                        <div class="input-group-addon">
+                            <i class="glyphicon glyphicon-calendar"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-3 padding-bottom-5">
+                    <input name="item-search-reference" class="form-control item-search-reference" placeholder="Reference" type="text">
+                </div>
+
+                <div class="col-sm-3 padding-bottom-5">
+                    <input name="item-search-amount" class="form-control item-search-amount" placeholder="Amount" type="text">
+                </div>
+
+                <div class="col-sm-2">
+                    <button class="form-control btn btn-primary item-search" data-loading-text="Wait!">
+                        <i class="glyphicon glyphicon-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <?php } ?>
+
+        <hr>
+
+        <div class="add-item-inner-container"></div>
+        <div class="item-inner-container"></div>
+    </div>
+
+    <div class="col-sm-6 transaction-container" data-money-accounts='<?php echo json_encode($this->inactiveMoneyAccounts); ?>'>
+        <legend>Transaction
+            <?php if ($isEdit) { ?>
+                (<span class="transaction-search-count">0</span>
+                <span class="text-muted">/</span>
+                <span class="transaction-count"><?php echo $data['transactionCount']; ?></span>)
+            <?php } ?>
+
+            <?php if ($financStatusId == Ticket::FIN_STATUS_NEW || ($isFinance && $financStatusId == Ticket::FIN_STATUS_READY)) { ?>
+                <a href="#" class="btn btn-xs btn-primary transaction-add pull-right" title="Add new Transaction">
+                    <i class="glyphicon glyphicon-plus"></i> Add
+                </a>
+            <?php } ?>
+
+            <small class="form-control-static pull-right limit-block">
+                <small>
+                    <span class="transaction-balance commented-text text-success" title="Transaction balance"
+                          data-initial-amount="<?php echo $initialTransactionBalance; ?>"
+                          data-amount="<?php echo $initialTransactionBalance; ?>"
+                          data-toggle="tooltip">
+                        <?php echo number_format(abs($data['ticket']['transaction_balance']), 2); ?>
+                    </span>
+                    <span class="expense-ticket-currency"></span>
+                </small>
+            </small>
+            <small class="pull-right" style="line-height: 35px;">/</small>
+            <small class="form-control-static pull-right limit-block">
+                <small>
+                    <span class="commented-text text-success transaction-search-balance" title="Transaction search balance" data-toggle="tooltip" data-value="0">0</span>
+                </small>
+            </small>
+        </legend>
+
+        <?php if ($isEdit) { ?>
+        <div class="search-filter">
+            <div class="row">
+                <div class="col-sm-7">
+                    <select name="transaction-search-account-from" class="form-control transaction-search-account-from" data-placeholder="From Account"></select>
+                </div>
+
+                <div class="col-sm-5">
+                    <div class="input-group padding-bottom-5">
+                        <input name="transaction-search-transaction-date" class="form-control transaction-search-transaction-date dp" placeholder="Transaction Date" type="text">
+                        <div class="input-group-addon">
+                            <i class="glyphicon glyphicon-calendar"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-7">
+                    <select name="transaction-search-account-to" class="form-control transaction-search-account-to" data-placeholder="To Supplier"></select>
+                </div>
+
+                <div class="col-sm-5">
+                    <div class="input-group padding-bottom-5">
+                        <input name="transaction-search-creation-date" class="form-control transaction-search-creation-date dp" placeholder="Creation Date" type="text">
+                        <div class="input-group-addon">
+                            <i class="glyphicon glyphicon-calendar"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-4">
+                    <input name="transaction-search-amount" class="form-control transaction-search-amount" placeholder="Amount" type="text">
+                </div>
+
+                <div class="col-sm-2">
+                    <button class="form-control btn btn-primary transaction-search" data-loading-text="Wait!">
+                        <i class="glyphicon glyphicon-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <?php } ?>
+
+        <hr>
+
+        <div class="add-transaction-inner-container"></div>
+        <div class="transaction-inner-container"></div>
+    </div>
+</div>
+
+<div id="templates"
+     data-is-unlocker="<?php echo $isUnlocker; ?>"
+     data-is-finance="<?php echo $isFinance; ?>"
+     data-is-manager="<?php echo $isManager; ?>"
+
+     data-ticket-id="<?php echo $isEdit; ?>"
+     data-user-id="<?php echo $identity->id; ?>"
+     data-status-id="<?php echo $statusId; ?>"
+     data-finance-status-id="<?php echo $financStatusId; ?>"
+
+     data-expense-creation-date="<?php echo date('Y-m-d', strtotime($dateCreated)); ?>"
+
+     data-item-count="<?php echo $data['itemCount']; ?>"
+     data-transaction-count="<?php echo $data['transactionCount']; ?>"
+
+     data-save-url="<?php echo $this->url('finance/purchase-order/save'); ?>"
+     data-account-url="<?php echo $this->url('finance/purchase-order/get-accounts'); ?>"
+     data-currency-url="<?php echo $this->url('finance/purchase-order/get-currencies'); ?>"
+     data-sub-category-url="<?php echo $this->url('finance/purchase-order/get-sub-categories'); ?>"
+     data-money-account-url="<?php echo $this->url('finance/purchase-order/get-money-accounts'); ?>"
+     data-cost-center-url="<?php echo $this->url('finance/purchase-order/get-cost-centers'); ?>"
+     data-affiliate-url="<?php echo $this->url('finance/purchase-order/get-affiliates'); ?>"
+     data-office-url="<?php echo $this->url('finance/purchase-order/get-offices'); ?>"
+     data-people-url="<?php echo $this->url('finance/purchase-order/get-people'); ?>">
+    <?php
+        echo $this->partial('finance/partial/item-add', [
+            'form' => $form,
+        ]);
+    ?>
+
+    <div class="template transaction" data-existing="0" data-date="<?php echo date('Y-m-d'); ?>">
+        <div class="remove transition noselect remove-custom pull-right" title="Remove item">
+            <i class="glyphicon glyphicon-remove"></i>
+        </div>
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-sm-5 account-from-container">
+                <?php echo $this->formSelect($form->get('account_from')); ?>
+            </div>
+            <div class="col-sm-7 account-to-container">
+                <?php echo $this->formSelect($form->get('account_to')); ?>
+            </div>
+        </div>
+
+        <div class="row fix-margin">
+            <div class="col-sm-5">
+                <div class="input-group">
+                    <?php echo $this->formInput($form->get('amount')); ?>
+                    <span class="input-group-addon currency-sufix"></span>
+                </div>
+            </div>
+            <div class="col-sm-offset-2 col-sm-5">
+                <div class="input-group">
+                    <?php echo $this->formInput($form->get('transaction_date')); ?>
+                    <span class="input-group-addon">
+                        <i class="glyphicon glyphicon-calendar"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="row">
+                <div class="col-sm-3 col">
+                    ID: <span class="id">XXXX</span>
+                </div>
+                <div class="col-sm-1 col text-right text-muted">
+                    <span class="user-icon" data-toggle="tooltip" title="<?php echo $editor; ?>"><img src="<?php echo $this->basePath(); ?>/img/ios-user.png"></span>
+                </div>
+                <div class="col-sm-2 col">
+                    <span class="text-muted date"><?php echo date(\Library\Constants\Constants::GLOBAL_DATE_FORMAT); ?></span>
+                </div>
+                <div class="col-sm-2 col">
+                    <span class="expense-value text-muted text-bold"></span>
+                </div>
+                <div class="col-sm-offset-2 col-sm-2 col col-ch refund transition">
+                    <label>
+                        <?php echo $this->formCheckbox($form->get('is_refund')); ?> Refund
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container page-actions">
+    <div class="row text-right">
+        <div class="pull-left">
+        <?php if ($financStatusId != \Library\Finance\Process\Expense\Helper::FIN_STATUS_SETTLED) { ?>
+            <a class="btn btn-success upload-attachment" href="#">
+                <i class="glyphicon glyphicon-cloud-upload"></i>
+                Upload Attachment
+            </a>
+        <?php } ?>
+
+        <?php if ($isEdit && $isApprover && $statusId == \Library\Finance\Process\Expense\Ticket::STATUS_PENDING) { ?>
+            <a class="btn btn-danger reject" href="#reject"
+               data-toggle="modal" data-target="#areYouSure"
+               data-context="ticket"
+               data-action="reject"
+               data-action-name="Reject"
+               data-action-state="danger"
+               data-title="Are you sure?"
+               data-body="By rejecting the purchase order ticket at this time you will send the ticket back to the creator for possible modification,
+               the creator will have a chance to resubmit or accept the rejection."
+               data-url="<?php echo $this->url('finance/purchase-order/reject', ['id' => $isEdit ?: 0]); ?>">Reject</a>
+            <a class="btn btn-success approve" href="#approve"
+               data-target="#areYouSure"
+               data-context="ticket"
+               data-action="approve"
+               data-action-name="Approve"
+               data-action-state="success"
+               data-title="Are you sure?"
+               data-body="Approve purchase order ticket and send to Finance for processing."
+               data-url="<?php echo $this->url('finance/purchase-order/approve', ['id' => $isEdit ?: 0]); ?>">Approve</a>
+        <?php } ?>
+
+        <?php if (($isApproved || $isRejected) && $isManager && $data['ticket']['finance_status'] == Helper::FIN_STATUS_NEW) { ?>
+            <a class="btn btn-primary ready" href="#ready" data-href="<?php echo $this->url('finance/purchase-order/ready', ['id' => $isEdit]); ?>">Close for Review</a>
+        <?php } ?>
+
+        <?php if (($isApproved || $isRejected) && $isFinance && $data['ticket']['finance_status'] == Helper::FIN_STATUS_READY) { ?>
+            <a class="btn btn-primary settle" href="#settle" data-href="<?php echo $this->url('finance/purchase-order/settle', ['id' => $isEdit]); ?>">Settle</a>
+        <?php } ?>
+
+        <?php if ($isUnlocker && $data['ticket']['finance_status'] == Helper::FIN_STATUS_SETTLED) { ?>
+            <a class="btn btn-primary unsettle" href="#unsettle" data-href="<?php echo $this->url('finance/purchase-order/unsettle', ['id' => $isEdit]); ?>">Unsettle</a>
+        <?php } ?>
+
+        <?php if ($isApproved && $isEdit && $isApprover && !$data['transactionCount'] && $data['ticket']['finance_status'] == Helper::FIN_STATUS_NEW) { ?>
+            <a class="btn btn-primary revoke" href="#revoke" data-href="<?php echo $this->url('finance/purchase-order/revoke', ['id' => $isEdit]); ?>">Revoke</a>
+        <?php } ?>
+        </div>
+
+        <div class="action-buttons hide">
+
+            <?php if ($isFinance) { ?>
+            <a class="btn btn-danger delete hide" href="#delete"
+               data-toggle="modal"
+               data-target="#areYouSure"
+               data-context="ticket"
+               data-action="delete"
+               data-action-name="Delete"
+               data-action-state="danger"
+               data-title="Delete purchase order ticket"
+               data-url="<?php echo $this->url('finance/purchase-order/delete', ['id' => $isEdit ?: 0]); ?>">Delete</a>
+            <?php } ?>
+
+            <?php if ($isFinance) { ?>
+            <a class="btn btn-primary duplicate hide" href="#duplicate"
+               data-toggle="modal"
+               data-target="#areYouSure"
+               data-context="ticket"
+               data-action="duplicate"
+               data-action-name="Duplicate"
+               data-action-state="primary"
+               data-title="Duplicate purchase order ticket"
+               data-url="<?php echo $this->url('finance/purchase-order/duplicate', ['id' => $isEdit ?: 0]); ?>">Duplicate</a>
+            <?php } ?>
+
+            <?php if ($statusId != \Library\Finance\Process\Expense\Ticket::FIN_STATUS_SETTLED) { ?>
+            <a href="#save-changes" class="btn btn-primary submit" data-status="<?php echo $statusId; ?>">Save Changes</a>
+            <?php } ?>
+
+            <a class="btn btn-danger limit-exceeded-btn hide" href="#areYouSure"
+               data-toggle="modal"
+               data-target="#areYouSure"
+               data-context="ticket"
+               data-action="confirm-limit-exceedance"
+               data-action-name="Yes"
+               data-action-state="danger"
+               data-title="PO limit is exceeded"
+               data-body="Are you sure?"></a>
+        </div>
+    </div>
+</div>
+
+<?php echo $this->form()->closeTag(); ?>
+
+<div class="modal fade" id="areYouSure" tabindex="-1" role="dialog" aria-labelledby="are-you-sure" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title"></h4>
+            </div>
+            <div class="modal-body"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-default action">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var GLOBAL_ATTACHMENT_PREVIEW_TYPE_TICKET  = <?= ExpenseTicket::ATTACHMENT_PREVIEW_TYPE_TICKET ?>;
+    var GLOBAL_ATTACHMENT_PREVIEW_TYPE_ITEM    = <?= ExpenseTicket::ATTACHMENT_PREVIEW_TYPE_ITEM ?>;
+    var GLOBAL_ITEM_ID                         = <?= $this->itemId ?>;
+    var GLOBAL_TRANSACTION_ID                  = <?= $this->transactionId ?>;
+</script>

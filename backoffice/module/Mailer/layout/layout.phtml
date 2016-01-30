@@ -1,0 +1,170 @@
+<table width="100%" align="center" border="0" cellpadding="0" cellspacing="0" data-mobile="true" dir="ltr" data-width="640" style="background-color: rgb(255, 255, 255);">
+    <tbody>
+        <tr>
+            <td valign="top" align="center" style="padding:0;margin:0;">
+                <table align="center" border="0" cellspacing="0" cellpadding="0" width="640" class="wrapper" style="margin: auto; width: 640px;">
+                    <tbody>
+                        <tr>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td align="center" valign="top" style="margin:0;padding:0;">
+                                <table align="center" width="100%" border="0" cellpadding="0" cellspacing="0" data-editable="text">
+                                    <tbody>
+                                        <tr>
+                                            <td valign="top" align="center" width="220px" style="padding: 10px 20px 0px 20px; margin: 0px; border: 0px none transparent; font-family: Helvetica, sans-serif; color: rgb(28, 83, 121); background-color: transparent;">
+                                                <table cellpadding="0" cellspacing="0" align="left" data-editable="image" data-mobile-width="1" width="160">
+                                                    <tbody>
+                                                        <tr>
+                                                            <!-- logo: start -->
+                                                            <td valign="top" align="left" style="margin: 0px; padding: 0px 10px 20px 0px;">
+                                                                <img
+                                                                    width="255"
+                                                                    height="73"
+                                                                    src="http://www.ginosi.com/images/logos/logo.gif"
+                                                                    data-src="http://www.ginosi.com/images/logos/logo.gif|255|73|255|73|0|0|1"
+                                                                    data-origsrc="http://www.ginosi.com/images/logos/logo.gif"
+                                                                    style="border: 0px none transparent; display: block;"
+                                                                >
+                                                            </td>
+                                                            <!-- logo: end -->
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <br>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+
+<?php
+    // TEMPLATE INCLUDE HERE
+    include __DIR__ . '/../templates/' . $this->template . '.phtml';
+?>
+
+                        <tr>
+                            <td>
+                                <!-- footer: start -->
+                                <table width="100%" border="0" cellpadding="0" cellspacing="0" align="center" data-editable="text" style="background-color: rgb(221, 238, 255); border-top-left-radius: 6px; border-top-right-radius: 6px; border-bottom-right-radius: 6px; border-bottom-left-radius: 6px;">
+                                    <tbody>
+                                        <tr>
+                                            <td valign="top" align="left" style="padding: 10px 0px 10px 16px; margin: 0px; border: 0px none transparent; background-color: transparent;">
+                                                <table cellpadding="0" cellspacing="0" align="left" data-editable="socialmedia">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td valign="top" align="left" style="padding: 0px; margin: 0px;">
+                                                                <table cellpadding="0" cellspacing="0" align="left">
+                                                                    <tbody>
+                                                                        <tr data-columns="no">
+                                                                            <!-- social icons: start -->
+                                                                            <td style="display: inline-block !important; width: auto !important; margin: auto; padding: 5px;">
+                                                                                <a
+                                                                                    href="https://www.facebook.com/ginosi"
+                                                                                    title="Facebook">
+                                                                                        <img
+                                                                                            src="http://www.ginosi.com/images/emails/facebook-32.png"
+                                                                                            alt="Like"
+                                                                                            border="0"
+                                                                                            style="display: block;"
+                                                                                        >
+                                                                                </a>
+                                                                            </td>
+                                                                            <td style="display: inline-block !important; width: auto !important; margin: auto; padding: 5px;">
+                                                                                <a
+                                                                                    href="https://twitter.com/ginosi"
+                                                                                    title="Twitter">
+                                                                                        <img
+                                                                                            src="http://www.ginosi.com/images/emails/twitter-32.png"
+                                                                                            alt="Twitter"
+                                                                                            border="0"
+                                                                                            style="display: block;"
+                                                                                        >
+                                                                                </a>
+                                                                            </td>
+                                                                            <td style="display: inline-block !important; width: auto !important; margin: auto; padding: 5px;">
+                                                                                <a
+                                                                                    href="https://plus.google.com/113386384616383124605/posts"
+                                                                                    title="GooglePlus">
+                                                                                        <img
+                                                                                            src="http://www.ginosi.com/images/emails/google+-32.png"
+                                                                                            alt="GooglePlus"
+                                                                                            border="0"
+                                                                                            style="display: block;"
+                                                                                        >
+                                                                                </a>
+                                                                            </td>
+                                                                            <!-- social icons: end -->
+
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                            <td align="left" valign="top" style="padding: 18px 20px 10px 10px; font-family: Verdana, sans-serif; color: rgb(255, 255, 255);">
+
+                                                <?php if ($this->phone1) { ?>
+                                                <div style="text-align: right;">
+                                                    <span style="color: rgb(0, 58, 77); font-family: Verdana, sans-serif;">
+                                                        <font size="14" style="font-size: 14px;">Tel.: <?= $this->phone1 ?></font>
+                                                    </span>
+                                                </div>
+                                                <?php } ?>
+                                                <?php if($this->phone2 && $this->phone2 != $this->phone1) { ?>
+                                                    <div style="text-align: right;">
+                                                    <span style="color: rgb(0, 58, 77); font-family: Verdana, sans-serif;">
+                                                        <font size="14" style="font-size: 14px;"><?= $this->phone2 ?></font>
+                                                    </span>
+                                                    </div>
+                                                <?php } ?>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- footer: end -->
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="" align="left" valign="top">
+                                <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                                    <tbody>
+                                        <tr>
+                                            <td style="" align="left" valign="top">
+                                                <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td valign="top" align="left" width="50%" style="padding: 0px; margin: 0px;"></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                                    <tbody>
+                                        <tr>
+                                            <td valign="top" align="left" width="50%" style="padding: 0px; margin: 0px;"></td>
+                                            <td valign="top" align="left" width="50%" style="padding: 0px; margin: 0px;"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    </tbody>
+</table>

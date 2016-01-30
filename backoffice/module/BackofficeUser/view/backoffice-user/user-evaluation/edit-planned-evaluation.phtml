@@ -1,0 +1,115 @@
+<?php
+$environment = getenv('APPLICATION_ENV') ?: 'production';
+
+echo "<script src='{$this->basePath()}/js/vendor/tinymce/tinymce.min.js' type='text/javascript'></script>";
+
+?>
+<script>
+    var SAVE_PLANNED_EVALUATION_URL = '<?= $this->url('evaluation/save-planned-evaluation') ?>';
+</script>
+
+<?php
+    /**
+     * @var \DDD\Domain\User\Evaluation\EvaluationExtended $evaluation
+     */
+    $userId = $this->userId;
+    $evaluationId = $this->evaluationId;
+    $evaluation = $this->evaluation;
+
+    $subject = $evaluation->getEmployeeFullName() . "'s planned evaluation";
+    $this->layout()->viewTitle = $subject;
+    $this->headTitle()->setSeparator(' - ');
+    $this->headTitle($subject);
+
+    $this->layout()->breadcrumb = $this->breadcrumb([
+        ['Administration'],
+        ['People Directory', $this->url('backoffice/default', ['controller' => 'company-directory'])],
+        [$evaluation->getEmployeeFullName(), $this->url('backoffice/default', ['controller' => 'user', 'action' => 'edit', 'id' => $userId])],
+        ['Planned Evaluation']
+    ]);
+
+    $this->InlineScript()
+        ->appendFile($this->basePath() . '/js/module/backoffice-user/user-evaluation/edit.js')
+        ->appendFile($this->basePath() . '/js/validation/user.evaluation.edit.js');
+
+    $userEditUrl = $this->url('backoffice/default', ['controller' => 'user', 'action' => 'edit', 'id' => $userId]);
+    $saveUrl = $this->url('evaluation/save-planned-evaluation', []);
+
+    $evaluationForm = $this->editPlannedEvaluationForm;
+
+    $evaluationForm->prepare();
+
+    // open tags don't work
+    echo $this->form()->openTag($evaluationForm);
+?>
+
+    <fieldset name="add-evaluation">
+        <legend>Planned Evaluation</legend>
+    </fieldset>
+    <div class="col-sm-12 form-group">
+        <div class="row">
+            <div class="col-sm-6 pull-right">
+                <div id="pre-evaluation-date" class="label label-primary margin-bottom-10 pull-right" style="display: none; font-size: 100%;">Previous Evaluation Date: &nbsp
+                    <span class="pull-right" style="color: #A0FFFF;"></span>
+                </div>
+                <div id="pre-score" class="label label-primary  pull-right" style="display: none; font-size: 100%;">Previous Evaluation Score: &nbsp
+                    <span class="badge pull-right" style="background-color: #5F1577;"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-12 form-group">
+        <label class="col-sm-2 control-label" for="evaluation_description">
+            Description
+            <?= $this->required() ?>
+        </label>
+        <div class="col-sm-10">
+            <?php echo $this->formElement($evaluationForm->get('creator_id')); ?>
+            <?php echo $this->formElement($evaluationForm->get('user_id')); ?>
+            <?php echo $this->formElement($evaluationForm->get('evaluation_id')); ?>
+            <?php echo $this->formElement($evaluationForm->get('evaluation_description')); ?>
+        </div>
+    </div>
+
+    <div id="evaluation-items">
+<?php
+    if ($this->evaluationItems) {
+        foreach ($this->evaluationItems as $id => $title) {
+?>
+        <div class="col-sm-6 form-group">
+            <label class="col-sm-8 control-label" for="evaluation_type">
+                <?= $title ?>
+            </label>
+            <div class="col-sm-4">
+                <div class="input-group">
+                    <input type="number" min="0.00" max="1.00" step="0.05" value="0" class="form-control evaluation-input-items" id="evaluation_item_<?= $id ?>">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default skip-button" type="button" data-status="1">Skip</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+<?php
+        }
+    }
+?>
+    </div>
+    <div class="col-sm-12 form-group">
+        <div id="score_sum" class="well well-sm col-sm-2 col-xs-12 margin-left-10 pull-right">Average Score: &nbsp
+            <span class="badge pull-right">0</span>
+        </div>
+    </div>
+
+<div class="page-actions container">
+    <div class="row text-right">
+        <a href="javascript:void(0)" class="btn btn-success col-sm-2 col-xs-12 margin-left-10 pull-right" id="save-planned-evaluation"">Evaluate</a>
+        <a href="<?= $userEditUrl ?>#evaluations-tab" class="btn btn-default col-sm-2 col-xs-12 margin-left-10 pull-right">Cancel</a>
+    </div>
+</div>
+
+<?php
+    $this->form()->closeTag($evaluationForm);
+?>
+
+

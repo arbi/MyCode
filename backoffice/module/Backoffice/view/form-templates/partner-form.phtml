@@ -1,0 +1,198 @@
+<?php $form = $this->form; ?>
+<div class="row">
+    <fieldset class="col-sm-6">
+        <legend>
+            General
+        </legend>
+
+        <div class="row form-group">
+            <label for="<?php echo $form->get('partner_name')->getAttribute('id'); ?>" class="control-label col-sm-4">
+                <?php echo $form->get('partner_name')->getLabel(); ?>
+                <?php echo $this->required(); ?>
+            </label>
+            <div class="col-sm-6">
+                <?php echo $this->formInput($form->get('partner_name')); ?>
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <label for="<?php echo $form->get('business_model')->getAttribute('id'); ?>" class="control-label col-sm-4">
+                <?php echo $form->get('business_model')->getLabel(); ?>
+            </label>
+            <div class="col-sm-6">
+                <?php echo $this->formSelect($form->get('business_model')); ?>
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <label for="<?php echo $form->get('contact_name')->getAttribute('id'); ?>" class="control-label col-sm-4">
+                <?php echo $form->get('contact_name')->getLabel(); ?>
+                <?php echo $this->required(); ?>
+            </label>
+            <div class="col-sm-6">
+                <?php echo $this->formInput($form->get('contact_name')); ?>
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <label for="<?php echo $form->get('email')->getAttribute('id'); ?>" class="control-label col-sm-4">
+                <?php echo $form->get('email')->getLabel(); ?>
+                <?php echo $this->required(); ?>
+            </label>
+            <div class="col-sm-6">
+                <?php echo $this->formInput($form->get('email')); ?>
+            </div>
+        </div>
+
+        <?php if ($this->action == 'edit') { ?>
+        <div class="row form-group">
+            <label for="<?php echo $form->get('partner-number')->getAttribute('id'); ?>" class="control-label col-sm-4">
+                <?php echo $form->get('partner-number')->getLabel(); ?>
+            </label>
+            <div class="col-sm-6">
+                <?php echo $this->formInput($form->get('partner-number')); ?>
+            </div>
+        </div>
+        <?php } ?>
+
+        <div class="row form-group">
+            <label for="<?php echo $form->get('mobile')->getAttribute('id'); ?>" class="control-label col-sm-4">
+                <?php echo $form->get('mobile')->getLabel(); ?>
+            </label>
+            <div class="col-sm-6">
+                <div class="input-group">
+                    <span class="input-group-addon"> + </span>
+                    <?php echo $this->formInput($form->get('mobile')); ?>
+                </div>
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <label for="<?php echo $form->get('phone')->getAttribute('id'); ?>" class="control-label col-sm-4">
+                <?php echo $form->get('phone')->getLabel(); ?>
+            </label>
+            <div class="col-sm-6">
+                <div class="input-group">
+                    <span class="input-group-addon"> + </span>
+                    <?php echo $this->formInput($form->get('phone')); ?>
+                </div>
+            </div>
+        </div>
+        <div class="row form-group">
+            <label for="url" class="control-label col-sm-4">
+                URL
+            </label>
+            <div class="col-sm-6">
+                <input type="text" name="url" class="form-control" id="url" disabled="disabled" value="<?= $this->partnerURL?>">
+            </div>
+        </div>
+        <div class="row form-group">
+            <label for="<?= $form->get('show_partner')->getAttribute('id'); ?>" class="control-label col-sm-4">
+                <?= $this->info($form->get('show_partner')->getLabel(), 'Displays the name of the partner near our logo on the Website.'); ?>
+            </label>
+            <div class="col-sm-2">
+                <div class="checkbox">
+                    <?= $this->formCheckbox($form->get('show_partner')); ?>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset class="col-sm-6">
+        <legend>
+            Financial
+        </legend>
+
+        <div class="row form-group">
+            <label for="<?php echo $form->get('account_holder_name')->getAttribute('id'); ?>" class="control-label col-sm-4">
+                <?php echo $form->get('account_holder_name')->getLabel(); ?>
+            </label>
+            <div class="col-sm-6">
+                <?php echo $this->formInput($form->get('account_holder_name')); ?>
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <label for="<?php echo $form->get('bank_bsr')->getAttribute('id'); ?>" class="control-label col-sm-4">
+                <?php echo $form->get('bank_bsr')->getLabel(); ?>
+            </label>
+            <div class="col-sm-6">
+                <?php echo $this->formInput($form->get('bank_bsr')); ?>
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <label for="<?php echo $form->get('bank_account_num')->getAttribute('id'); ?>" class="control-label col-sm-4">
+                <?php echo $form->get('bank_account_num')->getLabel(); ?>
+            </label>
+            <div class="col-sm-6">
+                <?php echo $this->formInput($form->get('bank_account_num')); ?>
+            </div>
+        </div>
+        <div class="row form-group">
+            <label for="<?php echo $form->get('discount_num')->getAttribute('id'); ?>" class="control-label col-sm-4">
+                <?php echo $this->info($form->get('discount_num')->getLabel(), 'Discount number should not exceed 15 percent'); ?>
+            </label>
+            <div class="col-sm-6">
+                <?php echo $this->formInput($form->get('discount_num')); ?>
+            </div>
+        </div>
+        <div class="row form-group">
+            <label for="<?= $form->get('apply_fuzzy_logic')->getAttribute('id'); ?>" class="control-label col-sm-4">
+                <?= $this->info($form->get('apply_fuzzy_logic')->getLabel(), 'Take the price of reservations from the channel.'); ?>
+            </label>
+            <div class="col-sm-2">
+                <div class="checkbox">
+                    <?= $this->formCheckbox($form->get('apply_fuzzy_logic')); ?>
+                </div>
+            </div>
+        </div>
+        <div class="row form-group">
+            <label for="<?= $form->get('is_deducted_commission')->getAttribute('id'); ?>" class="control-label col-sm-4">
+                <?= $this->info($form->get('is_deducted_commission')->getLabel(), 'if checkbox is checked then commission will be excluded from price on charges.'); ?>
+            </label>
+            <div class="col-sm-2">
+                <div class="checkbox">
+                    <?= $this->formCheckbox($form->get('is_deducted_commission')); ?>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset class="col-sm-6">
+        <legend>
+            Technical
+        </legend>
+        <div class="row form-group">
+            <label for="<?php echo $form->get('cubilis_id')->getAttribute('id'); ?>" class="control-label col-sm-4">
+                <?php echo $form->get('cubilis_id')->getLabel(); ?>
+            </label>
+            <div class="col-sm-6">
+                <?php echo $this->formInput($form->get('cubilis_id')); ?>
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <label for="<?= $form->get('is_ota')->getAttribute('id'); ?>" class="control-label col-sm-4">
+                <?= $this->info($form->get('is_ota')->getLabel(), 'This option will be turned on by development whenever we have the ability to check this partner\'s website for our apartments'); ?>
+            </label>
+            <div class="col-sm-2">
+                <div class="checkbox">
+                    <?= $this->formCheckbox($form->get('is_ota')); ?>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset class="col-sm-12">
+        <div class="row form-group">
+            <label for="<?php echo $form->get('notes')->getAttribute('id'); ?>" class="control-label col-sm-2">
+                <?php echo $form->get('notes')->getLabel(); ?>
+            </label>
+            <div class="col-sm-10">
+                <?php echo $this->formTextarea($form->get('notes')); ?>
+            </div>
+        </div>
+    </fieldset>
+</div>
+

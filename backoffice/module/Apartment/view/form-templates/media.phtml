@@ -1,0 +1,59 @@
+<?php
+
+$form = $this->form;
+$form->prepare();
+
+?>
+
+<?= $this->form()->openTag($form)?>
+
+<div class="col-sm-12">
+    <fieldset>
+        <legend>Links</legend>
+    </fieldset>
+    <div class="row">
+        <div class="col-sm-8 float-left">
+            <div class="form-group">
+                <label class="control-label col-xs-6 col-sm-4" for="<?= $form->get('video')->getAttribute('id') ?>">
+                    <?= $form->get('video')->getLabel() ?>
+                </label>
+                <div class="col-xs-6 col-sm-8">
+                    <?= $this->formInput($form->get('video'))?>
+                </div>
+            </div>
+        </div>
+        <?php if (!empty($this->formData['video'])) { ?>
+            <a href="<?php echo $this->formData['video']; ?>" class="pull-left btn btn-sm btn-info" target="_blank">
+                View <span class="glyphicon glyphicon-share"></span>
+            </a>
+        <?php } ?>
+    </div>
+    <div class="row">
+        <div class="col-sm-8 float-left">
+            <div class="form-group">
+                <label class="control-label col-xs-6 col-sm-4" for="<?= $form->get('key_entry_video')->getAttribute('id') ?>">
+                    <?= $form->get('key_entry_video')->getLabel() ?>
+                </label>
+                <div class="col-xs-6 col-sm-8">
+                    <?= $this->formInput($form->get('key_entry_video'))?>
+                </div>
+            </div>
+        </div>
+        <?php if (!empty($this->formData['key_entry_video'])) { ?>
+            <a href="<?php echo $this->formData['key_entry_video']; ?>" class="pull-left btn btn-sm btn-info" target="_blank">
+                View <span class="glyphicon glyphicon-share"></span>
+            </a>
+        <?php } ?>
+    </div>
+</div>
+
+<div class="page-actions container">
+    <div class="row text-right">
+        <?php if ($this->hasImages) { ?><a type="button" id="downloadAllImages" class="btn btn-info pull-left margin-left-10 col-sm-2 col-xs-12" href="media/download-all-images">Download All Images</a><?php } ?>
+        <button id="deleteImages" class="btn btn-danger pull-left margin-left-10 col-sm-2 col-xs-12">Delete Selected Images</button>
+        <div id="selectAll" class="btn btn-info pull-left margin-left-10 col-sm-2 col-xs-12">Select All</div>
+        <?= $this->formInput($form->get('save_button')) ?>
+    </div>
+</div>
+
+<?= $this->form()->closeTag() ?>

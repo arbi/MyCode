@@ -1,0 +1,31 @@
+<?php
+/**
+ * @var \DDD\Domain\User\Schedule\Schedule | null $data
+ */
+$data = $this->data;
+?>
+<div class="col-lg-3 schedule-item-container">
+    <div class="schedule-item">
+        <div class="row">
+            <div class="text-left col-xs-12 day-text">
+                Day <?= $data ? $data->getDay() : $this->day ?>
+            </div>
+            <div class="schedule-day-toggler-container">
+                <input type="checkbox" class="schedule-day-toggler" <?= !$data || $data->isActive() ? 'checked' : '' ?>>
+            </div>
+        </div>
+        <div class="schedule-item-disable-layer<?= !$data || $data->isActive() ? ' soft-hide' : '' ?>"></div>
+        <div class="time-intervals">
+            <?= $this->partial('backoffice-user/user-schedule/partial/time-interval', [
+                'data' => $data
+            ]); ?>
+        </div>
+        <div class="row<?= ($data && $data->getTimeFrom2()) ? ' soft-hide' : '' ?>">
+            <div class="col-xs-12">
+                <button class="btn btn-primary btn-sm btn-block add-time-interval-btn">
+                    Add Interval
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,352 @@
+<?php
+use Library\Constants\Constants;
+$this->layout()->viewTitle = $pageTitle = ($this->documentId > 0 ? 'Edit ' : 'Add ') . 'Document';
+
+
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($pageTitle);
+
+$this->InlineScript()
+     ->appendFile( $this->basePath() . '/js/plugins/jquery.form.min.js' )
+     ->appendFile($this->basePath() . '/js/module/document/edit.js')
+     ->appendFile($this->basePath() . '/js/validation/document.js');
+
+$this->layout()->breadcrumb = $this->breadcrumb([
+    ['Apartments'],
+    ['Document Management', $this->url('documents')],
+    [$pageTitle]
+]);
+
+$form = $this->docForm;
+$form->prepare();
+
+$deleteDocumentURL = $this->url( 'documents/delete', ['id'=>$this->documentId] );
+$deleteAttachmentURL = $this->url( 'documents/delete-attachment', ['id'=>$this->documentId]);
+
+/** @var \DDD\Domain\Document\Document $documentData */
+$documentData = $this->documentData;
+
+if ($this->entityId) {
+    $selectedEntity = '{type: ' . $this->entityType .
+        ', id: ' . $this->entityId .
+        ', text: "' . $this->entityName . '"}';
+} else if ($documentData) {
+    $selectedEntity = '{type: ' . $documentData->getEntityType() .
+        ', id: ' . $documentData->getEntityId() .
+        ', text: "' . $documentData->getEntityName() . '"}';
+} else {
+    $selectedEntity = 'false';
+}
+?>
+<script src="<?= $this->basePath() ?>/js/vendor/tinymce/tinymce.min.js" type="text/javascript"></script>
+<script>
+    var ENTITY_TYPE_APARTMENT       = 1;
+    var ENTITY_TYPE_APARTMENT_GROUP = 2;
+    var GET_ENTITY_LIST_URL = '<?= $this->url( 'documents/get-entity-list') ?>';
+    var selectedEntity = <?= $selectedEntity ?>;
+    $(function() {
+        tinymce.init({
+            selector: ".tinymce",
+            skin: "clean",
+            plugins: [
+                "code", "autoresize", "link"
+            ],
+            menu : {},
+            browser_spellcheck : true,
+            toolbar: "undo redo | styleselect | bold italic underline |  aligncenter alignjustify alignleft alignright | bullist numlist outdent indent | link | print | fontsizeselect | code | removeformat",
+            autoresize_min_height:280,
+            extended_valid_elements : "i[*]",
+            verify_html : false
+        });
+        <?php if($this->viewOnly) { ?>
+        $("#document-form").find("input, select, button").each(function(index) {
+            $(this).prop("disabled", true);
+        });
+        <?php } ?>
+    });
+</script>
+<?php if($this->creatorFullName != '') :?>
+
+<?php endif; ?>
+
+<?= $this->form()->openTag($form) ?>
+    <div class="row">
+        <div class="col-sm-12">
+            <fieldset>
+                <legend>
+                    General
+                </legend>
+            </fieldset>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="entity_id">
+                            <?= $form->get('entity_id')->getLabel() ?>
+                            <?= $this->required(); ?>
+                        </label>
+                        <div class="col-sm-6">
+                            <?= $this->formSelect($form->get('entity_id')) ?>
+                            <?= $this->formhidden($form->get('entity_type')) ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="category">
+                            <?= $form->get('category')->getLabel() ?>
+                        </label>
+                        <div class="col-sm-6">
+                            <?= $this->formElement($form->get('category')) ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="security_level">
+                            <?= $form->get('security_level')->getLabel() ?>
+                            <?= $this->required() ?>
+                        </label>
+                        <div class="col-sm-6">
+                            <?= $this->formSelect($form->get('security_level')) ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="supplier_id">
+                            <?= $form->get('supplier_id')->getLabel() ?>
+                        </label>
+                        <div class="col-sm-6">
+                            <?= $this->formSelect($form->get('supplier_id')) ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="url">
+                            <?= $form->get('url')->getLabel() ?>
+                        </label>
+                        <div class="col-sm-6">
+                            <?= $this->formUrl($form->get('url')) ?>
+                        </div>
+                        <div class="col-sm-3">
+                            <?php if ($this->documentId > 0 && $form->get('url')->getValue() != '') { ?>
+                                <a href="<?php echo $form->get('url')->getValue(); ?>" target="_blank" class="btn btn-small btn-info">
+                                    <span class="glyphicon glyphicon-eye-open"></span> Open
+                                </a>
+                            <?php } ?>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="valid_from">
+                            <?= $form->get('valid_from')->getLabel() ?>
+
+                        </label>
+                        <div class="col-sm-6">
+                            <?= $this->formElement($form->get('valid_from')) ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="valid_to">
+                            <?= $form->get('valid_to')->getLabel() ?>
+
+                        </label>
+                        <div class="col-sm-6">
+                            <?= $this->formElement($form->get('valid_to')) ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="<?= $form->get('is_frontier')->getAttribute('id') ?>">
+                            <?= $form->get('is_frontier')->getLabel() ?>
+                        </label>
+                        <div class="col-sm-6 checkbox">
+                            <?= $this->formCheckbox($form->get('is_frontier')) ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="username">
+                            <?= $form->get('username')->getLabel() ?>
+                        </label>
+                        <div class="col-sm-6">
+                            <?=$this->formInput($form->get('username'))?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="password">
+                            <?= $form->get('password')->getLabel() ?>
+                        </label>
+                        <div class="col-sm-6">
+                            <?= $this->formInput($form->get('password')) ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="account_number">
+                            <?= $form->get('account_number')->getLabel() ?>
+                        </label>
+                        <div class="col-sm-6">
+                            <?= $this->formInput($form->get('account_number')) ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="account_holder">
+                            <?= $form->get('account_holder')->getLabel() ?>
+                        </label>
+                        <div class="col-sm-6">
+                            <?= $this->formInput($form->get('account_holder')) ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="signatory_id">
+                            <?= $form->get('signatory_id')->getLabel() ?>
+
+                        </label>
+                        <div class="col-sm-6">
+                            <?= $this->formSelect($form->get('signatory_id')) ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="legal_entity_id">
+                            <?= $form->get('legal_entity_id')->getLabel() ?>
+
+                        </label>
+                        <div class="col-sm-6">
+                            <?= $this->formSelect($form->get('legal_entity_id')) ?>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+
+                    <?php if ($this->documentData && !empty($this->documentData->getCreatedBy())) { ?>
+                        <div class="form-group">
+                            <label class="control-label col-sm-3" for="last-saver">
+                                <?= $this->info('Creator', 'Person who has created this document'); ?>
+                            </label>
+
+                            <div class="col-sm-6 checkbox">
+                                <?php
+                                echo '<a href="'
+                                    . $this->url('profile', ['controller' => 'profile', 'action' => 'index', 'id' => $this->documentData->getCreatedBy()])
+                                    . '" target="new">'
+                                    . $this->documentData->getCreatorFullName()
+                                    . '</a>';
+                                ?>
+                                <i>at</i>
+                                <?php echo date(Constants::GLOBAL_DATE_FORMAT . ' H:i', strtotime($this->documentData->getCreatedDate())); ?>
+                            </div>
+                        </div>
+                    <?php } ?>
+
+                    <?php if ($this->documentData && !empty($this->documentData->getLastEditedBy())) { ?>
+                        <div class="form-group">
+                            <label class="control-label col-sm-3" for="last-saver">
+                                <?= $this->info('Last Saver', 'Last person who has saved the document'); ?>
+                            </label>
+
+                            <div class="col-sm-6 checkbox">
+                                <?php
+                                echo '<a href="'
+                                    . $this->url('profile', ['controller' => 'profile', 'action' => 'index', 'id' => $this->documentData->getLastEditedBy()])
+                                    . '" target="new">'
+                                    . $this->documentData->getLastEditorFullName()
+                                    . '</a>';
+                                ?>
+                                <i>at</i>
+                                <?php echo date(Constants::GLOBAL_DATE_FORMAT . ' H:i', strtotime($this->documentData->getLastEditedDate())); ?>
+                            </div>
+                        </div>
+                    <?php } ?>
+                </div>
+            </div>
+            <fieldset>
+                <legend>
+                    <?= $form->get('description')->getLabel() ?>
+                </legend>
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <?= $this->formElement($form->get('description')) ?>
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>
+                    <?= $form->get('attachment_doc')->getLabel() ?>
+                </legend>
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <?= $this->formElement($form->get('attachment_doc')) ?>
+                        <input type="hidden" name="validAttachment" id="validAttachment" value="0" />
+                    </div>
+                </div>
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class='well well-sm margin-1 pull-left file-name soft-hide text-muted'></div>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+    <div class="page-actions container">
+        <div class="row text-right">
+            <?php
+            echo $this->formButton($form->get('save_button'));
+            if($this->documentId) {
+                echo $this->formButton($form->get('delete_button'));
+            }
+            if ($form->has('download')) {
+                $downladButton = $form->get('download');
+
+                echo '<div class="btn-group">';
+                echo $this->formButton($form->get('download'));
+                echo '<button type="button" name="remove_attachment" id="remove-attachment" data-toggle="modal" data-target="#delete-attachment-modal"  class="btn btn-info pull-left state hidden-file-input"><span class="' . $downladButton->getOption('remove-icon') . '"></span></button>';
+                echo '</div>';
+            }
+
+            ?>
+        </div>
+    </div>
+<?php
+echo $this->formInput($form->get('edit_id'));
+?>
+<?= $this->form()->closeTag() ?>
+    <!-- Delete modal -->
+    <div id="delete-modal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-danger">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Delete Document <span id="delete_group"></span></h4>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                    <a class="btn btn-danger" id="confirm_delete_button" href="<?= $deleteDocumentURL ?>">Delete</a>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php if ($form->has('download')) { ?>
+    <!-- Delete modal -->
+    <div id="delete-attachment-modal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-danger">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Delete Attachment</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                    <a class="btn btn-danger" id="confirm_attachment_delete_button" href="<?= $deleteAttachmentURL ?>">Delete</a>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php } ?>

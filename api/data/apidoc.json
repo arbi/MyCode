@@ -1,0 +1,25 @@
+{
+  "name": "Ginosi",
+  "version": "1.0.0",
+  "description": "Ginosi Frontier API Documentation",
+  "order": [
+      "Authentication",
+      "Authorization",
+      "Login",
+      "Logout",
+      "RefreshToken",
+      "Error",
+      "Config",
+      "Asset",
+      "NewAsset",
+      "UpdateAsset",
+      "AssetList",
+      "AssetDetails",
+      "AssetHistories",
+      "Incident",
+      "Attachments",
+      "Category",
+      "Location",
+      "User"
+  ]
+}

@@ -1,0 +1,129 @@
+<?php
+use Library\Constants\DomainConstants;
+use Library\Utility\Helper;
+
+$this->headTitle('Add '.$this->textline(1325))->setSeparator(' - ');
+
+$this->inlineScript()
+    ->appendFile($this->basePath() . '/js/vendor/jquery.validate.min.js')
+    ->appendFile($this->basePath() . '/js/vendor/jquery.barrating.min.js')
+    ->appendFile($this->basePath() . '/js/review.js');
+
+$this->headMeta()
+    ->appendName('robots', 'noindex');
+
+$dateFrom = new \DateTime($this->reviewData->getDateFrom().' '.$this->reviewData->getCheckInTime());
+$dateTo = new \DateTime($this->reviewData->getDateTo().' '.$this->reviewData->getCheckOutTime());
+$totalNight = $dateFrom->diff($dateTo);
+
+$accImage = str_replace('_orig', '_445', $this->reviewData->getImage());
+?>
+<script>
+    var thankYouUrl = '<?php echo $this->thankYouUrl; ?>';
+</script>
+
+<div class="col-md-7 col-lg-8">
+	<div class="row">
+       <div class="col-sm-8">
+           <h1 class="margin-top-0"><?= $this->textline(1312) ?></h1>
+            <h3 class="margin-top-0"><?= $this->reviewData->getApartmentName() ?></h3>
+            <p>
+                <?php echo
+                $this->reviewData->getAccAddress().', '.
+                $this->cityname($this->reviewData->getApartmentCityId()).', '.
+                $this->reviewData->getAccPostalCode().', '.
+                $this->countryname($this->reviewData->getApartmentCountryId())
+            ;?>
+            </p>
+            <p><i class="glyphicon glyphicon-log-in"></i> <?php echo $this->textline(1313); ?>: <?php echo $dateFrom->format('d M Y - h:i A');?></p>
+            <p><i class="glyphicon glyphicon-log-out"></i> <?php echo $this->textline(1314); ?>: <?php echo $dateTo->format('d M Y - h:i A');?></p>
+	    </div>
+        <div class="col-sm-4">
+            <span class="thumbnail">
+	            <img alt="" src="<?php echo '/images'.$accImage;?>" class="full-with">
+            </span>
+	    </div>
+
+	</div>
+
+	<div class="row">
+	    <div class="col-sm-12">
+	        <?php echo Helper::evaluateTextline($this->textline(1315),
+                                                    [
+                                                        '{{GUEST_NAME}}' => ucfirst($this->reviewData->getGuestFirstName())
+                                                    ]);?>
+		    <?php
+	            $this->form->setAttribute('action', '/add-review/ajax-save-review');
+
+	            echo $this->form()->openTag($this->form);
+
+	            $this->form->get('like')->setOptions(['label' => $this->textline(1316)]);
+	            $this->form->get('suggestions')->setOptions(['label' => $this->textline(1317)]);
+	            $this->form->get('submit')->setOptions(['label' => $this->textline(1318)]);
+	            $this->form->get('review-hash')->setAttributes(['value' => $this->reviewHash]);
+
+	            $answers[1327] = $this->textline(1327);
+	            echo $this->formElement($this->form->get('review-hash'));
+
+		    ?>
+		    <?php $this->form->get('like')->setAttribute('placeholder', $this->form->get('like')->getlabel()); ?>
+
+		    <div class="form-group">
+		        <?php echo $this->formElement($this->form->get('like')); ?>
+	        </div>
+
+		    <?php $this->form->get('suggestions')->setAttribute('placeholder', strip_tags($this->form->get('suggestions')->getlabel())); ?>
+
+		    <div class="form-group">
+	            <?php echo $this->formElement($this->form->get('suggestions')); ?>
+            </div>
+
+		    <div class="form-group">
+			    <div class="row">
+				    <div class="col-sm-6">
+	                    <div class="rating">
+                            <h3 class="margin-0"><?=$this->textline(1451)?></h3>
+                            <?php echo $this->formElement($this->form->get('stars')); ?>
+                        </div>
+				    </div>
+				    <div class="col-sm-6 text-right">
+	                    <?php echo $this->formElement($this->form->get('submit')); ?>
+				    </div>
+			    </div>
+            </div>
+
+	        <?php echo $this->form()->closeTag(); ?>
+
+		    <hr>
+	    </div>
+	</div>
+</div>
+
+<div class="col-md-5 col-lg-4 hidden-xs hidden-sm">
+    <h1 class="margin-top-0 text-right"><?php echo $this->textline(1319);?></h1>
+
+	<div class="row pull-right">
+		<div class="col-sm-12 text-center">
+			<ul class="list-inline social-mini hidden-print">
+				<li>
+					<a href="https://www.facebook.com/ginosi" target="_blank" class="bg-primary">
+						<i class="icon-facebook"></i>
+					</a>
+				</li>
+				<li>
+					<a href="https://twitter.com/ginosi" target="_blank" class="bg-primary">
+						<i class="icon-twitter"></i>
+					</a>
+				</li>
+				<li>
+					<a href="https://plus.google.com/+Ginosi" target="_blank" class="bg-primary">
+						<i class="icon-gplus"></i>
+					</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+</div>
+
+
+

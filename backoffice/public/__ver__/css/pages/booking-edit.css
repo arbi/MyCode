@@ -1,0 +1,479 @@
+#datatable_history td:last-child {
+    text-align: center;
+}
+
+.chargedView {
+    cursor: pointer;
+}
+
+.deleted {
+    text-decoration: line-through;
+}
+
+.table-charge-details {
+    margin-bottom: 5px;
+}
+
+.table-charge-details td {
+    border-left: none;
+    font-size: 13px;
+}
+
+.table-charge-details td.title {
+    font-weight: bold;
+    color: #008bb9;
+}
+
+.sub-details, .sub-details td, .sub-details tr {
+    background: #f8f8f8
+}
+
+.border-bottom{
+    border-bottom: 1px solid #ddd;
+}
+
+.ticketButtons a, .ticketButtons button,.ticketButtons .btn-group { width: 100%; }
+@media (min-width: 766px) {
+    .ticketButtons a, .ticketButtons button, .ticketButtons .btn-group { width: auto;}
+}
+
+.table-transaction-details {
+    margin-bottom: 0 !important;
+}
+
+.table-transaction-details td {
+    border-left: none;
+    font-size: 12px;
+}
+
+.table-transaction-details td.title {
+    font-weight: bold;
+    color: #008bb9;
+}
+
+/**
+ * Credit Cards
+ */
+.credit-card {
+	background: url(../../img/cc-background.png) center center no-repeat;
+	width: 321px;
+	height: 199px;
+}
+.credit-card-list li {
+	position: relative;
+	border: 1px solid #42a3b1;
+	border-radius: 5px;
+	padding: 3px;
+	margin: 5px 0;
+	cursor: default;
+	background: #5ae2f4;
+	background: -moz-linear-gradient(left,  #5ae2f4 0%, #7db9e8 100%);
+	background: -webkit-gradient(linear, left top, right top, color-stop(0%,#5ae2f4), color-stop(100%,#7db9e8));
+	background: -webkit-linear-gradient(left,  #5ae2f4 0%,#7db9e8 100%);
+	background: -o-linear-gradient(left,  #5ae2f4 0%,#7db9e8 100%);
+	background: -ms-linear-gradient(left,  #5ae2f4 0%,#7db9e8 100%);
+	background: linear-gradient(to right,  #5ae2f4 0%,#7db9e8 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#5ae2f4', endColorstr='#7db9e8',GradientType=1 );
+
+	opacity: .5;
+}
+.credit-card-list li.default .ribbon {
+	visibility: visible;
+	opacity: 1;
+}
+.credit-card-list li.active {
+	color: #193742;
+	background: #5ae2f4;
+	background: -moz-linear-gradient(left,  #5ae2f4 0%, #7db9e8 100%);
+	background: -webkit-gradient(linear, left top, right top, color-stop(0%,#5ae2f4), color-stop(100%,#7db9e8));
+	background: -webkit-linear-gradient(left,  #5ae2f4 0%,#7db9e8 100%);
+	background: -o-linear-gradient(left,  #5ae2f4 0%,#7db9e8 100%);
+	background: -ms-linear-gradient(left,  #5ae2f4 0%,#7db9e8 100%);
+	background: linear-gradient(to right,  #5ae2f4 0%,#7db9e8 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#5ae2f4', endColorstr='#7db9e8',GradientType=1 );
+	opacity: 1;
+}
+.credit-card-list li:not(.active) img {
+	-webkit-filter: grayscale(100%);
+	-moz-filter: grayscale(100%);
+	filter: grayscale(100%);
+}
+.credit-card-list li:not(.active) .card-type {
+	opacity: .7;
+}
+.credit-card-list li:not(.active) .card-display-name,
+.credit-card-list li:not(.active) .received {
+	color: #555;
+}
+
+.credit-card-list .fraud-cc {
+	border-color: #000;
+    color: #fff;
+    background: #000; /* Old browsers */
+    background: -moz-linear-gradient(top,  #969494 0%, #636363 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#969494), color-stop(100%,#636363));
+    background: -webkit-linear-gradient(top,  #969494 0%,#636363 100%);
+    background: -o-linear-gradient(top,  #969494 0%,#636363 100%);
+    background: -ms-linear-gradient(top,  #969494 0%,#636363 100%);
+    background: linear-gradient(to bottom,  #969494 0%,#636363 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#969494', endColorstr='#636363',GradientType=0 );
+}
+
+.credit-card-list .fraud-cc.active {
+    color: #fff;
+    background: #5b5b5b; /* Old browsers */
+    background: -moz-linear-gradient(top,  #5b5b5b 0%, #444444 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#5b5b5b), color-stop(100%,#444444));
+    background: -webkit-linear-gradient(top,  #5b5b5b 0%,#444444 100%);
+    background: -o-linear-gradient(top,  #5b5b5b 0%,#444444 100%);
+    background: -ms-linear-gradient(top,  #5b5b5b 0%,#444444 100%);
+    background: linear-gradient(to bottom,  #5b5b5b 0%,#444444 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#5b5b5b', endColorstr='#444444',GradientType=0 );
+}
+
+.credit-card-list .fraud-cc .card-display-name,
+.credit-card-list .fraud-cc .received {
+    color: #fff !important;
+}
+
+.credit-card-list .tooltip,
+.credit-card .tooltip {
+	min-width: 5px;
+}
+.card-type {
+	width: 64px;
+}
+.card-type img {
+	width: 100%;
+}
+.card-type,
+.card-display-name,
+.received {
+	float: left;
+}
+.card-display-name {
+	font-size: 130%;
+	min-width: 130px;
+	max-width: 218px;
+	margin-left: 5px;
+	margin-top: -2px;
+}
+.received {
+	font-size: 80%;
+	margin-left: 5px;
+	margin-top: -4px;
+	padding-right: 110px;
+}
+.is-partner {
+	position: absolute;
+	right: 57px;
+	top: 12px;
+	text-shadow: -1px 1px 1px #fff;
+	cursor: default;
+}
+.status {
+	width: 8px;
+	height: 8px;
+	position: absolute;
+	right: 37px;
+	top: 18px;
+	border-radius: 50%;
+	background-color: #957928;
+}
+.transaction-status {
+	position: absolute;
+	right: 12px;
+	top: 13px;
+	color: #957928;
+}
+.status:hover {
+	transform: scale(1.5);
+}
+.status-approved {
+	background-color: #088013;
+}
+.transaction-status-approved {
+	color: #088013;
+}
+.status-declined {
+	background-color: #80001c;
+}
+.transaction-status-declined {
+	color: #80001c;
+}
+.card-header {
+	width: 100%;
+	height: 50px;
+	position: relative;
+}
+.card-body {
+	width: 100%;
+	height: 100px;
+	position: relative;
+}
+.card-footer {
+	width: 100%;
+	height: 50px;
+	position: relative;
+}
+.card-header .card-display-name {
+	font-size: 120%;
+	min-width: 0;
+	max-width: 150px;
+	float: left;
+	margin: 10px 0 0 16px;
+}
+.card-header .status-control {
+	float: right;
+	margin: 10px 32px 0 0;
+	max-height: 28px;
+	padding: 3px 1px;
+	font-size: 90%;
+}
+.card-header .status-control .ellipsis {
+	padding-right: 5px;
+	max-width: 80px;
+	float: left;
+}
+.card-header .status {
+	right: 13px;
+	top: 20px
+}
+.card-body .card-number {
+	font-family: 'Share Tech Mono';
+	font-size: 191%;
+	padding: 16px 0 0 18px;
+}
+.card-body .card-cvc {
+	font-family: 'Share Tech Mono';
+	position: absolute;
+	right: 21px;
+	bottom: 10px;
+}
+.card-body .card-exp {
+	font-family: 'Share Tech Mono';
+	position: absolute;
+	left: 21px;
+	bottom: 10px;
+	display: none;
+}
+.card-footer .card-type {
+	float: right;
+	margin-right: 12px;
+}
+.card-footer .card-holder-name {
+	font-family: 'Share Tech Mono';
+	float: left;
+	margin: 12px 0 0 10px;
+	text-transform: uppercase;
+	font-size: 110%;
+	max-width: 230px;
+}
+.card-footer .card-holder-name:before {
+	content: "Holder Name";
+	position: absolute;
+	top: -4px;
+	text-transform: none;
+	font-size: 74%;
+	color: #999;
+}
+.request-details {
+	margin: 10px;
+}
+.ribbon-container {
+	overflow: hidden;
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 33px;
+	height: 33px;
+}
+.ribbon {
+	background-color: #3b8cd1;
+	overflow: hidden;
+	white-space: nowrap;
+	position: absolute;
+	left: -54px;
+	top: -15px;
+	-webkit-transform: rotate(-45deg);
+	-moz-transform: rotate(-45deg);
+	-ms-transform: rotate(-45deg);
+	-o-transform: rotate(-45deg);
+	transform: rotate(-45deg);
+	-webkit-box-shadow: 0 0 10px #000;
+	-moz-box-shadow: 0 0 10px #000;
+	box-shadow: 0 0 10px #000;
+	z-index: 1;
+	visibility: hidden;
+	opacity: 0;
+}
+.ribbon a {
+	color: #fff;
+	display: block;
+	font: bold 81.25% 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	margin: 1px 0;
+	padding: 20px 50px 0;
+	text-align: center;
+	text-decoration: none;
+}
+.credit-card-list li.default .ribbon a,
+.ribbon a:hover {
+	text-decoration: none;
+	text-shadow: 1px 0 0 rgba(0,0,0,.8);
+	color: #fff;
+}
+.transition {
+	-webkit-transition: all .2s ease-out;
+	-moz-transition: all .2s ease-out;
+	-o-transition: all .2s ease-out;
+	transition: all .2s ease-out;
+}
+.ellipsis {
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+#round-buttons {
+    right: 15px;
+    top: 5px;
+    position: absolute;
+    z-index: 500;
+}
+
+#round-buttons .btn {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    padding: 6px 9px !important;
+    border-radius: 50% !important;
+    outline: none !important;
+}
+
+.receipt-body p {
+     margin-bottom: 5px;
+}
+.receipt-modal .modal-body { padding-top: 7px;}
+.receipt-modal .receipt-title { font-size: 30px;}
+.receipt-modal .modal-header { border: none; padding-bottom: 0; padding-bottom: 20px;}
+.receipt-modal .modal-footer { border: none;}
+.receipt-border {margin: 4px 0 8px 0; border: 1px solid #e5e5e5}
+
+.bg-void {
+    background: #e5e5e5;
+}
+
+.attachmentFileName {
+    margin: 5px auto;
+}
+
+.attachmentFileName .btn:hover {
+    color: #F00;
+}
+
+div.modal-body img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+div.modal-content.delete {
+    max-width: 600px;
+    max-height: 183px;
+}
+
+a.image-resize img {
+    border : 1px solid #000;
+    margin: 1px;
+}
+
+.date-closed {
+    background: #efc2bf !important;
+    border-radius: 0 !important;
+    color: #333333 !important;
+}
+
+.date-open {
+    background: #9aed9a !important;
+    border-radius: 0 !important;
+    color: #333333 !important;
+}
+
+.date-used {
+    border: 2px solid #0075b0 !important;
+}
+
+.date-closed:hover, .date-open:hover, .date-used:hover {
+    background: #999999 0 !important;
+    border-radius: 0 !important;
+    color: #333333 !important;
+}
+
+.charges-tbl, .transactions-tbl {
+    font-size: 13px;
+}
+div#new_attachment_part {
+    visibility: visible !important;
+}
+
+.change-datepicker-checkin, .change-datepicker-checkout {
+    width: 130px !important;
+}
+
+#activeChargesTable .charge_valid{
+    width: 120px;
+}
+
+#activeChargesTable .input-group{
+    width: 120px;
+    float: right;
+}
+
+.total-charges-item {
+    background: #ebf2e8;
+}
+
+.totalChargesView {
+    /*cursor: pointer;*/
+    /*font-size: 18px;*/
+}
+
+.reversChargeRow{
+    /*cursor: pointer;*/
+    /*margin-right: 30px;*/
+    /*font-size: 18px;*/
+}
+
+.bg-yellow{
+    background: #fff5d1 !important;
+}
+
+.red-border {
+    border: 2px solid #f00 !important;
+}
+
+.btn-send-frontier {
+    cursor: pointer;
+}
+
+p.ccca-email {
+    margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+    #round-buttons {
+        top: -253px;
+        right: 70px;
+    }
+}
+
+.no-border>tr td{
+	border-top:none!important;
+}
+
+.padding-right-15{
+	padding-right:15px!important;
+}
+
+.padding-left-15{
+	padding-left:15px!important;
+}

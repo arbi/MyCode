@@ -1,0 +1,55 @@
+.selectize-control.single .selectize-input:after {
+    display: none !important;
+}
+
+#cards .table {
+    margin-bottom: 0;
+}
+
+#task-list {
+    list-style-type: none;
+    padding-left: 10px;
+}
+
+.task-label {
+    margin-right: 3px;
+}
+
+.bs-callout+.bs-callout {
+    margin-top: 20px !important;
+}
+
+.collapse-trigger {
+    cursor: pointer;
+}
+
+.card-actions {
+    margin-top: 10px;
+}
+
+.card-actions .btn:not(:last-child) {
+    margin-right:10px;
+}
+
+#reservation-card {
+    position: relative;
+}
+
+.frontier-card-task-list {
+    padding: 8px 6px;
+}
+
+.frontier-card-task-list-hr {
+    border-bottom: 1px solid #EEEEEE;
+}
+
+.frontier-card-task-keyfob-checkbox {
+    float: right;
+    font-size: 1.8em;
+    margin: -4px 0 0 0;
+    color: #337AB7;
+}
+
+.label.pull-right:not(:first-child) {
+    margin-right: 3px;
+}

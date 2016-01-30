@@ -1,0 +1,18 @@
+.balance-container {
+	position: absolute !important;
+	top: -48px;
+	right: 15px;
+}
+
+.balance {
+	z-index: 9;
+	text-shadow: 0 0 5px #fff, 0 0 15px #fff, 0 0 25px #fff, 0 0 35px #FFE, 0 0 45px #fff, 0 0 55px #fff;
+
+	font-size: 200%;
+	color: #ddd;
+	line-height: 100%;
+}
+
+.balance-amount {
+	color: #888;
+}

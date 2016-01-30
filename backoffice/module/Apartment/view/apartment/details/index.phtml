@@ -1,0 +1,35 @@
+<?php
+	$this->headTitle()->setSeparator(' - ');
+
+	$this->headTitle($this->layout()->apartmentName . ' - Apartment Details');
+
+	$this->headLink()->appendStylesheet($this->basePath() . '/css/apartment/common.css');
+
+    $this->InlineScript()
+		->appendFile($this->basePath() . '/js/plugins/jquery.form.min.js')
+		->appendFile($this->basePath() . '/js/pages/apartment.details.js')
+		->appendFile($this->basePath() . '/js/validation/apartment.details.js');
+?>
+
+<style>
+	.checkbox_container .control-group {
+		margin-bottom: 0 !important;
+	}
+</style>
+
+<script>
+    var GET_PARKING_SPOTS_URL = '<?= $this->url('apartment/details/get-parking-spots', ['apartment_id' => $this->apartmentId])?>';
+    var apartmentParkingSpots = <?= json_encode($this->apartmentParkingSpots); ?>;
+    var PARKING_LOT_IS_VIRTUAL = <?php echo ($this->parkingLotIsVirtualStatus) ? 'true' : 'false' ?>;
+</script>
+
+<div class="row">
+    <div class="col-sm-12">
+        <hr>
+        <?= $this->apartmentNavigation($this->apartmentId, $this->apartmentStatus, 'apartment/details')?>
+    </div>
+</div>
+
+<?= $this->formOutput ?>
+
+

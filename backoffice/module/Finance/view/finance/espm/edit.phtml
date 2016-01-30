@@ -1,0 +1,210 @@
+<?php
+use DDD\Service\Finance\Espm;
+
+$current = $this->id ? 'Edit Payment' : 'Add Payment';
+$this->layout()->viewTitle = $current;
+$this->layout()->breadcrumb = $this->breadcrumb([
+	['Finance'],
+	['ESPM Management', $this->url('finance/espm')],
+	[$current]
+]);
+
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($this->layout()->viewTitle);
+
+$this->headLink()
+    ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css');
+
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+    ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+    ->appendFile($this->basePath() . '/js/module/finance/espm.edit.js');
+
+$espmData = $this->espmData;
+?>
+
+<?php if ($this->id) {?>
+<div class="row">
+    <div class="col-sm-12 mobile-text-center">
+        <span class="label label-success margin-right-5"><?= $espmData['currency_code'] ?></span>
+    </div>
+</div><br>
+<?php } ?>
+<ul class="nav nav-tabs tabs-general">
+    <li class="active">
+        <a href="#general" data-toggle="tab" aria-expanded="false" id="general-tab">General</a>
+    </li>
+    <li class="history-tab pull-right">
+        <a href="#history" data-toggle="tab" aria-expanded="false" id="history-tab"><span class="glyphicon glyphicon-list-alt"></span> History</a>
+    </li>
+</ul>
+<div class="tab-content">
+    <div class="tab-pane fade active in" id="general">
+    <?php echo $this->form()->openTag($this->form); ?>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="name" class="col-sm-2 control-label">Amount <?php echo $this->required(); ?></label>
+                <div class="col-sm-3">
+                    <?= $this->formInput($form->get('amount')) ?>
+                </div>
+            </div>
+            <?php if (!$this->id) {?>
+            <div class="form-group">
+                <label for="status" class="col-sm-2 control-label">Currency <?php echo $this->required(); ?></label>
+                <div class="col-sm-3">
+                    <?php echo $this->formSelect($form->get('currency')); ?>
+                </div>
+            </div>
+            <?php } ?>
+            <div class="form-group">
+                <label for="status" class="col-sm-2 control-label">Supplier <?php echo $this->required(); ?></label>
+                <div class="col-sm-3">
+                    <?php echo $this->formSelect($form->get('transaction_account')->setAttributes([
+                        'data-unique-id' => $espmData ? $espmData['transaction_account_id'] : '',
+                        'data-account-id' => $espmData ? $espmData['transaction_unique_account_id'] : '',
+                        'data-account-name' => $espmData ? $espmData['transaction_account_name'] : '',
+                        'data-account-type' => $espmData ? $espmData['transaction_account_type'] : '',
+                    ])); ?>
+
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="status" class="col-sm-2 control-label">Account</label>
+                <div class="col-sm-3">
+                    <?php echo $this->formSelect($form->get('account')->setAttributes([
+                        'data-id' => $espmData ? $espmData['external_account_id'] : ''
+                    ])); ?>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="status" class="col-sm-2 control-label">Type <?php echo $this->required(); ?></label>
+                <div class="col-sm-3">
+                    <?php echo $this->formSelect($form->get('type')); ?>
+                </div>
+            </div>
+            <?php if ($this->id) {?>
+            <div class="form-group">
+                <label for="status" class="col-sm-2 control-label">Status <?php echo $this->required(); ?></label>
+                <div class="col-sm-3">
+                    <?php echo $this->formSelect($form->get('status')); ?>
+                </div>
+            </div>
+            <?php } ?>
+            <div class="form-group">
+                <label for="status" class="col-sm-2 control-label">Action Date <?php echo $this->required(); ?></label>
+                <div class="col-sm-3">
+                    <div class="input-group">
+                        <?php echo $this->formInput($form->get('action_date')); ?>
+                        <label class="input-group-addon" for="interval">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <?php if ($this->id) {?>
+                <div class="form-group">
+                    <label for="status" class="col-sm-2 control-label">Created by</label>
+                    <div class="col-sm-3 checkbox">
+                        <?= $espmData['creator'] . ' ' . $espmData['created_date'] ?>
+                    </div>
+                </div>
+            <?php } ?>
+            <div class="form-group">
+                <label for="description" class="col-sm-2 control-label">Reason</label>
+                <div class="col-sm-5">
+                    <?= $this->formElement($form->get('reason')) ?>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="page-actions container">
+        <div class="row text-right">
+            <?php
+            if (!$this->archived) {
+                echo $this->formInput($form->get('save'));
+            }
+
+            if ($this->isGlobal && $this->id) {
+                 if (!$this->archived) {?>
+                    <a href="#modal_archive" data-toggle="modal" class="btn btn-danger col-sm-2 col-xs-12 margin-left-10 pull-right">Archive</a>
+                <?php } else { ?>
+                    <a href="#modal_unarchive" data-toggle="modal" class="btn btn-success col-sm-2 col-xs-12 margin-left-10 pull-right">Unarchive</a>
+                <?php }
+            } ?>
+        </div>
+    </div>
+    <?=$this->form()->closeTag(); ?>
+    </div>
+
+    <div class="tab-pane fade" id="history">
+        <div class="row" id="history-block">
+            <div class="col-sm-12">
+                <table id="datatable_history" class="table table-bordered table-condensed table-hover">
+                    <thead>
+                    <tr>
+                        <th> Date </th>
+                        <th> Employee </th>
+                        <th> Message </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                <div class="alert alert-success" id="history_clean">
+                    <span class="glyphicon glyphicon-ok-sign" aria-hidden="true"></span>
+                    There are no items to display
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<?php if ($this->id) {?>
+    <div class="modal fade" id="modal_archive" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-danger">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">
+                        Archive <span id="deactivate_group"></span>
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to archive this ESPM?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default" data-dismiss="modal">Close</button>
+                    <a class="btn btn-danger" href="/finance/espm/archive/<?=$this->id?>/<?= Espm::IS_ARCHIVED ?>">Archive</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="modal_unarchive" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-success">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">
+                        Unarchive <span id="deactivate_group"></span>
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to unarchive this ESPM?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default" data-dismiss="modal">Close</button>
+                    <a class="btn btn-success" href="/finance/espm/archive/<?=$this->id?>/<?= Espm::UNARCHIVED ?>">Unarchive</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<?php } ?>
+<script>
+    var DISABLE_ALL_FORM = '<?=$this->archived || !$this->isGlobal ? 'yes' : 'no'; ?>';
+    var ENABLE_STATUS = '<?= !$this->archived && ($this->isGlobal || $this->isPayer) ? 'yes' : 'no'; ?>';
+    var SUPPLIER_URL = '<?= $this->url('finance/purchase-order/get-accounts'); ?>';
+    var GET_SUPPLIER_ACCOUNT = '<?= $this->url('finance/espm/get-supplier-account'); ?>';
+    var isEditMode = <?= $this->id; ?>;
+    var HISTORY_DATA = <?= $this->historyData; ?>;
+</script>

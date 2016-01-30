@@ -1,0 +1,88 @@
+<?php
+use DDD\Service\Task;
+use DDD\Service\User;
+
+$task          = $this->task;
+$permissionSet = $this->permissionSet;
+?>
+<div class="clearfix <?= $this->visibility ?>"></div>
+<hr class=" <?= $this->visibility ?>">
+<footer class="<?= $this->visibility ?>">
+    <div class="pull-left">
+        <?php if ($task['task_status'] < Task::STATUS_DONE) { ?>
+            <?php if (isset($permissionSet[Task::ACTION_CHANGE_STATUS])) { ?>
+                <button type="button"
+                        class="btn btn-success btn-status-change"
+                        data-status="<?= Task::STATUS_DONE ?>"
+                        data-status-class="<?= Task::getTaskStatusLabelClass(Task::STATUS_DONE) ?>"
+                        data-status-text="<?= Task::getTaskStatus()[Task::STATUS_DONE] ?>"
+                    >
+                    Mark Done
+                </button>
+            <?php } ?>
+        <?php } ?>
+        <?php if ($task['task_status'] <= Task::STATUS_DONE) { ?>
+            <?php if (
+                $task['verifier_id'] != User::AUTO_VERIFY_USER_ID
+                && isset($permissionSet[Task::ACTION_CHANGE_STATUS])
+                && $permissionSet[Task::ACTION_CHANGE_STATUS] == 1
+            ) { ?>
+                <button type="button"
+                        class="btn btn-success btn-status-change"
+                        data-status="<?= Task::STATUS_VERIFIED ?>"
+                        data-status-class="<?= Task::getTaskStatusLabelClass(Task::STATUS_VERIFIED) ?>"
+                        data-status-text="<?= Task::getTaskStatus()[Task::STATUS_VERIFIED] ?>"
+                    >
+                    Mark Verified
+                </button>
+            <?php } ?>
+
+            <?php if (
+                isset($permissionSet[Task::ACTION_CHANGE_STATUS])
+                && $permissionSet[Task::ACTION_CHANGE_STATUS] == 1
+            ) { ?>
+                <button type="button"
+                        class="btn btn-default btn-status-change"
+                        data-status="<?= Task::STATUS_CANCEL ?>"
+                        data-status-class="<?= Task::getTaskStatusLabelClass(Task::STATUS_CANCEL) ?>"
+                        data-status-text="<?= Task::getTaskStatus()[Task::STATUS_CANCEL] ?>"
+                    >
+                    Mark Canceled
+                </button>
+            <?php } ?>
+        <?php } ?>
+    </div>
+    <div class="btn-group pull-right">
+        <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown" data-loading-text="Saving...">
+            Report Incident <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu incident-report-buttons">
+            <li>
+                <a data-type="<?= Task::INCIDENT_REPORT_SMOKING ?>">
+                    There was an evidence of smoking
+                </a>
+            </li>
+            <li>
+                <a data-type="<?= Task::INCIDENT_REPORT_KEYS ?>">
+                    The keys were not returned
+                </a>
+            </li>
+            <li>
+                <a data-type="<?= Task::INCIDENT_REPORT_DIRTY ?>">
+                    The house was left in a unusually dirty condition
+                </a>
+            </li>
+            <li>
+                <a data-type="<?= Task::INCIDENT_REPORT_BROKEN ?>">
+                    There was a broken furniture
+                </a>
+            </li>
+            <li class="divider">
+            <li>
+                <a data-type="<?= Task::INCIDENT_REPORT_OTHER ?>" class="report-btn-other">
+                    Other Incident
+                </a>
+            </li>
+        </ul>
+    </div>
+</footer>

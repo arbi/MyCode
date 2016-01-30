@@ -1,0 +1,72 @@
+<script type="text/javascript">
+	var GENERATE_SITEMAP_URL = '<?= $this->url('backoffice/default', array('controller' => 'system', 'action' => 'generate-sitemap'))?>';
+	var CREATE_NEW_DATABASE_URL = '<?= $this->url('backoffice/default', array('controller' => 'system', 'action' => 'create-new-database'))?>';
+	var DOWNLOAD_DATABASE_BACKUP_URL = '<?= $this->url('backoffice/default', array('controller' => 'system', 'action' => 'download-database-backup'))?>';
+	var DELETE_DATABASE_BACKUP_URL = '<?= $this->url('backoffice/default', array('controller' => 'system', 'action' => 'delete-database-backup'))?>';
+    var filesAaData = <?= $filesAaData ?>;
+</script>
+<?php
+
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle('System Configuration');
+
+$this->layout()->viewTitle  = 'System Configuration';
+
+$this->layout()->breadcrumb = $this->breadcrumb([
+    ['Administration'],
+    [$this->layout()->viewTitle]
+]);
+
+$this->headLink()
+    ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css');
+
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+    ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+    ->appendFile($this->basePath() . '/js/pages/system.module.js');
+
+$environment =  getenv('APPLICATION_ENV');
+?>
+<div class="row">
+    <div class="col-sm-6">
+        <fieldset name="website">
+            <legend>Website</legend>
+            <div class="form-group">
+                <span class="col-sm-12">
+                    <button class="btn btn-block btn-primary" id="generate_sitemap"><span class="glyphicon glyphicon-refresh"></span> Generate Sitemap</button>
+                </span>
+            </div>
+        </fieldset>
+        <?php if($this->hasDevelopmentTesingRole && $environment !== 'production') { ?>
+            <fieldset name="test-results" class="margin-top-20">
+                <legend>Last Test Results</legend>
+                <div class="form-group">
+                <span class="col-sm-12">
+                    <a class="btn btn-block btn-primary" target="_blank" href="/test-results"><span class="glyphicon glyphicon-share-alt"></span> See last test results</a>
+                </span>
+                </div>
+            </fieldset>
+        <?php } ?>
+
+    </div>
+    <div class="col-sm-6">
+        <fieldset name="general">
+            <legend>MySQL Database</legend>
+            <div class="form-group">
+                <span class="col-sm-12 margin-bottom-10">
+                    <button class="btn btn-block btn-primary" id="create-new-database" data-loading-text="Creating..."><span class="glyphicon glyphicon-compressed"></span> Create New Safe Database</button>
+                </span>
+                <table id="dbDatatable" class="table table-striped table-bordered table-condensed table-hover">
+                    <thead>
+                    <tr>
+                        <th> File (Download) </th>
+                        <th> &nbsp; </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </fieldset>
+    </div>
+</div>

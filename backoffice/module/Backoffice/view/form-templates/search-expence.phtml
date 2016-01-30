@@ -1,0 +1,141 @@
+<?php
+	//Form object
+	$form = $this->form;
+	$form->prepare();
+?>
+
+<!-- Form opening tag -->
+<?php echo $this->form()->openTag($form); ?>
+
+<!-- First Row -->
+<div class="row">
+
+	<!-- Category -->
+	<div class="col-sm-1 form-group">
+		<?= $this->formInput($form->get('tid')) ?>
+	</div>
+
+	<!-- Category -->
+	<div class="col-sm-2 form-group">
+		<?= $this->formSelect($form->get('category')) ?>
+	</div>
+
+	<!-- Entered for -->
+	<div class="col-sm-3 form-group">
+		<?= $this->formInput($form->get('entered_for')) ?>
+		<?= $this->formHidden($form->get('entered_for_id')) ?>
+	</div>
+
+	<!-- Entered by -->
+	<div class="col-sm-3 form-group">
+		<?= $this->formInput($form->get('entered_by')) ?>
+		<?= $this->formHidden($form->get('entered_by_id')) ?>
+	</div>
+
+	<!-- Managed by -->
+	<div class="col-sm-3 form-group">
+		<?= $this->formInput($form->get('managed_by')) ?>
+		<?= $this->formHidden($form->get('managed_by_id')) ?>
+	</div>
+
+</div>
+
+<!-- Second Row -->
+<div class="controls controls-row row">
+
+	<!-- Supplier -->
+	<div class="col-sm-3 form-group">
+		<?= $this->formSelect($form->get('supplier')) ?>
+	</div>
+	
+	<!-- Supplier Reference -->
+	<div class="col-sm-3 form-group">
+		<?= $this->formInput($form->get('supplier_reference')) ?>
+	</div>
+	
+	<!-- Purpose -->
+	<div class="col-sm-2 form-group">
+		<?= $this->formInput($form->get('purpose')) ?>
+	</div>
+    
+    <div class="col-sm-2 form-group">
+		<?= $this->formSelect($form->get('cost_center_id')) ?>
+	</div>
+
+    <div class="col-sm-2 form-group">
+        <?= $this->formSelect($form->get('debt')) ?>
+    </div>
+</div>
+
+<!-- Third Row -->
+<div class="controls controls-row row">
+
+	<div class="col-sm-12">
+		<div class="row">
+			<!-- Money Account -->
+			<div class="col-sm-3 form-group">
+				<?= $this->formSelect($form->get('bank_account')) ?>
+			</div>
+			
+			<!-- Currency -->
+			<div class="col-sm-3 form-group">
+				<?= $this->formSelect($form->get('currency')) ?>
+			</div>
+			
+			<!-- Amount -->
+			<div class="col-sm-2 form-group">
+				<?= $this->formInput($form->get('amount')) ?>
+			</div>
+			
+			<div class="col-sm-2 form-group">
+				<!-- Global Cost -->
+				<?= $this->formSelect($form->get('global_cost')) ?>
+			</div>
+			
+			<!-- Direct Debit -->
+			<div class="col-sm-2 form-group">
+				<?= $this->formSelect($form->get('direct_debit')) ?>
+			</div>
+		</div>
+		
+		<div class="row">
+			<!-- Date Entered -->
+			<div class="col-sm-3 form-group">
+                <div class="input-group">
+                    <label class="input-group-addon" for="date_entered">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </label>
+                    <?= $this->formInput($form->get('date_entered')) ?>
+                </div>
+			</div>
+			
+			<!-- Transaction Date -->
+			<div class="col-sm-3 form-group">
+				<div class="input-group">
+                    <label class="input-group-addon" for="transaction_date">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </label>
+                    <?= $this->formInput($form->get('transaction_date')) ?>
+                </div>
+			</div>
+			
+			<!-- Verified -->
+			<div class="col-sm-2 form-group">
+				<?= $this->formSelect($form->get('verified')) ?>
+			</div>
+			
+			<!-- Paid -->
+			<div class="col-sm-2 form-group">
+				<?= $this->formSelect($form->get('paid')) ?>
+			</div>
+			
+			
+			<div class="col-sm-2 form-group">
+				<?= $this->formSelect($form->get('approved')) ?>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Form close tag -->
+<?= $this->form()->closeTag() ?>

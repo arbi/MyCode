@@ -1,0 +1,32 @@
+<?php
+use \DDD\Service\Frontier;
+?>
+<?php if (!empty($apartments)) { ?>
+    <div id="apartments-coming-via-ajax">
+
+    <table class="table table-condensed">
+        <tr>
+            <td id="building-apartments">
+
+                <table>
+                    <?php $i = 0; ?>
+                    <?php foreach ($apartments as $apartment) { ?>
+                        <tr style="<?= (++$i >= Frontier::LIMIT_APARTMENT_SHOW_COUNT_BUILDING_CARD) ? 'display:none;' : ''?>">
+                            <td class="text-muted apartment-unit-number" width="60"><?= $apartment['unit_number'] ?></td>
+                            <td  width="300">
+                                <a href="/frontier?id=<?php echo Frontier::CARD_APARTMENT . '_' . $apartment['id']?>"><?= $apartment['name'] ?></a>
+                            </td>
+                            <td class="text-muted apartment-bedroom-count"><?= $apartment['bedroom_count'] ?></td>
+                        </tr>
+                    <?php } ?>
+                </table>
+            </td>
+        </tr>
+    </table>
+    <?php if ($i > Frontier::LIMIT_APARTMENT_SHOW_COUNT_BUILDING_CARD) { ?>
+        <p>
+            <a href="#" class="collapse-trigger collapsed">Load More</a>
+        </p>
+    <?php } ?>
+    </div>
+<?php } ?>

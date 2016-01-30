@@ -1,0 +1,84 @@
+<?php
+
+$documentForm = $this->documentForm;
+
+$documentForm->prepare();
+
+// open tags don't work
+$this->form()->openTag($documentForm);
+?>
+
+<script>
+    var GLOBAL_ADD_DOCUMENT_URL = '/user/ajax-add-document';
+    var GLOBAL_UPLOAD_DOCUMENT_FILE_URL = '/user/ajax-upload-document';
+</script>
+
+<div class="col-sm-12">
+    <fieldset name="add-document">
+        <legend>Add Document</legend>
+    </fieldset>
+    <div class="col-sm-12 form-group">
+        <label class="col-sm-2 control-label" for="document_type">Document</label>
+        <div class="col-sm-4">
+            <?php
+                echo $this->formElement($documentForm->get('document_type_id'));
+
+                $documentForm->get('document_user_id')->setValue($this->editableUserId);
+                echo $this->formElement($documentForm->get('document_user_id'));
+
+                $documentForm->get('document_creator_id')->setValue($this->userId);
+                echo $this->formElement($documentForm->get('document_creator_id'));
+            ?>
+        </div>
+        <?php if ($documentForm->has('download')) {
+                $downladButton = $documentForm->get('download');
+
+                echo '<div class="btn-group">';
+                echo $this->formButton($documentForm->get('download'));
+                echo '<button type="button" name="remove_attachment" id="remove-attachment" data-toggle="modal" data-target="#delete-attachment-modal"  class="btn btn-info pull-left state hidden-file-input"><span class="' . $downladButton->getOption('remove-icon') . '"></span></button>';
+                echo '</div>';
+            }
+        ?>
+    </div>
+    <div class="col-sm-12 form-group">
+        <label class="col-sm-2 control-label" for="document_url">
+            <?= $this->info('URL', 'Paste a URL here'); ?>
+        </label>
+        <div class="col-sm-10">
+            <?php echo $this->formElement($documentForm->get('document_url')); ?>
+        </div>
+    </div>
+    <div class="col-sm-12 form-group">
+        <label class="col-sm-2 control-label" for="document_description">
+            Description
+            <?= $this->required(); ?>
+        </label>
+        <div class="col-sm-10">
+            <?php echo $this->formElement($documentForm->get('document_description')); ?>
+        </div>
+    </div>
+    <div class="col-sm-12">
+        <fieldset>
+            <legend>
+                Attachment
+            </legend>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <?php
+                        echo $this->formElement($documentForm->get('document_attachment'));
+                        echo $this->formElement($documentForm->get('document_file_name'));
+                    ?>
+                    <input type="hidden" name="validAttachment" id="validAttachment" value="0" />
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <div class='well well-sm margin-1 pull-left file-name soft-hide text-muted'></div>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+</div>
+<?php
+// close tags dont' work
+$this->form()->closeTag($documentForm);

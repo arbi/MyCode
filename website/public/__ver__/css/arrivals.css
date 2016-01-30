@@ -1,0 +1,10 @@
+
+p.today {
+    display: inline;
+    color: #357ebd;
+}
+
+p.yesterday {
+    display: inline;
+    color: #d9534f;
+}

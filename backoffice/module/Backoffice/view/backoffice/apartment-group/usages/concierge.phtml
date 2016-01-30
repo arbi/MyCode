@@ -1,0 +1,79 @@
+<?php
+    $form        = $this->form;
+    $actionTitle = ($this->id ? $form->get('name')->getValue() : 'Add Group');
+
+    $this->headTitle()->setSeparator(' - ');
+    $this->headTitle($actionTitle . ' | Product Groups');
+    $this->layout()->viewTitle = $actionTitle;
+    $this->layout()->breadcrumb = $this->breadcrumb([
+        ['Apartment'],
+        ['Apartment Groups', $this->url('backoffice/default', ['controller' => 'apartment-group', 'action' => 'index'])],
+        [$actionTitle]
+    ]);
+
+    $this->InlineScript()
+        ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+        ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+        ->appendFile($this->basePath() . '/js/pages/apartment-group-concierge.js');
+
+    $this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css')
+        ->appendStylesheet($this->basePath() . '/css/pages/apartment.group.css');
+
+    $form->prepare();
+    $form->setAttribute('action', $this->url('backoffice/default', ['controller' => 'apartment-group-concierge', 'action' => 'ajaxsave']));
+    $form->setAttribute('method', 'post');
+    $form->setAttribute('class', 'form-horizontal');
+    $form->setAttribute('id', 'form_apartment_group_concierge');
+?>
+<script>
+    var GLOBAL_SAVE_DATA   = '<?= $this->url('backoffice/default', array('controller' => 'apartment-group-concierge', 'action' => 'ajaxsave'))?>';
+    var APARTMENT_GROUP_ID = '<?= $this->id ?>';
+</script>
+    <?php if ($this->id > 0) { ?>
+   <div class="row">
+    <div class="col-sm-12">
+        <hr>
+        <?= $this->apartmentGroupNavigation($this->id, 'apartment-group/concierge')?>
+    </div>
+</div>
+    <?php } ?>
+    <?php echo $this->form()->openTag($form); ?>
+
+    <div id="concierge-dashboard">
+        <?php if($this->id && $this->global) {?>
+            <div class="col-sm-12">
+                <fieldset id="div_concierge" class="form-horizontal">
+                    <legend>Concierge Options</legend>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label" for="concierge_email">
+                            <?= $this->info('<span>Email</span>', 'Everyday before 10 AM the list of new arrivals will be sent to this email address'); ?>
+                        </label>
+                        <div class="col-sm-4">
+                            <?php echo $this->formInput($form->get('concierge_email')); ?>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label" for="psp-id">
+                            PSP
+                        </label>
+                        <div class="col-sm-4">
+                            <?php echo $this->formSelect($form->get('psp_id')); ?>
+                        </div>
+                    </div>
+                </fieldset>
+                <br />
+            </div>
+        <?php } ?>
+    </div>
+    <div class="page-actions container">
+        <div class="row text-right">
+            <?php
+            if ($this->isActive) {
+                echo $this->formButton($form->get('save_button'));
+            }
+            ?>
+        </div>
+    </div>
+    <?php echo $this->form()->closeTag() ?>
+

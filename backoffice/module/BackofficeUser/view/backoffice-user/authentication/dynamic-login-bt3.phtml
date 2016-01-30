@@ -1,0 +1,41 @@
+<?php
+	$form = $this->loginForm;
+	$form->prepare();
+	$form->setAttribute('class', 'form-horizontal');
+	$form->setAttribute('action', $this->url('backoffice_user_authenticate', array()));
+?>
+
+<!-- Dynamic Login Form -->
+<div id="dynamicLoginForm" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-primary">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Please Sign In again</h4>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger hide" id="dynamicLoginFormError"></div>
+                <?= $this->form()->openTag($form) ?>
+                <div class="form-group">
+                    <label class="control-label col-sm-4" for="dynamicLoginFormEmail">Email</label>
+                    <div class="col-sm-8">
+                        <?= $this->formInput($form->get('identity')) ?>
+                    </div>
+                </div>
+                <div class="form-group">
+                        <label class="control-label col-sm-4" for="dynamicLoginFormPassword">Password</label>
+                        <div class="col-sm-8">
+                                <?= $this->formInput($form->get('credential')) ?>
+                        </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="pull-right">
+                    <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                    <input name="sign_in" type="submit" class="btn btn-primary login-btn" value="Sign In">
+                </div>
+            </div>
+            <?= $this->form()->closeTag() ?>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,73 @@
+<?php
+    $this->layout()->viewTitle = 'Jobs Management';
+    $this->headTitle()->setSeparator(' - ');
+    $this->headTitle($this->layout()->viewTitle);
+    $this->layout()->breadcrumb = $this->breadcrumb([
+        ['Administration'],
+        [$this->layout()->viewTitle]
+    ]);
+?>
+
+<script>
+    var DATATABLE_AJAX_SOURCE = '<?= $ajaxSourceUrl ?>';
+
+    $(document).click(function(event) {
+        var target = $(event.target);
+
+        if (!target.hasClass("daterangepicker") && !target.hasClass("form-control") && target.parents(".daterangepicker").length == 0 && target.parents(".calendar-date").length == 0) {
+            $(".daterangepicker").hide();
+        }
+    });
+</script>
+
+<?php
+    $this->InlineScript()
+        ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+        ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+        ->appendFile($this->basePath() . '/js/pages/jobs.js');
+
+    $this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css');
+
+    $this->headMeta()->appendName('viewport', 'width=device-width, initial-scale=1.0');
+?>
+
+<?= $this->formOutput ?>
+
+<div id="status-switch">
+    <div class="btn-group fn-buttons pull-right">
+        <a href="#all" class="btn btn-sm btn-default" data-status="all">All</a>
+        <a href="#live" class="btn btn-sm btn-default active" data-status="live">Live</a>
+        <a href="#draft" class="btn btn-sm btn-default" data-status="draft">Draft</a>
+        <a href="#inactive" class="btn btn-sm btn-default" data-status="inactive">Inactive</a>
+    </div>
+    <input type="hidden" name="show_status" id="show-status" value="1">
+</div>
+
+<div class="row" id="job">
+    <div class="col-sm-12">
+        <table id="datatable_jobs" class="table table-striped table-bordered table-condensed table-hover">
+            <thead>
+                <tr>
+                    <th> Status </th>
+                    <th> Title </th>
+                    <th> Department </th>
+                    <th> City </th>
+                    <th> Start Date </th>
+                    <th> Description </th>
+                    <th> &nbsp; </th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="container page-actions">
+    <div class="row text-right">
+        <a href="<?= $this->url('recruitment/jobs', [
+            'controller' => 'jobs',
+            'action'     => 'edit'
+        ])?>" class="btn btn-primary col-sm-2 col-xs-12 pull-right">Add New Job</a>
+    </div>
+</div>

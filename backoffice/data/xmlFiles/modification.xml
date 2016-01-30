@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<OTA_HotelResRS xmlns="http://www.opentravel.org/OTA/2003/05" Version="2.02">
+  <Success />
+  <HotelReservations>
+    <HotelReservation CreateDateTime="2015-05-18T09:51:08" CreatorID="12452584s532" ResStatus="modified">
+      <POS>
+        <Source TerminalID="127.0.0.1" />
+      </POS>
+      <UniqueID ID="5" Type="PAR">
+        <CompanyName><![CDATA[expedia]]></CompanyName>
+      </UniqueID>
+      <UniqueID ID="2581" Type="HOT" />
+      <RoomStays>
+        <RoomStay RoomStayStatus="Reserved" IndexNumber="1">
+          <RoomTypes>
+            <RoomType IsRoom="true" RoomID="10403">
+              <RoomDescription Name="Hollywood Walk" />
+            </RoomType>
+          </RoomTypes>
+          <RatePlans>
+	    <RatePlan EffectiveDate="2015-11-14" RatePlanID="0" RatePlanName="Best Deal For 6 people">
+              <RatePlanInclusions TaxInclusive="true" />
+              <AdditionalDetails>
+                <AdditionalDetail Amount="176.86" CurrencyCode="USD" />
+              </AdditionalDetails>
+            </RatePlan>
+	   <RatePlan EffectiveDate="2015-11-15" RatePlanID="0" RatePlanName="Best Deal For 6 people">
+              <RatePlanInclusions TaxInclusive="true" />
+              <AdditionalDetails>
+                <AdditionalDetail Amount="176.86" CurrencyCode="USD" />
+              </AdditionalDetails>
+            </RatePlan>
+	  <RatePlan EffectiveDate="2015-11-16" RatePlanID="0" RatePlanName="Best Deal For 6 people">
+              <RatePlanInclusions TaxInclusive="true" />
+              <AdditionalDetails>
+                <AdditionalDetail Amount="176.86" CurrencyCode="USD" />
+              </AdditionalDetails>
+            </RatePlan>
+          </RatePlans>
+          <GuestCounts>
+            <GuestCount AgeQualifyingCode="1" Count="5" />
+          </GuestCounts>
+          <Total AmountAfterTax="353.72" CurrencyCode="USD" />
+          <BasicPropertyInfo HotelCode="2581" />
+          <Comments>
+            <Comment GuestViewable="true">
+              <Text><![CDATA[Price for 2015-05-24: USD 176,86 (Rateplan: Best Deal For 6 people)
+Price for 2015-05-25: USD 176,86 (Rateplan: Best Deal For 6 people)
+Guest name: Martin
+smoking preference: Non-Smoking
+Facilities: Shower, TV, Air Conditioning, Hairdryer, Iron, Refrigerator, Free toiletries, Toilet, Microwave, Dishwasher, Bathroom, Heating, Kitchen, Bath or Shower, Flat-screen TV, Dining area, Electric kettle, Kitchenware, Towels/Sheets (extra fee), Oven, Stovetop, Cleaning products, Towels, Linen, Dining table, Children's high chair, Upper floors accessible by lift, Private flat in building
+Parking space (per night: 3n): 3]]></Text>
+            </Comment>
+          </Comments>
+        </RoomStay>
+      </RoomStays>
+      <ResGlobalInfo>
+        <TimeSpan Start="2015-05-21T00:00:00" End="2015-05-23" />
+        <Comments>
+          <Comment GuestViewable="false" Name="Partner" CreatorID="5">
+            <Text><![CDATA[expedia]]></Text>
+          </Comment>
+          <Comment GuestViewable="true">
+            <Text><![CDATA[]]></Text>
+          </Comment>
+        </Comments>
+        <Guarantee>
+          <GuaranteesAccepted>
+            <GuaranteeAccepted>
+              <PaymentCard CardCode="VI" CardNumber="4111111111111111" SeriesCode="123" ExpireDate="1234">
+                <CardHolderName><![CDATA[Martin Pimont]]></CardHolderName>
+              </PaymentCard>
+            </GuaranteeAccepted>
+          </GuaranteesAccepted>
+        </Guarantee>
+        <Total AmountAfterTax="393.72" CurrencyCode="USD" />
+        <HotelReservationIDs>
+          <HotelReservationID ResID_Value="8829203" ResID_Source="593043545" />
+        </HotelReservationIDs>
+        <Profiles>
+          <ProfileInfo>
+            <Profile>
+              <Customer Language="en">
+                <PersonName>
+                  <GivenName><![CDATA[HOP]]></GivenName>
+                  <Surname><![CDATA[bach]]></Surname>
+                </PersonName>
+                <Telephone PhoneNumber="0659736419" />
+                <Email><![CDATA[test@ginosi.com]]></Email>
+                <Address>
+                  <AddressLine><![CDATA[9 chemin du trou à sable]]></AddressLine>
+                  <CityName><![CDATA[Saint-Nom-La-Bretèche]]></CityName>
+                  <PostalCode><![CDATA[78860]]></PostalCode>
+                  <CountryName><![CDATA[FR]]></CountryName>
+                </Address>
+              </Customer>
+            </Profile>
+          </ProfileInfo>
+        </Profiles>
+      </ResGlobalInfo>
+    </HotelReservation>
+  </HotelReservations>
+</OTA_HotelResRS>

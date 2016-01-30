@@ -1,0 +1,72 @@
+<?php
+
+$this->InlineScript()
+    ->appendFile( $this->basePath() . '/js/plugins/jquery.form.min.js' )
+    ->appendFile($this->basePath() . '/js/pages/booking.document.js');
+
+$environment = getenv('APPLICATION_ENV') ?: 'production';
+
+echo "<script src='{$this->basePath()}/js/vendor/tinymce/tinymce.min.js' type='text/javascript'></script>";
+
+?>
+
+<script>
+    $(function() {
+        tinymce.init({
+            selector: ".tinymce",
+            skin: "clean",
+            plugins: [
+                "code", "autoresize", "link"
+            ],
+            menu : {},
+            toolbar: "undo redo | styleselect | bold italic underline |  aligncenter alignjustify alignleft alignright | bullist numlist outdent indent | link | print | fontsizeselect | code | removeformat",
+            browser_spellcheck : true,
+            autoresize_min_height:280,
+            extended_valid_elements : "i[*]",
+            verify_html : false
+        });
+        <?php if($this->viewOnly) { ?>
+        $("#document-form").find("input, select, button").each(function(index) {
+            $(this).prop("disabled", true);
+        });
+        <?php } ?>
+    });
+
+    var GLOBAL_UPLOAD_FILES     = '<?= $this->url('backoffice/default', ['controller' => 'booking', 'action' => 'ajax-upload-files'])?>';
+    var GLOBAL_DELETE_ATACHMENT = '<?= $this->url('backoffice/default', ['controller' => 'booking', 'action' => 'ajax-delete-attachment'])?>';
+</script>
+
+<div class="row">
+    <div class="col-sm-12">
+        <fieldset>
+            <legend>
+                Description
+                <?= $this->required(); ?>
+            </legend>
+            <div class="form-group">
+                <div class="col-sm-12">
+                    <?=$this->formElement($form->get('doc_description'))?>
+                    <?=$this->formElement($form->get('delete_data'))?>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset>
+            <legend>
+                Attachments
+            </legend>
+            <div class="form-group">
+                <div class="col-sm-12 base">
+                    <?=$this->formElement($form->get('uploaded_files'))?>
+                    <input type="hidden" name="validAttachment" id="validAttachment" value="0" />
+                </div>
+                <div id="reservoir"></div>
+                <div class='col-sm-12'>
+                    <div class='col-sm-6'>
+                        <ul class="attach_files list-group">
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+</div>

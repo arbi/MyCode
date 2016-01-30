@@ -1,0 +1,14 @@
+.progress-bar {
+    min-width: 50px !important;
+}
+
+.progress {
+    margin: 8px 0 12px 0 !important;
+}
+@media screen and (min-width: 992px) and (max-width: 1400px) {
+    #total-number-hint {
+        padding: 0;
+        font-size: 12px;
+        line-height: 22px;
+    }
+}

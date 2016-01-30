@@ -1,0 +1,130 @@
+<?php
+
+use Library\Constants\DomainConstants;
+use UniversalDashboard\AbstractUDWidget as AbstractUDWidget;
+
+$this->layout()->viewTitle = 'Universal Dashboard';
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($this->layout()->viewTitle);
+$this->layout()->breadcrumb = $this->breadcrumb([
+	['Dashboards'],
+	[$this->layout()->viewTitle]
+]);
+
+$widgetTypesOrder = [
+    AbstractUDWidget::WIDGET_DANGER,
+    AbstractUDWidget::WIDGET_INFO,
+    AbstractUDWidget::WIDGET_WARNING,
+    AbstractUDWidget::WIDGET_SUCCESS,
+    AbstractUDWidget::WIDGET_PRIMARY,
+    AbstractUDWidget::WIDGET_DEFAULT
+];
+
+?>
+<script>
+    var GLOBAL_VAC_ACC_REJ      = '<?= '//' . DomainConstants::BO_DOMAIN_NAME . '/ud/universal-dashboard/ajaxvacationrequest' ?>';
+    var GLOBAL_VAC_RES          = '<?= '//' . DomainConstants::BO_DOMAIN_NAME . '/ud/universal-dashboard/ajax-resolve-vacation-request' ?>';
+    var GLOBAL_MARK_SETTLED     = '<?= '//' . DomainConstants::BO_DOMAIN_NAME . '/ud/universal-dashboard/ajax-mark-settled' ?>';
+    var GLOBAL_MARK_PAID_TO_AFF = '<?= '//' . DomainConstants::BO_DOMAIN_NAME . '/ud/universal-dashboard/ajax-mark-paid' ?>';
+    var GLOBAL_PINNED_RES       = '<?= $this->url('backoffice/default', ['controller' => 'booking', 'action' => 'ajax-pin-reservation'])?>';
+    var GLOBAL_RESOLVE_COMMENT  = '<?= '//' . DomainConstants::BO_DOMAIN_NAME . '/ud/universal-dashboard/ajax-resolve-comment' ?>';
+    var GLOBAL_CHANGE_TRANSACTION_STATUS = '<?= $this->url('backoffice/default', ['controller' => 'common', 'action' => 'ajax-change-transaction-status'])?>';
+</script>
+<?php
+	$this->InlineScript()
+		->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+		->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+		->appendFile($this->basePath() . '/js/pages/universaldashboard.js');
+
+	$this->headLink()
+		->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css');
+?>
+<div class="row universal-dashboard">
+	<div class="col-sm-12">
+<?php
+	if (count($this->widgets)) {
+        foreach($widgetTypesOrder as $type) {
+            if(isset($this->widgets[$type]) && count($this->widgets[$type])) {$i=0;
+                foreach ($this->widgets[$type] as $id => $widget) {
+                    $columns = $widget->getColumns();
+                    $widgetId = preg_replace('/[^a-z0-9 ]/i', '', strtolower($widget->getTitle()));
+                    $widgetId = preg_replace('/\s+/', '-', $widgetId);
+                    $widgetId = 'ud-' . $widgetId;
+
+                    ?>
+
+		<div class="ud-block">
+            <div class="panel panel-<?= $type ?>">
+                <div class="panel-heading transition" data-widget-id="<?= $widgetId ?>">
+                    <span><?= $widget->getTitle() ?></span><span class="text-muted"> (<?= $widget->getCount()?>)</span>
+                    <div class="glyphicon  pull-right row-arrow hidden-xs"></div>
+                </div>
+                <table id="<?= $id ?>" class="table table-striped table-bordered table-condensed table-hover">
+                    <thead>
+                    <tr>
+                        <?php foreach($columns as $column) { ?>
+                            <th> <?= $column['title']; ?> </th>
+                        <?php } ?>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+		</div>
+        <script>
+            $(function() {
+                /** Datatable configuration */
+
+                /**
+                 * @var AbstractUDWidget $widget
+                 */
+
+                if (jQuery().dataTable) {
+                    gTable = $('#<?= $id ?>').dataTable({
+                        bFilter: true,
+                        bInfo: true,
+                        bAutoWidth: false,
+                        bServerSide: false,
+                        bProcessing: false,
+                        bPaginate: true,
+                        bStateSave: true,
+                        bLengthChange: false,
+                        iDisplayLength: 25,
+                        sAjaxSource: "<?= $widget->getAjaxSourceUrl() ?>",
+                        sPaginationType: "bootstrap",
+                        aoColumns: <?= json_encode($columns) ?>,
+                        order: [[<?= $widget->getSortingOrder()[0] ?>,'<?= $widget->getSortingOrder()[1] ?>']],
+                        drawCallback: function( settings ) {
+                            $("select.selectize").not(".selectized").each(function(index){
+                                $(this).selectize({
+                                    plugins: ['remove_button'],
+                                    selectOnTab: true
+                                });
+                            });
+
+                            $('[data-toggle="tooltip"]').tooltip();
+                            $('[data-toggle="popover"]').popover({
+                                trigger: "hover"
+                            });
+
+                            <?= $widget->getAfterDrawCallbackJsFunctionAddition() ?>
+                        }
+                    });
+                }
+            });
+        </script>
+
+<?php
+
+                }
+            }
+		}
+	} else {
+?>
+		<h3 class="text-center text-success">Hooray, you have no tasks!</h3>
+<?php
+	}
+?>
+	</div>
+</div>

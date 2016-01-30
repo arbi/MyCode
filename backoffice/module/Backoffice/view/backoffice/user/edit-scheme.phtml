@@ -1,0 +1,99 @@
+<script>
+    var GLOBAL_SALARY_SCHEME_SAVE = '<?= $this->url('backoffice/default', ['controller' => 'user', 'action' => 'ajax-save-salary-scheme'])?>';
+</script>
+
+<!-- Form opening tag -->
+<?= $this->form()->openTag($this->form); ?>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="name"><?= $this->form->get('name')->getOption('label') ?>: <?= $this->required(); ?></label>
+                        <div class="col-sm-8">
+                            <?= $this->formInput($this->form->get('name'));?>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="payFrequencyType"><?= $this->form->get('payFrequencyType')->getOption('label') ?>: <?= $this->required(); ?></label>
+                        <div class="col-sm-8">
+                            <?= $this->formSelect($this->form->get('payFrequencyType'));?>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="effectiveFrom"><?= $this->form->get('effectiveFrom')->getOption('label') ?>:</label>
+                        <div class="col-sm-8">
+                            <div class="input-group">
+                                <label class="input-group-addon" for="effectiveFrom">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </label>
+                                <?= $this->formInput($this->form->get('effectiveFrom'));?>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="effectiveTo"><?= $this->form->get('effectiveTo')->getOption('label') ?>:</label>
+                        <div class="col-sm-8">
+                            <div class="input-group">
+                                <label class="input-group-addon" for="effectiveTo">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </label>
+                                <?= $this->formInput($this->form->get('effectiveTo'));?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="externalAccountId"><?= $this->form->get('externalAccountId')->getOption('label') ?>: <?= $this->required(); ?></label>
+                        <div class="col-sm-8">
+                            <?= $this->formSelect($this->form->get('externalAccountId'));?>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="type"><?= $this->form->get('type')->getOption('label') ?>: <?= $this->required(); ?></label>
+                        <div class="col-sm-8">
+                            <?= $this->formSelect($this->form->get('type'));?>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-4 text-right">
+                            <label class="control-label" for="salary"><?= $this->form->get('salary')->getOption('label') ?>: <?= $this->required(); ?></label>
+                        </div>
+                        <div class="col-sm-8">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <?= $this->formInput($this->form->get('salary'));?>
+                                </div>
+                                <div class="col-sm-6">
+                                    <?= $this->formSelect($this->form->get('currencyId'));?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-sm-12">
+    <div class="page-actions container hidden-print">
+        <div class="row">
+            <div class="col-xs-12">
+                <?= $this->formInput($this->form->get('id'));?>
+                <?= $this->formInput($this->form->get('status'));?>
+                <?php if ($this->id > 0) : ?>
+                    <a href="javascript:void(0)" class="btn btn-danger edit-scheme-tab-btn pull-left salary_scheme_inactivate"  data-toggle="modal" data-target="#salary_scheme_inactivate" data-id="<?= $this->id ?>" data-status="<?= \DDD\Service\User\SalaryScheme::SALARY_SCHEME_STATUS_INACTIVE ?>">Deactivate</a>
+                    <a href="javascript:void(0)" class="btn btn-primary edit-scheme-tab-btn pull-left salary_scheme_archive"  data-toggle="modal" data-target="#salary_scheme_archive" data-id="<?= $this->id ?>" data-status="<?= \DDD\Service\User\SalaryScheme::SALARY_SCHEME_STATUS_ARCHIVED ?>">Archive</a>
+                <?php endif; ?>
+                <a href="javascript:void(0)" class="btn btn-primary edit-scheme-tab-btn pull-right margin-left-10" id="save_salary_scheme">Save Changes</a>
+                <a href="<?= $this->url('backoffice/default', ['controller' => 'user', 'action' => 'edit', 'id' => $this->userId]) ?>#salary" class="btn btn-default edit-scheme-tab-btn pull-right margin-left-10" id="cancel_salary_scheme">Cancel</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Form close tag -->
+<?= $this->form()->closeTag(); ?>

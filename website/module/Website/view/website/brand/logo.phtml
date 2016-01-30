@@ -1,0 +1,133 @@
+<?php
+
+use \Library\Constants\DomainConstants as DC;
+
+$this->headMeta()->appendName('robots', 'noindex');
+$this->headTitle('Logos');
+
+$data = [[
+    'name' => 'Email',
+    'section' => [
+        ['size' => '175x68'],
+        ['size' => '233x68'],
+    ],
+], [
+    'name' => 'Facebook',
+    'section' => [
+        ['size' => '160x160'],
+    ],
+], [
+    'name' => 'Google+',
+    'section' => [
+        ['size' => '250x250'],
+    ],
+], [
+    'name' => 'Instagram',
+    'section' => [
+        ['size' => '110x110'],
+    ],
+], [
+    'name' => 'LinkedIn',
+    'section' => [
+        ['size' => '200x200'],
+    ],
+], [
+    'name' => 'Pinterest',
+    'section' => [
+        ['size' => '153x153'],
+    ],
+], [
+    'name' => 'Tumblr',
+    'section' => [
+        ['size' => '128x128'],
+    ],
+], [
+    'name' => 'Twitter',
+    'section' => [
+        ['size' => '73x73'],
+        ['size' => '500x500'],
+    ],
+], [
+    'name' => 'YouTube',
+    'section' => [
+        ['size' => '98x98'],
+    ],
+], [
+    'name' => 'KI Print',
+    'section' => [
+        ['size' => '450x175'],
+    ],
+]];
+
+foreach ($data as $item) {
+?>
+<div class="col-xs-12 form-horizontal">
+    <h2><?php echo $item['name']; ?></h2>
+    <?php foreach ($item['section'] as $section) { ?>
+    <section>
+        <div class="form-group">
+            <div class="col-xs-12">
+                <ul class="list-inline">
+                    <li>
+                        <img src="//<?=DC::WS_DOMAIN_NAME?>/s/logo/<?php echo $section['size']; ?>_transparent.gif" class="transparency thumbnail max-250">
+                    </li>
+                    <li>
+                        <img src="//<?=DC::WS_DOMAIN_NAME?>/s/logo/<?php echo $section['size']; ?>_transparent.png" class="transparency thumbnail max-250">
+                    </li>
+                    <li>
+                        <img src="//<?=DC::WS_DOMAIN_NAME?>/s/logo/<?php echo $section['size']; ?>_white.png" class="thumbnail max-250">
+                    </li>
+                    <li>
+                        <img src="//dummyimage.com/<?php echo $section['size']; ?>/969696/fff.png" class="thumbnail max-250">
+                    </li>
+                </ul>
+            </div>
+            <label class="col-sm-2 control-label">
+                Transparent GIF
+            </label>
+            <div class="col-sm-10">
+                <input type="text" value="https://<?=DC::WS_DOMAIN_NAME?>/s/logo/<?php echo $section['size']; ?>_transparent.gif" class="form-control" data-count="0" readonly>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">
+                Transparent PNG
+            </label>
+            <div class="col-sm-10">
+                <input type="text" value="https://<?=DC::WS_DOMAIN_NAME?>/s/logo/<?php echo $section['size']; ?>_transparent.png" class="form-control" data-count="1" readonly>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">
+                White PNG
+            </label>
+            <div class="col-sm-10">
+                <input type="text" value="https://<?=DC::WS_DOMAIN_NAME?>/s/logo/<?php echo $section['size']; ?>_white.png" class="form-control" data-count="2" readonly>
+            </div>
+        </div>
+    </section>
+    <?php } ?>
+</div>
+<?php
+}
+?>
+<script type="text/javascript">
+    $(function() {
+        $('.form-control').focus(function(e) {
+            e.preventDefault();
+
+            var self = $(this),
+                count = self.attr('data-count');
+
+            $('.thumbnail').removeClass('active');
+            self.closest('section').find('.thumbnail').eq(count).addClass('active');
+
+            setTimeout(function() {
+                self.select();
+            }, 1);
+        }).blur(function(e) {
+            e.preventDefault();
+            $('.thumbnail').removeClass('active');
+        });
+    });
+</script>

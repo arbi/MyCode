@@ -1,0 +1,103 @@
+<?php
+	$this->layout()->viewTitle = 'Task Management';
+    $this->headTitle()->setSeparator(' - ');
+    $this->headTitle($this->layout()->viewTitle);
+    $this->layout()->breadcrumb = $this->breadcrumb([
+	    ['Administration'],
+	    [$this->layout()->viewTitle],
+    ]);
+
+    $this->InlineScript()
+        ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+        ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+        ->appendFile($this->basePath() . '/js/pages/task_index.js');
+
+    $this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css')
+        ->appendStylesheet($this->basePath() . '/css/pages/task.css')
+        ->appendStylesheet($this->basePath() . '/css/pages/task.print.css', 'print');
+?>
+<script>
+	var GLOBAL_AUTOCOMPLET    = '<?= $this->url('backoffice/default', array('controller' => 'task', 'action' => 'ajax-get-user'))?>';
+	var GLOBAL_PROPERTY       = '<?= $this->url('backoffice/default', array('controller' => 'task', 'action' => 'ajax-get-property'))?>';
+	var GLOBAL_BUILDING       = '<?= $this->url('backoffice/default', array('controller' => 'task', 'action' => 'ajax-get-building'))?>';
+    var GLOBAL_SAVE           = '<?= $this->url('backoffice/default', ['controller' => 'task', 'action' => 'ajaxsave'])?>';
+    var DATATABLE_AJAX_SOURCE = '<?= $ajaxSourceUrl ?>';
+    var USER_OPTIONS          = <?= $users ?>;
+    var ALL_USERS             = <?= json_encode($allUsers) ?>;
+    var anyTeamMember         = <?= json_encode($anyTeamMember) ?>;
+    var GLOBAL_ALL_TAGS       = <?= json_encode($tags) ?>;
+    var GLOBAL_TAG_ID         = <?= $tagId; ?>;
+    //var USER_OPTIONS = $.makeArray( USER_OPTIONS1 );
+</script>
+
+<div id="task-search-form">
+    <div class="row">
+        <div class="col-sm-12">
+            <?= $this->formOutput ?>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-6"><a href="javascript:void(0)" class="btn btn-medium btn-block btn-primary" id="btn_search_task"><i class="icon-search icon-white"></i> Search</a></div>
+        <div class="col-sm-3"><a href="javascript:void(0)" class="btn btn-medium btn-block btn-default" id="clearTaskFilters"><i class="icon-search icon-white"></i>Clear Filter</a></div>
+        <div class="col-sm-3">
+            <div class="dropdown quick-tasks" data-user-id="<?=$this->identity->id?>" data-user-department="<?=$this->departmentId?>">
+                <a class="btn btn-default btn-block" data-toggle="dropdown"><span class="qt-label" data-default="Quick Search">Quick Search</span> <span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a class="qt-item" tabindex="-1" data-value="0" href="#">-- All Tasks --</a></li>
+                    <li class="divider"></li>
+                    <li><a class="qt-item" tabindex="-1" data-value="-1" href="#">Unassigned Tasks</a></li>
+                    <li class="dropdown-header">Active Tasks</li>
+                    <li><a class="qt-item" tabindex="-1" data-value="1" href="#">My Open Tasks</a></li>
+                    <li><a class="qt-item" tabindex="-1" data-value="2" href="#">Created Tasks</a></li>
+                    <li><a class="qt-item" tabindex="-1" data-value="3" href="#">Following Tasks</a></li>
+                    <li><a class="qt-item" tabindex="-1" data-value="4" href="#">Department Tasks</a></li>
+                    <li class="dropdown-header">Process</li>
+                    <li><a class="qt-item" tabindex="-1" data-value="5" href="#">Verify Tasks</a></li>
+                </ul>
+            </div>
+        </div>
+
+
+    </div>
+
+    <hr>
+</div>
+
+<div class="row hidden" id="datatable_task_container">
+    <div class="col-sm-12">
+        <table id="datatable_task_info" class="table table-striped table-bordered table-condensed table-hover">
+            <thead>
+            <tr>
+                <th> P </th>
+                <th> St </th>
+                <th> Start Date </th>
+                <th> Due Date </th>
+                <th> Title </th>
+                <th> Location </th>
+                <th> Responsible </th>
+                <th> Verifier </th>
+                <th> Type </th>
+                <th> &nbsp; </th>
+                <th> Staff manager </th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="container page-actions">
+    <div class="row text-right">
+        <a class="btn btn-primary pull-right col-sm-2 col-xs-12 margin-left-10" href="<?= $this->url('backoffice/default', ['controller' => 'task', 'action' => 'edit'])?>">Add New Task</a>
+        <a class="btn btn-primary pull-right col-sm-2 col-xs-12 margin-left-10" id="print-btn">Print</a>
+    </div>
+</div>
+<script type="text/javascript">
+    batchAutocomplete('creater', 'creater_id', GLOBAL_AUTOCOMPLET);
+    batchAutocomplete('responsible', 'responsible_id', GLOBAL_AUTOCOMPLET);
+    batchAutocomplete('follower', 'follower_id', GLOBAL_AUTOCOMPLET);
+    batchAutocomplete('helper', 'helper_id', GLOBAL_AUTOCOMPLET);
+    batchAutocomplete('building', 'building_id', GLOBAL_BUILDING);
+</script>

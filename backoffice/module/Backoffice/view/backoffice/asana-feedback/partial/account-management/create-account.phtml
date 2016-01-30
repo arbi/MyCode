@@ -1,0 +1,64 @@
+<div class="form-group">
+    <input type="text" name="feedback-firstname" id="feedback-firstname" class="form-control"  placeholder="First name" value="">
+</div>
+<div class="form-group">
+    <input type="text" name="feedback-lastname" id="feedback-lastname" class="form-control" placeholder="Last name" value="">
+</div>
+<div class="form-group">
+    <input type="text" name="feedback-duedate" id="feedback-duedate" class="form-control" placeholder="Due Date" value="">
+</div>
+
+<div class="form-group">
+    <input type="text" name="feedback-existing-email-address" id="feedback-existing-email-address" class="form-control" placeholder="Existing email address" value="">
+</div>
+
+<div class="form-group">
+    <input type="checkbox" name="feedback-bo-account" id="feedback-bo-account" value="1" />
+    <label for="feedback-bo-account">Create a BO account&nbsp;</label>
+</div>
+
+<div class="form-group">
+    <input type="checkbox" name="feedback-google-account" id="feedback-google-account" value="1" />
+    <label for="feedback-google-account">Create a Google account&nbsp;</label>
+</div>
+
+<div class="form-group">
+    <input type="checkbox" name="feedback-lastpass-account" id="feedback-lastpass-account" value="1" />
+    <label for="feedback-lastpass-account">Create a LastPass account&nbsp;</label>
+</div>
+
+<div class="form-group">
+    <input type="text" name="feedback-other-account" id="feedback-other-account" placeholder="Other Account" class="form-control"  value="">
+</div>
+
+<div class="form-group">
+    <input type="checkbox" value="1" id="computer-setup">
+    <label for="computer-setup">Computer setup is needed for this employee&nbsp;</label>
+</div>
+
+<div class="form-group">
+    <label for="feedback-department">Department</label>
+    <select id="feedback-department" name="feedback-department" class="form-control">
+        <?php foreach ($this->departments as $department) { ?>
+           <option value="<?= $department->getName() ?>"><?= $department->getName() ?></option>
+        <?php } ?>
+    </select>
+</div>
+
+<div class="form-group">
+    <input type="text" name="feedback-position-and-title" id="feedback-position-and-title" placeholder="Position and Title" class="form-control"  value="">
+</div>
+
+<div class="form-group">
+    <input type="text" name="feedback-location" id="feedback-location" class="form-control" placeholder="Location" value="">
+</div>
+
+<div class="form-group">
+    <label for="feedback-personal-info"></label>
+    <textarea name="feedback-personal-info" id="feedback-personal-info" class="form-control" placeholder="Personal information (Like Address...)" rows="4"></textarea>
+</div>
+
+<div class="form-group">
+    <input type="checkbox" value="1" id="feedback-subscribe-google-groups">
+    <label for="feedback-subscribe-google-groups">Subscribe to department mailing list&nbsp;</label>
+</div>

@@ -1,0 +1,26 @@
+/*
+    Created on : May 21, 2014, 6:21:02 PM
+    Author     : Gh. Tigran
+*/
+
+.progress {
+    margin-bottom: 0 !important;
+    position: relative;
+}
+
+.progress-bar {
+    text-align: left !important;
+    padding-left: 3px !important;
+}
+
+.progress-label {
+    position: absolute;
+    width: 100%;
+    text-align: left;
+    padding-left: 5px;
+    text-shadow: 0 0 1px #cccccc;
+}
+
+#product-statistics td {
+    text-align: right;
+}

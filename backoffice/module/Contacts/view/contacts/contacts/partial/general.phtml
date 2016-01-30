@@ -1,0 +1,232 @@
+<?php
+/**
+ * @var \DDD\Domain\Contacts\Card $card
+ */
+
+use Library\Constants\Constants;
+
+
+if (!isset($card) || empty($card)) {
+    return null;
+}
+?>
+
+<div class="bs-callout bs-callout-primary">
+    <h4>
+        <span>
+            <?php echo $card->getName(); ?>
+        </span>
+    </h4>
+    <table class="table table-condensed">
+
+        <?php if (!empty($card->getCompany())) { ?>
+        <tr>
+            <td>Company</td>
+            <td>
+                <span id="contact-company">
+                    <?php echo $card->getCompany(); ?>
+                </span>
+            </td>
+        </tr>
+        <?php } ?>
+
+        <?php if (!empty($card->getPosition())) { ?>
+        <tr>
+            <td>Position</td>
+            <td>
+                <span id="contact-position">
+                    <?php echo $card->getPosition(); ?>
+                </span>
+            </td>
+        </tr>
+        <?php } ?>
+
+        <?php if (!empty($card->getCity())) { ?>
+        <tr>
+            <td>City</td>
+            <td>
+                <span id="contact-city">
+                    <?php echo $card->getCity(); ?>
+                </span>
+            </td>
+        </tr>
+        <?php } ?>
+
+        <?php if (!empty($card->getAddress())) { ?>
+            <tr>
+                <td>Address</td>
+                <td>
+                    <span id="contact-address">
+                        <?php echo $card->getAddress(); ?>
+                    </span>
+                </td>
+            </tr>
+        <?php } ?>
+
+        <?php if (!empty($card->getUrl())) { ?>
+            <tr>
+                <td>URL</td>
+                <td>
+                    <a  href="<?php echo $card->getUrl(); ?>" target="_blank">
+                        <?php echo $card->getUrl(); ?>
+                    </a>
+                </td>
+            </tr>
+        <?php } ?>
+
+        <?php if (!empty($card->getPhoneMobile())) { ?>
+            <tr>
+                <td>Mobile Phone</td>
+                <td>
+                    <span>
+                        <?php $mobilePhoneNumber = '+' . $card->getPhoneMobileCountryCode() . $card->getPhoneMobile() ?>
+                        <?php if (($userInternalNumber && $card->getPhoneMobile())) { ?>
+                        <a href="<?php echo sprintf(Constants::GINOSI_CALL_CENTER_URL, $userInternalNumber, filter_var($card->getPhoneMobileCountryCode() . $card->getPhoneMobile(), FILTER_SANITIZE_NUMBER_INT)) ; ?>" target="_blank">
+                            <?php echo $mobilePhoneNumber; ?>
+                        </a>
+                        <?php } else { ?>
+                            <span><?php echo $mobilePhoneNumber; ?></span>
+                        <?php } ?>
+                    </span>
+                </td>
+            </tr>
+        <?php } ?>
+
+        <?php if (!empty($card->getPhoneCompany())) { ?>
+            <tr>
+                <td>Company Phone</td>
+                <td>
+                    <span>
+                        <?php $companyPhoneNumber = '+' . $card->getPhoneCompanyCountryCode() . $card->getPhoneCompany() ?>
+                        <?php if (($userInternalNumber && $card->getPhoneCompany())) { ?>
+                        <a href="<?php echo sprintf(Constants::GINOSI_CALL_CENTER_URL, $userInternalNumber, filter_var($card->getPhoneMobileCountryCode() . $card->getPhoneCompany(), FILTER_SANITIZE_NUMBER_INT)); ?>" target="_blank">
+                            <?php echo $companyPhoneNumber; ?>
+                        </a>
+                        <?php } else { ?>
+                            <span><?php echo $companyPhoneNumber; ?></span>
+                        <?php } ?>
+                    </span>
+                </td>
+            </tr>
+        <?php } ?>
+
+        <?php if (!empty($card->getPhoneOther())) { ?>
+            <tr>
+                <td>Other Phone</td>
+                <td>
+                    <span >
+                        <?php $otherPhoneNumber = '+' . $card->getPhoneOtherCountryCode() . $card->getPhoneOther() ?>
+                        <?php if (($userInternalNumber && $card->getPhoneOther())) { ?>
+                        <a href="<?php echo sprintf(Constants::GINOSI_CALL_CENTER_URL, $userInternalNumber, filter_var($card->getPhoneMobileCountryCode() . $card->getPhoneOther(), FILTER_SANITIZE_NUMBER_INT)) ; ?>" target="_blank">
+                            <?php echo $otherPhoneNumber; ?>
+                        </a>
+                        <?php } else { ?>
+                            <span><?php echo $otherPhoneNumber; ?></span>
+                        <?php } ?>
+                    </span>
+                </td>
+            </tr>
+        <?php } ?>
+
+        <?php if (!empty($card->getPhoneFax())) { ?>
+            <tr>
+                <td>Fax</td>
+                <td>
+                    <span >
+                        <?php $faxPhoneNumber = '+' . $card->getPhoneFaxCountryCode() . $card->getPhoneFax() ?>
+                        <a href="#">
+                            <?php echo $faxPhoneNumber; ?>
+                        </a>
+                    </span>
+                </td>
+            </tr>
+        <?php } ?>
+
+        <?php if (!empty($card->getEmail())) { ?>
+            <tr>
+                <td>Email</td>
+                <td>
+                    <a  href="mailto:<?php echo $card->getEmail(); ?>" target="_blank">
+                        <?php echo $card->getEmail(); ?>
+                    </a>
+                </td>
+            </tr>
+        <?php } ?>
+
+        <?php if (!empty($card->getSkype())) { ?>
+            <tr>
+                <td>Skype</td>
+                <td>
+                    <a href="skype:<?php echo $card->getSkype(); ?>">
+                        <?php echo $card->getSkype(); ?>
+                    </a>
+                </td>
+            </tr>
+        <?php } ?>
+
+        <?php if (!empty($card->getTeamName())) { ?>
+            <tr>
+                <td class="col-sm-3">Team</td>
+                <td class="col-sm-9">
+                    <span>
+                        <?php echo $card->getTeamName(); ?>
+                    </span>
+                </td>
+            </tr>
+        <?php } ?>
+
+        <?php if (!empty($card->getApartmentName())) { ?>
+            <tr>
+                <td>Apartment</td>
+                <td>
+                    <span>
+                        <?php echo $card->getApartmentName(); ?>
+                    </span>
+                </td>
+            </tr>
+        <?php } ?>
+
+        <?php if (!empty($card->getBuildingName())) { ?>
+            <tr>
+                <td>Building</td>
+                <td>
+                    <span>
+                        <?php echo $card->getBuildingName(); ?>
+                    </span>
+                </td>
+            </tr>
+        <?php } ?>
+
+        <?php if (!empty($card->getPartnerName())) { ?>
+            <tr>
+                <td>Partner</td>
+                <td>
+                    <span>
+                        <?php echo $card->getPartnerName(); ?>
+                    </span>
+                </td>
+            </tr>
+        <?php } ?>
+
+        <?php if (!empty($card->getNotes())) { ?>
+            <tr>
+                <td>Notes</td>
+                <td>
+                    <span>
+                        <?php echo $card->getNotes(); ?>
+                    </span>
+                </td>
+            </tr>
+        <?php } ?>
+
+    </table>
+
+    <div class="text-right">
+        <a
+            class="btn btn-primary btn-sm hand-task-button"
+            href="<?php echo $this->url('contacts/edit') . $card->getId(); ?>"
+            target="_blank">
+            Edit Contact
+        </a>
+    </div>
+</div>

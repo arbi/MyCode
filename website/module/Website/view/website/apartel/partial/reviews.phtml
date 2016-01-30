@@ -1,0 +1,64 @@
+<?php
+
+use Library\Utility\Helper;
+
+foreach ($this->reviews as $review) {
+?>
+    <div class="row">
+
+        <script type="application/ld+json">
+        {
+            "@context": "http://schema.org",
+            "@type": "Review",
+            "itemReviewed": "<?=$this->apartel->getName()?>",
+            "reviewRating": {
+                "@type": "Rating",
+                "bestRating": "5",
+                "ratingValue": "<?=$review['score']?>"
+            },
+            "datePublished": "<?=date("Y-m-d", strtotime($review['date']))?>",
+            "author": "<?=ucwords($review['user_name'])?>",
+            "reviewBody": "<?=trim(preg_replace('/\s\s+/', ' ', str_replace('"', "'", strip_tags($review['liked']))))?>"
+        }
+        </script>
+
+        <div class="col-xs-12 font-weight-100">
+            <strong><?=ucwords($review['user_name'])?></strong>
+        </div>
+        <div class="col-xs-12 text-muted font-weight-100">
+            <?php
+            echo Helper::getReadableDifferenceBetweenDates($review['date']) . ', '
+                . ucfirst($review['city'])
+                . ($review['country_id']
+                    ? ', ' . ucfirst($this->countryname($review['country_id']))
+                    : '');
+            ?>
+        </div>
+        <div class="col-xs-12 margin-bottom-30">
+            <span class="inline-stars">
+                <?php
+                $goodScore = $review['score'];
+                $badScore = 5 - $review['score'];
+
+                if ($goodScore) {
+                    for ($i = 0; $i < $goodScore; $i++) {
+                        ?>
+                        <i class="star_good"></i>
+                        <?php
+                    }
+                }
+
+                if ($badScore) {
+                    for ($j = 0; $j < $badScore; $j++) {
+                        ?>
+                        <i class="star_bad"></i>
+                        <?php
+                    }
+                }
+                ?>
+            </span>
+            <?=$review['liked']?>
+        </div>
+    </div>
+<?php } ?>
+

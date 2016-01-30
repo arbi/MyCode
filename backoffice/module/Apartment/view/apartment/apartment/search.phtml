@@ -1,0 +1,99 @@
+<?php
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle('Apartment Search');
+
+$layoutViewModel = $this->viewModel()->getRoot();
+$basePath = $layoutViewModel->basePathView;
+$this->layout()->breadcrumb = $this->breadcrumb([
+    ['Apartment'],
+    ['Apartment Search'],
+]);
+$this->layout()->viewTitle  = 'Apartment Search';
+
+$this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css')
+        ->appendStylesheet($this->basePath() . '/css/pages/apartment-search.css');
+
+$this->InlineScript()
+        ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+        ->appendFile($this->basePath() . '/js/plugins/fnReloadAjax.js')
+        ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+        ->appendFile($this->basePath() . '/js/pages/apartment.search.js');
+?>
+
+<script>
+    var BUILDING_SEARCH = '<?= $this->url('apartments', ['controller' => 'apartment', 'action' => 'get-buildings'])?>';
+</script>
+
+<?php
+    $form = $this->search_form;
+    $form->setAttribute('class', 'form-horizontal');
+    $form->setAttribute('id', 'search-product');
+?>
+
+<?php
+    echo $this->form()->openTag($form);
+?>
+<div class="row form-group">
+    <div class="col-sm-2">
+        <?php
+            echo $this->formElement($form->get('status'));
+        ?>
+    </div>
+    <div class="col-sm-2">
+        <?php
+            echo $this->formElement($form->get('building'));
+            echo $this->formElement($form->get('building_id'));
+        ?>
+    </div>
+    <div class="col-sm-5">
+        <?php
+            echo $this->formElement($form->get('address'));
+        ?>
+    </div>
+    <div class="col-sm-3">
+        <div class="input-group">
+            <label class="input-group-addon" for="createdDate">
+                <span class="glyphicon glyphicon-calendar"></span>
+            </label>
+            <?php
+                echo $this->formElement($form->get('createdDate'));
+            ?>
+        </div>
+    </div>
+</div>
+
+<?php
+    echo $this->form()->closeTag($form);
+?>
+
+<div class="row">
+    <div class="col-sm-12">
+        <a href="javascript:void(0)" class="btn btn-medium btn-block btn-primary" id="btn_filter_products">
+            <i class="glyphicon glyphicon-search"></i>
+            Search
+        </a>
+    </div>
+</div>
+
+<hr>
+
+<div class="row">
+    <div class="col-sm-12">
+        <table id="datatable_apartments" class="table table-striped table-bordered table-condensed table-hover" style="display: none;">
+            <thead>
+            <tr>
+                <th>ST</th>
+                <th>Apartment (Unit)</th>
+                <th>City</th>
+                <th>Building</th>
+                <th>Created</th>
+                <th>Navigation</th>
+                <th>Links</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,214 @@
+<?php
+	use DDD\Service\Booking\Charge as ChargeService;
+    use DDD\Service\Taxes;
+    use \DDD\Service\Booking\BookingAddon;
+    use \Library\Constants\Constants;
+?>
+<form id="charge-form" name="charge-form">
+    <div class="row">
+        <div class="col-sm-12">
+            <fieldset>
+                <legend>Charges</legend>
+            </fieldset>
+            <table class="table table-striped table-bordered table-condensed" id="activeChargesTable">
+                <thead>
+                    <tr>
+                        <th width="17%">Type</th>
+                        <th width="15%">Date</th>
+                        <th width="25%">Value</th>
+                        <th width="13%">Price (<?= $this->ticketData->getApartmentCurrencyCode() ?>)</th>
+                        <th width="13%">Collection</th>
+                        <th width="13%">Commission</th>
+                        <th width="5%">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php
+                $accommodationTotal = 0;
+                $totProductValue    = 0;
+                $totDiscountSet     = 0;
+
+                if (count($this->charges) > 0) {
+                    foreach ($this->charges as $charge) {
+                        /* @var $charge \DDD\Domain\Booking\Charge */
+                        $accommodationTotal += $charge->getAcc_amount();
+                ?>
+                    <tr class="charged_tr alredyCharged" data-type="<?= $charge->getAddons_type() ?>">
+                        <td>
+                            <?php
+                                if ($charge->getAddon()) {
+                                    echo $charge->getAddon();
+                                } elseif ($charge->getType() == 'p') {
+                                    echo 'Penalty';
+                                } elseif ($charge->getType() == 'g') {
+                                    echo 'Penalty Ginosi';
+                                } else {
+                                    echo 'Other';
+                                }
+                            ?>
+                        </td>
+                        <td class="text-center">
+                            <?= $charge->getReservationNightlyDate() ? date(Constants::GLOBAL_DATE_FORMAT, strtotime($charge->getReservationNightlyDate())) : '' ?>
+                        </td>
+                        <td class="text-right">
+                        <?php
+                            if (($charge->getAddons_type() == BookingAddon::ADDON_TYPE_ACC || $charge->getAddons_type() == BookingAddon::ADDON_TYPE_PARKING) && $charge->getRateName()) {
+                                echo $charge->getRateName();
+                            } elseif($charge->getAddons_value() > 0) {
+                                echo $charge->getAddons_value();
+                                if($charge->getTaxType() == Taxes::TAXES_TYPE_PERCENT) {
+                                    echo ' %';
+                                } elseif($charge->getTaxType() == Taxes::TAXES_TYPE_PER_NIGHT) {
+                                    echo ' p/n';
+                                } elseif($charge->getTaxType() == Taxes::TAXES_TYPE_PER_PERSON) {
+                                    echo ' p/p';
+                                }
+                            }
+                            ?>
+                        </td>
+                        <td class="text-right">
+                        <?php
+                            $isParent = 0;
+
+                            if ($charge->getAddons_type() == BookingAddon::ADDON_TYPE_ACC) {
+                                $isParent = 1;
+                            }
+
+                            if (in_array($charge->getAddons_type(), [
+                                BookingAddon::ADDON_TYPE_ACC,
+                                BookingAddon::ADDON_TYPE_CLEANING_FEE,
+                                BookingAddon::ADDON_TYPE_PARKING
+                            ])) {
+                            echo $charge->getAcc_amount(); ?><input value="<?=$charge->getAcc_amount()?>" type="hidden" class="acc_amount_exist product_value_exist"/>
+                        <?php  } elseif ($charge->getAddons_type() ==  BookingAddon::ADDON_TYPE_DISCOUNT) {
+                            echo $charge->getAcc_amount();?><input value="<?=$charge->getAcc_amount()?>" type="hidden" class="acc_amount_exist discount_value_exist"/>
+                        <?php } else {
+                            echo $charge->getAcc_amount()?><input value="<?=$charge->getAcc_amount()?>" type="hidden" class="acc_amount_exist"/>
+                        <?php } ?>
+                        </td>
+                        <td class="text-center"><?= @ChargeService::$moneyDirectionOptions[$charge->getMoneyDirection()] ?></td>
+                        <td class="text-center"><?= $charge->getCommission() ?></td>
+
+                        <td>
+
+                            <?php
+                                $addonTypesThatAllowedToReverse = [
+                                    BookingAddon::ADDON_TYPE_ACC,
+                                    BookingAddon::ADDON_TYPE_PARKING,
+                                    BookingAddon::ADDON_TYPE_CLEANING_FEE,
+                                    BookingAddon::ADDON_TYPE_DAMAGE,
+                                    BookingAddon::ADDON_TYPE_PENALTY,
+                                    BookingAddon::ADDON_TYPE_DISCOUNT,
+                                    BookingAddon::ADDON_TYPE_COMPENSATION,
+                                    BookingAddon::ADDON_TYPE_MINIBAR,
+                                    BookingAddon::ADDON_TYPE_EXTRA_PERSON,
+                                ];
+
+                                $chargeTypesThatAllowedToReverse = [
+                                    'p', // penalty
+                                    'g'  // ginosi penalty
+                                ];
+
+                                if (in_array($charge->getAddons_type(), $addonTypesThatAllowedToReverse) || in_array($charge->getType(), $chargeTypesThatAllowedToReverse)) {
+                            ?>
+                                    <a href="javascript:void(0)" class="btn btn-sm btn-warning chargedRemoveRow" data-id="<?=$charge->getId()?>" data-is-parent="<?=$isParent?>" data-nightly-id="<?= $charge->getReservationNightlyId() ?>">Reverse</a>
+                            <?php } else { ?>
+                                    <a href="javascript:void(0)" class="btn btn-sm btn-warning chargedRemoveRow hidden" data-id="<?=$charge->getId()?>" data-is-parent="<?=$isParent?>" data-nightly-id="<?= $charge->getReservationNightlyId() ?>">Reverse</a>
+                            <?php } ?>
+                            <input value="0" type="hidden" name="removed[]" class="removedRow"/>
+                        </td>
+                    </tr>
+            <?php
+                    }
+                }
+                $accommodationTotal = number_format($accommodationTotal, 2, '.', '');
+            ?>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3"><b>Total</b></td>
+                        <td class="text-right">
+                            <span id="total_accommodation_span"><?= $accommodationTotal ?></span>
+                            <input type="hidden" value="<?= $accommodationTotal ?>" name="accommodation_total"  id="accommodation_total" />
+                            <input type="hidden" value="" name="product_total_value"  id="product_total_value" />
+                            <input type="hidden" value="" name="discount_total_value"  id="discount_total_value" />
+
+                        </td>
+                        <td colspan="2"></td>
+                        <td>
+                            <a href="javascript:void(0)" class="btn btn-sm btn-primary" id="addNewChargeRow">Add new</a>
+                            <span id="total_charge_span"></span>
+                            <input type="hidden" value="" name="charge_total" id="charge_total" />
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+            <div id="taxes-details" class="hide">
+                <?php if(isset($this->taxes['tot_included'])) { ?>
+                    <div id="tot-details"
+                         data-included="<?=$this->taxes['tot_included']?>"
+                         data-max-duration="<?=$this->taxes['tot_max_duration']?>"
+                         <?php if (!empty($this->taxes['tot_type'])) { ?>
+                         data-value="<?=$this->taxes['tot_apartment']?>"
+                         data-type="<?=$this->taxes['tot_type']?>"
+                         data-exact-value="<?=$this->taxes['tot_exact_value']?>"
+                         data-additional-value="<?= isset($this->taxes['tot_additional_apartment']) ? $this->taxes['tot_additional_apartment'] : 0 ?>"
+                         data-additional-exact-value="<?=$this->taxes['tot_additional_value']?>"
+                         <?php } ?>
+                        ></div>
+                <?php } ?>
+                <?php if(isset($this->taxes['vat_included'])) { ?>
+                    <div id="vat-details"
+                         data-included="<?=$this->taxes['vat_included']?>"
+                         data-max-duration="<?=$this->taxes['vat_max_duration']?>"
+                         <?php if (!empty($this->taxes['vat_type'])) { ?>
+                         data-value="<?=$this->taxes['vat_apartment']?>"
+                         data-type="<?=$this->taxes['vat_type']?>"
+                         data-exact-value="<?=$this->taxes['vat_exact_value']?>"
+                         data-additional-value="<?= isset($this->taxes['vat_additional_apartment']) ? $this->taxes['vat_additional_apartment'] : 0 ?>"
+                         data-additional-exact-value="<?=$this->taxes['vat_additional_value']?>"
+                         <?php } ?>
+                        ></div>
+                <?php } ?>
+                <?php if(isset($this->taxes['city_tax_included'])) { ?>
+                    <div id="city_tax-details"
+                         data-included="<?=$this->taxes['city_tax_included']?>"
+                         data-max-duration="<?=$this->taxes['city_tax_max_duration']?>"
+                         <?php if (!empty($this->taxes['city_tax_type'])) { ?>
+                         data-value="<?=$this->taxes['city_tax_apartment']?>"
+                         data-type="<?=$this->taxes['city_tax_type']?>"
+                         data-exact-value="<?=$this->taxes['city_tax_exact_value']?>"
+                         data-additional-value="<?= isset($this->taxes['city_tax_additional_apartment']) ? $this->taxes['city_tax_additional_apartment'] : 0?>"
+                         data-additional-exact-value="<?=$this->taxes['city_tax_additional_value']?>"
+                         <?php } ?>
+                        ></div>
+                <?php } ?>
+                <?php if(isset($this->taxes['sales_tax_included'])) { ?>
+                    <div id="sales_tax-details"
+                         data-included="<?=$this->taxes['sales_tax_included']?>"
+                         data-max-duration="<?=$this->taxes['sales_tax_max_duration']?>"
+                         <?php if (!empty($this->taxes['sales_tax_type'])) { ?>
+                         data-value="<?=$this->taxes['sales_tax_apartment']?>"
+                         data-type="<?=$this->taxes['sales_tax_type']?>"
+                         data-exact-value="<?=$this->taxes['sales_tax_exact_value']?>"
+                         data-additional-value="<?= isset($this->taxes['sales_tax_additional_apartment']) ? $this->taxes['sales_tax_additional_apartment'] : 0 ?>"
+                         data-additional-exact-value="<?=$this->taxes['sales_tax_additional_value']?>"
+                         <?php } ?>
+                        ></div>
+                <?php } ?>
+            </div>
+
+            <input type="hidden" value="<?=$this->ticketData->getCustomer_currency_rate()?>" id="current_customer_currency_rate" name="current_customer_currency_rate" />
+            <input type="hidden" value="<?=$this->ticketData->isPartnerTaxCommission()?>" id="is-partner-tax-commission" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <fieldset>
+                <legend>Comment</legend>
+            </fieldset>
+            <textarea rows="3" name="charge_comment" id="charge_comment" class="form-control"></textarea>
+        </div>
+    </div>
+    <input type="hidden" name="chargeClick" id="chargeClick" value="" />
+</form>

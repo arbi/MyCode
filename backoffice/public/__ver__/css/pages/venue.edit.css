@@ -1,0 +1,28 @@
+.venue-item-title {
+    width: 220px !important;
+}
+
+.venue-item-description {
+    width: 100% !important;
+}
+
+.venue-item-price {
+    width: 160px !important;
+}
+
+.venue-item-availability {
+    width: 160px !important;
+}
+
+.venue-item-edit-column {
+    width: 70px !important;
+}
+
+#add-item {
+    margin: 0 6px;
+}
+
+.type-label{
+    position: relative;
+    top: 6px;
+}

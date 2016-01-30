@@ -1,0 +1,965 @@
+<?php
+
+use Library\Constants\Objects;
+use Library\Constants\DomainConstants;
+use Library\Constants\Constants;
+use Library\Constants\TextConstants;
+use Library\Utility\Helper;
+use DDD\Service\User\Vacation;
+
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle('Profile');
+
+$this->headLink()
+    ->appendStylesheet($this->basePath() . '/css/lineicons-style.css')
+    ->appendStylesheet($this->basePath() . '/css/pages/profile-page.css');
+
+if ($this->itsMe || $this->profileViewer  || $this->isManager) {
+    $this->InlineScript()->prependFile($this->basePath() . '/js/plugins/jquery.form.min.js', $type = 'text/javascript');
+    $this->InlineScript()->appendFile($this->basePath() . '/js/validation/profile.js');
+    $this->InlineScript()->appendFile($this->basePath() . '/js/pages/profile.js', $type = 'text/javascript');
+}
+
+$userProfile = $this->user->get('user_main');
+$userCountry = '';
+
+foreach ($this->userOptions->get('countries') as $row) {
+    if ($userProfile->getCountry_id() == $row->getId()) {
+        $userCountry = $row->getName();
+    }
+}
+
+foreach ($this->cities as $row) {
+    if ($userProfile->getCity_id() == $row->getId()) {
+        $userCity = $row->getName();
+    }
+}
+$userAdressPermanent = $userProfile->getAddressPermanent();
+$userAdressResidence = $userProfile->getAddressResidence();
+$avatar = Helper::getUserAvatar($userProfile, 'big');
+$managerAvatar = Helper::getUserAvatar($this->myManager);
+$tooltip = 'Lunch break included';
+
+$highAccess = $this->itsMe || $this->profileViewer || $this->isManager;
+
+?>
+<script>
+	var GLOBAL_CHANGE_DETAILS   = '<?= $this->url('backoffice/default', array('controller' => 'profile', 'action' => 'ajax-change-details'))?>';
+    var GLOBAL_CHANGE_PASSWORD  = '<?= $this->url('backoffice/default', array('controller' => 'profile', 'action' => 'ajax-change-password'))?>';
+	var GLOBAL_VACATION         = '<?= '//' . DomainConstants::BO_DOMAIN_NAME . '/ud/universal-dashboard/ajaxvacationrequest' ?>';
+    var GLOBAL_SAVE_GINOCOIN    = '<?= $this->url('backoffice/default', array('controller' => 'profile', 'action' => 'ajax-save-ginocoin'))?>';
+</script>
+<div class="row">
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+
+        <div class="hidden-xs col-sm-3 col-md-2 col-lg-2">
+            <?php if ($this->itsMe || $this->hasHRole) { ?>
+            <form id="avatarForm" method="POST" enctype="multipart/form-data" action="<?=$this->url('backoffice/default', array('controller' => 'upload', 'action'=>'avatar'))?>">
+                <input id="userId" hidden="hidden" style="display: none;" value="<?=$userProfile->getId()?>">
+                <img id="avatar" src="<?= $avatar ?>" class="img-circle" data-toggle='tooltip' title='Click to change profile image'>
+                <input id="avatarFile" type="file" hidden="hidden" style="display: none;" accept='image/*'>
+            </form>
+            <?php } else { ?>
+            <img id="avatar" src="<?= $avatar ?>" class="img-circle pull-left">
+            <?php } ?>
+        </div>
+
+        <div class="col-xs-12 hidden-sm hidden-md hidden-lg">
+            <div class="col-xs-2">
+                <img id="avatar" src="<?= $avatar ?>" class="img-circle" width="60" style="margin-top: 15px; margin-left: -15px;">
+            </div>
+            <div class="col-xs-8">
+                <h1><?=$userProfile->getFirstName().' '.$userProfile->getLastName()?></h1>
+                <h4><?= $userProfile->getPosition() ?></h4>
+            </div>
+            <div class="col-xs-2">
+                <?php if ($userProfile->getBadgeNext()) { ?>
+                <img src="//<?= DomainConstants::BO_DOMAIN_NAME ?>/<?= Constants::APP_VERSION ?>/img/badges/neXt_badge.png" style="margin-top: 17px;"/>
+                <?php } ?>
+            </div>
+        </div>
+
+        <div class="col-xs-12 hidden-sm hidden-md hidden-lg">
+            <div class="col-xs-2"></div>
+            <div class="col-xs-10"></div>
+        </div>
+
+        <div class="col-xs-12 hidden-sm hidden-md hidden-lg">
+            <div class="col-xs-1">
+                <img id="avatar" src="<?=$managerAvatar?>" class="img-circle">
+            </div>
+            <div class="col-xs-11" style="margin-top: 2px;">
+                <h4>&nbsp;&nbsp;<a href="<?=$this->url('backoffice/default', array('controller' => 'profile')).'/'.$this->myManager->getId()?>" class="manager-title"><?=$this->myManager->getFirstName().' '.$this->myManager->getLastName()?></a>, Manager</h4>
+            </div>
+        </div>
+
+
+        <div class="hidden-xs col-sm-6 col-md-4 col-lg-4">
+            <h1><?=$userProfile->getFirstName().' '.$userProfile->getLastName()?></h1>
+            <h3 class="profile-position"><?= $userProfile->getPosition() ?></h3>
+            <div class="profile-manager">
+                <div class="profile-manager-pic">
+                    <img src="<?=$managerAvatar?>" class="img-circle">
+                </div>
+                <h4>
+                    <a href="<?=$this->url('backoffice/default', array('controller' => 'profile')).'/'.$this->myManager->getId()?>" class="manager-title"><?=$this->myManager->getFirstName().' '.$this->myManager->getLastName()?></a>
+                    <span>Manager</span>
+                </h4>
+            </div>
+        </div>
+
+        <div id="badge-container" class="hidden-xs col-sm-3 col-md-6 col-lg-6">
+            <?php if ($userProfile->getBadgeNext()) { ?>
+            <div class="employee-badge-next col-sm-2 col-md-2 col-lg-2">
+                <img src="//<?= DomainConstants::BO_DOMAIN_NAME ?>/<?= Constants::APP_VERSION ?>/img/badges/neXt_badge.png" title="Attended first 3 NeXt Sessions"/>
+            </div>
+            <?php } ?>
+            <div id="weeks-worked-badge" class="hidden-sm">
+                <?= $this->weeksWorked ?><br /><small>WEEKS</small>
+            </div>
+            <div id="years-worked-badge" class="pull-right hidden-sm <?php if(!$this->yearsWorked) {?> greyscale<?php } ?>">
+                <?= $this->yearsWorked ?><br /><small>YEAR<?= $this->yearsWorked == 1 ? '' : 'S' ?></small>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-<?= ($highAccess ? '4' : '6') ?> profile-contact-blocks">
+        <div class="profile-contacts text-center">
+            <span class="profile-li-blocks"><span class="li_mail"></span></span>
+        </div>
+        <div class="profile-contacts-content">
+            <div class="row">
+                <div class="col-sm-6 col-xs-6 text-right">
+                    <p>Department</p>
+                </div>
+                <div class="col-sm-6 col-xs-6">
+                    <p><span class="text-info"><?=$this->departments[$this->userDepartment]?></span></p>
+                </div>
+                <div class="col-sm-6 col-xs-6 text-right">
+                    <p>Email</p>
+                </div>
+                <div class="col-sm-6 col-xs-6">
+                    <p>
+                        <span class="text-info">
+                            <a href="mailto:<?= $userProfile->getEmail()?>" class="hidden-xs">
+                                <?= $userProfile->getEmail()?>
+                            </a>
+                            <a href="mailto:<?= $userProfile->getEmail()?>" class="visible-xs-inline">
+                                <?= substr($userProfile->getEmail(), 0, strpos($userProfile->getEmail(), '@')) ?>
+                            </a>
+                        </span>
+                    </p>
+                </div>
+                <?php if ($userProfile->getPersonal_phone() !== '' AND ($this->itsMe || $this->profileViewer || $this->isManager)) { ?>
+                <div class="col-sm-6 col-xs-6 text-right">
+                    <p>Personal:</p>
+                </div>
+                <div class="col-sm-6 col-xs-6">
+                    <p><span class="text-info">+<?=$userProfile->getPersonal_phone()?></span></p>
+                </div>
+                <?php } ?>
+                <?php if ($userProfile->getBusiness_phone() !== '') { ?>
+                <div class="col-sm-6 col-xs-6 text-right">
+                    <p>Business</p>
+                </div>
+                <div class="col-sm-6 col-xs-6">
+                    <p><span class="text-info">+<?=$userProfile->getBusiness_phone()?></span></p>
+                </div>
+                <?php } ?>
+                <?php if ($userProfile->getEmergency_phone() !== '' AND ($this->itsMe || $this->profileViewer || $this->isManager)) { ?>
+                <div class="col-sm-6 col-xs-6 text-right">
+                    <p>Emergency</p>
+                </div>
+                <div class="col-sm-6 col-xs-6">
+                    <p><span class="text-info">+<?=$userProfile->getEmergency_phone()?></span></p>
+                </div>
+                <?php } ?>
+                <?php if ($userProfile->getHouse_phone() !== '' AND ($this->itsMe || $this->profileViewer || $this->isManager)) { ?>
+                <div class="col-sm-6 col-xs-6 text-right">
+                    <p>House</p>
+                </div>
+                <div class="col-sm-6 col-xs-6">
+                    <p><span class="text-info">+<?= $userProfile->getHouse_phone()?></span></p>
+                </div>
+                <?php } ?>
+                <?php if (!is_null($userProfile->getBirthday())) { ?>
+                    <div class="col-sm-6 col-xs-6 text-right">
+                        <p>Birthday</p>
+                    </div>
+                    <div class="col-sm-6 col-xs-6">
+                        <p><span class="text-info">
+                        <?php
+                        if ($userProfile->getBirthday() != '') {
+                            echo date('j M', strtotime($userProfile->getBirthday()));
+                        }
+                        ?>
+                        </span></p>
+                    </div>
+                <?php } ?>
+                <?php if ($userProfile->getInternalNumber() > 0) { ?>
+                    <div class="col-sm-6 col-xs-6 text-right">
+                        <p>Extension</p>
+                    </div>
+                    <div class="col-sm-6 col-xs-6">
+                        <p>
+                            <span class="text-info"><?= $userProfile->getInternalNumber() ?></span>
+                        </p>
+                    </div>
+                <?php } ?>
+                <div class="col-sm-6 col-xs-6 text-right">
+                    <p>ID</p>
+                </div>
+                <div class="col-sm-6 col-xs-6">
+                    <p><span class="text-info">
+                        <?=str_pad($userProfile->getId(), 3, "0", STR_PAD_LEFT)?>
+                        </span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-<?= ($highAccess ? '4' : '6') ?>">
+        <div class="profile-contacts text-center">
+            <span class="profile-li-blocks"><span class="li_location"></span></span>
+        </div>
+        <div class="profile-contacts-content">
+            <div class="row">
+                <?php if (!empty($userCountry)) { ?>
+                <div class="col-sm-6 col-xs-6 text-right">
+                    <p>Country</p>
+                </div>
+                <div class="col-sm-6 col-xs-6">
+                    <p><span class="text-info"><?=$userCountry?></span></p>
+                </div>
+                <?php } ?>
+                <?php if (!empty($userCity)) { ?>
+                <div class="col-sm-6 col-xs-6 text-right">
+                     <p>City</p>
+                </div>
+                <div class="col-sm-6 col-xs-6">
+                    <p><span class="text-info"><?=$userCity?></span></p>
+                </div>
+                <?php } ?>
+                <?php if (!empty($userAdressPermanent) AND ($highAccess)) { ?>
+                <div class="col-sm-6 col-xs-6 text-right">
+                    <p>Permanent Address:</p>
+                </div>
+                <div class="col-sm-6 col-xs-6">
+                    <p><span class="text-info"><?= $userAdressPermanent?></span></p>
+                </div>
+                <?php } ?>
+                <?php if (!empty($userAdressResidence) AND ($highAccess)) { ?>
+                    <div class="col-sm-6 col-xs-6 text-right">
+                        <p>Residence Address:</p>
+                    </div>
+                    <div class="col-sm-6 col-xs-6">
+                        <p><span class="text-info"><?= $userAdressResidence?></span></p>
+                    </div>
+                <?php } ?>
+                <div class="col-sm-6 col-xs-6 text-right">
+                    <p>Timezone</p>
+                </div>
+                <div class="col-sm-6 col-xs-6">
+                    <p><span class="text-info"><?php echo Helper::getTimezoneOffset('UTC', $userProfile->getTimezone(), true, true); ?></span></p>
+                </div>
+                <div class="col-sm-6 col-xs-6 text-right">
+                    <p>Local Time</p>
+                </div>
+                <div class="col-sm-6 col-xs-6">
+                    <p><span class="text-info"><?= $this->local_datetime?></span></p>
+                </div>
+                <?php if ($this->good_time_to_call) { ?>
+                <div class="col-sm-6 col-xs-6 text-right">
+                    <p>&nbsp;</p>
+                </div>
+                <div class="col-sm-6 col-xs-6">
+                    <p><span class="label label-success">Good time to call</span></p>
+                </div>
+                <?php } ?>
+            </div>
+        </div>
+    </div>
+
+    <?php if ($highAccess) { ?>
+    <div class="col-sm-4">
+        <div class="profile-contacts text-center">
+            <span class="profile-li-blocks"><span class="li_calendar"></span></span>
+        </div>
+        <div class="profile-contacts-content">
+            <div class="row">
+
+                <div  class="clearfix"></div>
+                <br />
+
+                <h4 class="h4-centered">
+                    Vacation
+                </h4>
+                <div class="col-sm-6 col-xs-6 text-right">
+                    <p class="profile-vacation">
+                        <span>Yearly</span>
+                    </p>
+                </div>
+                <div class="col-sm-6 col-xs-6">
+                    <p class="profile-vacation">
+                        <span class="text-info"><?= round($userProfile->getVacation_days_per_year(), 2) ?> days</span>
+                    </p>
+                </div>
+                <div  class="clearfix"></div>
+                <div class="col-sm-6 col-xs-6 text-right">
+                    <p class="profile-vacation">
+                        <span>Taken</span>
+                    </p>
+                </div>
+                <div class="col-sm-6 col-xs-6">
+                    <p class="profile-vacation">
+                        <span class="text-info"><?= round($this->vacationDaysUsedThisYesr, 2) ?> days</span>
+                    </p>
+                </div>
+                <div  class="clearfix"></div>
+                <div class="col-sm-6 col-xs-6 text-right">
+                    <p class="profile-vacation">
+                        <span>Vested</span>
+                    </p>
+                </div>
+                <div class="col-sm-6 col-xs-6">
+                    <p class="profile-vacation">
+                        <span class="text-info"><?= round($userProfile->getVacation_days(), 2) ?> days</span>
+                    </p>
+                </div>
+                <div class="clearfix"></div>
+                <?php if ($this->cashingDays) { ?>
+                <div class="clearfix"></div>
+                <div class="col-sm-12 col-xs-12 text-primary text-center">
+                    <p class="profile-vacation label label-info">
+                        <?= $this->cashingDays ?>
+                    </p>
+                </div>
+                <?php } ?>
+            </div>
+        </div>
+    </div>
+    <?php } ?>
+
+    <!-- Work Schedule Block -->
+    <div class="col-sm-12 user-schedule">
+        <form>
+            <fieldset>
+                <legend>
+                    Schedule <small class="text-muted"><?= Objects::getShift($userProfile->getScheduleType()) ?></small>
+                </legend>
+            </fieldset>
+        </form>
+
+        <ul class="schedule">
+            <?php
+
+            /** @var \DDD\Domain\User\Schedule\Inventory $scheduleDay */
+            foreach ($this->schedule as $scheduleDay) {
+
+                $class = '';
+                $times = $timesColor = '';
+                $workingDay = true;
+
+                if ($scheduleDay->getAvailability() >= 1) {
+                    $class .= 'sch-working';
+                    $timesColor = 'green';
+                } else if ($scheduleDay->getAvailability() >= 0.5) {
+                    $class .= 'sch-halfday';
+                    $timesColor = 'default';
+                    $times .= '<span class=\'label label-warning\'>Part Day Off / ' . $scheduleDay->getVacationTypeText() . '</span><br />';
+                } else {
+                    $workingDay = false;
+
+                    $times .= '<span class=\'label label-danger\'>Time Off / ';
+
+                    switch ($scheduleDay->getVacationType()) {
+                        case 0:
+                            $class .= 'sch-non-working';
+                            $times = '<span class=\'label label-grey\'>Not Working</span>';
+                            break;
+                        case 1: // vacation
+                            $class .= 'sch-vacation';
+                            $times .= $scheduleDay->getVacationTypeText() . '</span>';
+                            break;
+                        case 2: // personal
+                            $class .= 'sch-vacation';
+                            $times .= $scheduleDay->getVacationTypeText() . '</span>';
+                            break;
+                        case 3: // sick
+                            $class .= 'sch-sick';
+                            $times .= $scheduleDay->getVacationTypeText() . '</span>';
+                            break;
+                        case 4: // unpaid
+                            $class .= 'sch-vacation';
+                            $times .= $scheduleDay->getVacationTypeText() . '</span>';
+                            break;
+                    }
+                };
+
+                if ($workingDay) {
+                    $times .= '<span class=\'label label-' . $timesColor . '\'>'
+                        . '<span class=\'glyphicon glyphicon-time\'></span> '
+                        . $scheduleDay->getTimeFrom1() . ' - ' . $scheduleDay->getTimeTo1() . '</span>';
+
+                    if ($scheduleDay->getTimeFrom2()) {
+                        $times .= '<span class=\'label label-' . $timesColor . '\'>'
+                            . '<span class=\'glyphicon glyphicon-time\'></span> '
+                            . $scheduleDay->getTimeFrom2() . ' - ' . $scheduleDay->getTimeTo2() . '</span>';
+                    }
+                }
+            ?>
+
+            <li
+                class="<?= $class; ?>"
+                data-toggle="popover"
+                data-placement="top"
+                title="<?= date(Constants::GLOBAL_DATE_FORMAT . ' l', strtotime($scheduleDay->getDate())); ?>"
+                data-content="<p><?= $times ?></p>"
+
+            >
+                <div><?= date('d', strtotime($scheduleDay->getDate())); ?></div>
+                <div class="month-name"><?= date('M', strtotime($scheduleDay->getDate())); ?></div>
+                <div class="week-name"><?= date('D', strtotime($scheduleDay->getDate())); ?></div>
+            </li>
+            <?php
+                }
+            ?>
+        </ul>
+    </div>
+
+    <!-- Subordinates -->
+    <?php
+        if ($this->manager_subordinates->count()) {
+    ?>
+    <div class="col-sm-12">
+        <form><fieldset><legend>Direct Reports</legend></fieldset></form>
+    </div>
+    <?php
+            foreach ($this->manager_subordinates as $subordinates) {
+                /**
+                 * @var $subordinates \DDD\Domain\User\User
+                 */
+    ?>
+        <div class="col-sm-3">
+            <div class="media subordinates">
+                    <img class="media-object pull-left" src="<?php echo Helper::getUserAvatar($subordinates); ?>" width="28">
+                <div class="media-body">
+                    <a href="<?= $this->url('backoffice/default', array('controller' => 'profile', 'id' => $subordinates->getId())) ?>" target="_blank">
+                        <?= $subordinates->getFirstName() . ' ' . $subordinates->getLastName() ?>
+                    </a>
+                </div>
+            </div>
+        </div>
+    <?php
+            }
+    }
+
+    if ($this->itsMe || $this->profileViewer || $this->isManager) { ?>
+
+        <div class="clearfix"></div>
+    <!-- Teams -->
+    <?php
+        if ($this->userTeams->count()) {
+    ?>
+    <div class="col-sm-12">
+        <form><fieldset><legend>Teams</legend></fieldset></form>
+    </div>
+    <?php
+            foreach ($this->userTeams as $team) {
+    ?>
+        <div class="col-sm-3">
+            <div class="media subordinates">
+                <a class="pull-left" href="#">
+                    <img class="media-object" src="<?php
+                    echo \Library\Utility\Helper::getTeamAvatar(); ?>" width="20">
+                </a>
+                <div class="media-body">
+                    <span><?php echo $team->getName(); ?></span>
+                </div>
+            </div>
+        </div>
+    <?php
+            }
+        }
+    }
+    ?>
+
+    <div class="clearfix"></div>
+
+    <!-- Employee Reservations -->
+    <?php if (($this->itsMe || $this->profileViewer || $this->isManager) && !empty($this->resevations)) { ?>
+        <div class="col-sm-12">
+            <fieldset>
+                <legend>Reservations in <?= date('Y') ?></legend>
+                <table class="table table-bordered table-condensed">
+                    <tbody>
+                    <?php foreach ($this->resevations as $row) { ?>
+                        <tr>
+                            <td><?=$row?></td>
+                        </tr>
+                    <?php } ?>
+                    </tbody>
+                </table>
+            </fieldset>
+        </div>
+    <?php } ?>
+    <div class="clearfix"></div>
+
+
+
+
+    <?php if ($this->itsMe || $this->profileViewer || $this->isManager) { ?>
+        <?php if ($this->vacationRequestNew->count() > 0) { ?>
+            <!-- Vacation -->
+            <div class="col-sm-12 col-xs-12">
+                <fieldset>
+                    <legend>Upcoming Time-Off Requests</legend>
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                        <tr>
+                            <th style="width: 455px">Description</th>
+                            <th>Purpose</th>
+                            <th style="width: 80px">Status</th>
+                            <th style="width: 1%">Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($this->vacationRequestNew as $row) { ?>
+                            <tr>
+                                <td><?php
+                                    if ($row->getType() == Vacation::VACATION_TYPE_SICK || $row->getType() == Vacation::VACATION_TYPE_UNPAID) {
+                                        echo sprintf(
+                                            TextConstants::VACATION_DESCRIPTION_SICK_OR_UNPAID,
+                                            (isset(Objects::getVacationType()[$row->getType()])
+                                                ? Objects::getVacationType()[$row->getType()]
+                                                : 'None'),
+                                            date(Constants::GLOBAL_DATE_FORMAT, strtotime($row->getFrom())),
+                                            date(Constants::GLOBAL_DATE_FORMAT, strtotime($row->getTo())),
+                                            $row->getTotal_number()
+                                        );
+
+                                    } else {
+                                        echo sprintf(
+                                            TextConstants::VACATION_DESCRIPTION,
+                                            (isset(Objects::getVacationType()[$row->getType()])
+                                                ? Objects::getVacationType()[$row->getType()]
+                                                : 'None'),
+                                            date(Constants::GLOBAL_DATE_FORMAT, strtotime($row->getFrom())),
+                                            date(Constants::GLOBAL_DATE_FORMAT, strtotime($row->getTo())),
+                                            $row->getTotal_number()
+                                        );
+                                    }
+                                    ?></td>
+                                <td>
+                                    <?php if ($row->getComment()) { ?>
+                                        <?= $this->info('<span class="glyphicon glyphicon-comment visible-xs-block"></span>', $row->getComment()); ?>
+                                        <span class="hidden-xs">
+                                    <?=$row->getComment()?>
+                                </span>
+                                    <?php } ?>
+                                </td>
+                                <td class="text-center">
+                                    <?php
+                                    if ($row->getIs_approved() == Vacation::VACATION_REQUEST_STATUS_APPROVED) {
+                                        echo 'Approved';
+                                    } elseif ($row->getIs_approved() == Vacation::VACATION_REQUEST_STATUS_REJECTED) {
+                                        echo 'Rejected';
+                                    } elseif ($row->getIs_approved() == Vacation::VACATION_REQUEST_STATUS_PENDING) {
+                                        echo 'Checking';
+                                    } else {
+                                        echo 'Canceled';
+                                    }
+                                    ?>
+                                </td>
+                                <td class="text-center">
+                                    <?php
+                                    if ($this->itsMe || $this->hasHRoleHrVacationEditor) {
+                                        $cancelUrl = '<a href="javascript:void(0)" class="btn btn-xs btn-primary" onclick="vacationsRequset(' . $row->getId() . ',0, this)">Cancel</a>';
+                                    } else {
+                                        $cancelUrl = 'Pending';
+                                    }
+
+                                    if ($row->getIs_approved() == Vacation::VACATION_REQUEST_STATUS_APPROVED) {
+                                        echo ($this->itsMe || $this->hasHRoleHrVacationEditor) ? $cancelUrl : '';
+                                    } elseif ($row->getIs_approved() == Vacation::VACATION_REQUEST_STATUS_REJECTED) {
+                                        echo '';
+                                    } elseif ($row->getIs_approved() == Vacation::VACATION_REQUEST_STATUS_PENDING) {
+                                        echo $cancelUrl;
+                                    } else {
+                                        echo '';
+                                    }
+                                    ?>
+
+                                </td>
+                            </tr>
+                        <?php } ?>
+                        </tbody>
+                    </table>
+                </fieldset>
+            </div>
+        <?php } ?>
+
+        <?php if ($this->vacationRequestOld->count() > 0) { ?>
+            <div class="col-sm-12 col-xs-12">
+                <fieldset>
+                    <legend>Time-Off Requests</legend>
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                        <tr>
+                            <th style="width: 455px">Description</th>
+                            <th class="text-left">Purpose</th>
+                            <th style="width: 80px">Status</th>
+                            <?php if ($this->hasHRoleHrVacationEditor) {?>
+                                <th style="width: 1%">Action</th>
+                            <?php } ?>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php
+                        foreach ($this->vacationRequestOld as $index => $row) {
+                            $collapsed = ($index >= 5);
+                            ?>
+                            <tr<?php print($collapsed ? ' class="collapsed"' : ''); ?>>
+                                <td><?php
+                                    if ($row->getType() == Vacation::VACATION_TYPE_SICK || $row->getType() == Vacation::VACATION_TYPE_UNPAID) {
+                                        echo sprintf(
+                                            TextConstants::VACATION_DESCRIPTION_SICK_OR_UNPAID,
+                                            (isset(Objects::getVacationType()[$row->getType()])
+                                                ? Objects::getVacationType()[$row->getType()]
+                                                : 'None'),
+                                            date(Constants::GLOBAL_DATE_FORMAT, strtotime($row->getFrom())),
+                                            date(Constants::GLOBAL_DATE_FORMAT, strtotime($row->getTo())),
+                                            $row->getTotal_number()
+                                        );
+
+                                    } else {
+                                        echo sprintf(
+                                            TextConstants::VACATION_DESCRIPTION,
+                                            (isset(Objects::getVacationType()[$row->getType()])
+                                                ? Objects::getVacationType()[$row->getType()]
+                                                : 'None'),
+                                            date(Constants::GLOBAL_DATE_FORMAT, strtotime($row->getFrom())),
+                                            date(Constants::GLOBAL_DATE_FORMAT, strtotime($row->getTo())),
+                                            $row->getTotal_number()
+                                        );
+                                    }
+                                    ?></td>
+                                <td>
+                                    <?php if ($row->getComment()) { ?>
+                                        <?= $this->info('<span class="glyphicon glyphicon-comment visible-xs-block"></span>', $row->getComment()); ?>
+                                        <span class="hidden-xs">
+                                    <?=$row->getComment()?>
+                                </span>
+                                    <?php } ?>
+                                </td>
+                                <td class="text-center">
+                                    <?php
+                                    if ($row->getIs_approved() == Vacation::VACATION_REQUEST_STATUS_APPROVED) {
+                                        echo 'Approved';
+                                    } elseif ($row->getIs_approved() == Vacation::VACATION_REQUEST_STATUS_REJECTED) {
+                                        echo 'Rejected';
+                                    } elseif ($row->getIs_approved() == Vacation::VACATION_REQUEST_STATUS_PENDING) {
+                                        echo 'Checking';
+                                    } else {
+                                        echo 'Canceled';
+                                    }
+                                    ?>
+                                </td>
+                                <?php if ($this->hasHRoleHrVacationEditor) {?>
+                                    <td>
+                                        <?php if (
+                                            $row->getIs_approved() == Vacation::VACATION_REQUEST_STATUS_APPROVED
+                                            ||
+                                            $row->getIs_approved() == Vacation::VACATION_REQUEST_STATUS_PENDING
+                                        ) {
+                                            echo '<a href="javascript:void(0)" class="btn btn-xs btn-primary" onclick="vacationsRequset(' . $row->getId() . ',0, this)">Cancel</a>';
+                                         } ?>
+                                    </td>
+                                <?php } ?>
+                            </tr>
+                        <?php } ?>
+                        <tr>
+                            <td colspan="5" class="td-more">More <i class="glyphicon glyphicon-chevron-down"></i></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </fieldset>
+            </div>
+        <?php }?>
+
+    <?php } ?>
+    <div class="clearfix"></div>
+</div>
+
+<div class="container page-actions">
+    <div class="row text-right btn-toolbar">
+        <?php if ($this->itsMe) { ?>
+            <a href="#changePassowrdModal" data-toggle="modal" class="btn btn-primary col-sm-2 col-xs-12 margin-left-10 pull-right">Change Password</a>
+            <a href="#changeDetailsModal" data-toggle="modal" class="btn btn-primary col-sm-2 col-xs-12 pull-right">Change Details</a>
+            <a href="#ginocoinModal" data-toggle="modal" class="btn btn-primary col-sm-2 col-xs-12 pull-right">Ginocoin</a>
+        <?php } ?>
+        <?php if ($this->hasAccessToManage) { ?>
+            <a href="<?= $this->url('backoffice/default', array('controller' => 'user', 'action'=>'edit')) . '/' . $userProfile->getId() ?>" class="btn btn-primary col-sm-2 col-xs-12 pull-right">Manage</a>
+        <?php } ?>
+    </div>
+</div>
+
+<?php if ($this->itsMe) { ?>
+
+<div id="ginocoinModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-primary">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 id="ginocoinModalLabel" class="modal-title">Ginocoin</h4>
+            </div>
+            <div class="modal-body">
+                <form id="ginocoin-form" class="form-horizontal">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <label class="col-sm-4 control-label" for="ginocoin-amount">
+                                <span data-content="The amount that you are ready to spend beyond the Venue Treshold" data-container="body" data-toggle="popover" data-placement="top" class="commented-text" data-animation="true" data-original-title="" title="">Overhead Limit</span>
+                            </label>
+                            <div class="col-sm-6 controls">
+                                <div class="input-group">
+                                    <input name="ginocoin-amount" id="ginocoin-amount" class="form-control text-right amount" placeholder="Amount" type="text" value="<?=$userProfile->getGinocoinLimitAmount()?>" aria-required="true">
+                                    <div class="input-group-btn custom-select currency" data-value="usd">
+                                        <button type="button" class="btn btn-default dropdown-toggle " data-toggle="dropdown" aria-expanded="false" disabled>
+                                        <?=$userProfile->getCurrencyCode()?>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-12">
+                            <label class="col-sm-4 control-label" for="ginocoin-pin">
+                                <span data-content="Your PIN number that will inquired in case the order amount exceeds the Overhead Limit" data-container="body" data-toggle="popover" data-placement="top" class="commented-text" data-animation="true" data-original-title="" title="">PIN</span>
+                            </label>
+                            <div class="col-sm-6 controls">
+                                <input name="ginocoin-pin" id="ginocoin-pin" class="form-control" value="<?=$userProfile->getGinocoinPin()?>">
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-12">
+                            <label class="col-sm-4 control-label">
+                                <span data-content="Amount that you have already spent which will be deducted with your next salary" data-container="body" data-toggle="popover" data-placement="top" class="commented-text" data-animation="true" data-original-title="" title="">Spent so far</span>
+                            </label>
+                            <div class="col-sm-6 checkbox">
+                                <?=$this->ginocoinSpentSoFar?> <?=$userProfile->getCurrencyCode()?>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <div class="clearfix"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <button class="btn btn-primary" id="save-ginocoin" data-loading-text="Save...">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="changeDetailsModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-primary">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 id="myModalLabel" class="modal-title">Change Details</h4>
+            </div>
+            <div class="modal-body">
+                <?php
+                    $form = $this->changeDetailsForm;
+                    $form->prepare();
+                    $form->setAttribute('action', $this->url('backoffice/default', array('controller' => 'profile', 'action'=>'ajaxchangedetails')));
+                    $form->setAttribute('method', 'post');
+                    $form->setAttribute('class', 'form-horizontal');
+                    $form->setAttribute('id', 'changeDetailsForm');
+
+                    echo $this->form()->openTag($form);
+                ?>
+                <div class="form-group">
+                    <label class="control-label col-sm-4" for="address">Permanent Address</label>
+
+                    <div class="col-sm-8">
+                        <?php
+                        $addressPermanent = $form->get('address_permanent');
+                        $addressPermanent->setValue($userAdressPermanent);
+
+                        echo $this->formElement($addressPermanent);
+                        ?>
+                        <label class="control-label help-block"></label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-sm-4" for="address">Residence Address</label>
+
+                    <div class="col-sm-8">
+                        <?php
+                        $addressResidence = $form->get('address_residence');
+                        $addressResidence->setValue($userAdressResidence);
+
+                        echo $this->formElement($addressResidence);
+                        ?>
+                        <label class="control-label help-block"></label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-sm-4" for="businessphone">
+                        <?= $this->info('Business Phone', 'Only this phone number will be shared with the entire organization.'); ?>
+                    </label>
+
+                    <div class="col-sm-8">
+                        <div class="input-group">
+                            <span class="input-group-addon">+</span>
+                            <?php
+                            $businessphone = $form->get('businessphone');
+                            $businessphone->setValue($userProfile->getBusiness_phone());
+
+                            echo $this->formInput($businessphone);
+                            ?>
+                        </div>
+                        <label class="control-label help-block"></label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-sm-4" for="personalphone">Personal Phone</label>
+
+                    <div class="col-sm-8">
+                        <div class="input-group">
+                            <span class="input-group-addon">+</span>
+                            <?php
+                            $personalphone = $form->get('personalphone');
+                            $personalphone->setValue($userProfile->getPersonal_phone());
+
+                            echo $this->formInput($personalphone);
+                            ?>
+                        </div>
+                        <label class="control-label help-block"></label>
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    <label class="control-label col-sm-4" for="emergencyphone">Emergency Phone</label>
+
+                    <div class="col-sm-8">
+                        <div class="input-group">
+                            <span class="input-group-addon">+</span>
+                            <?php
+                            $emergencyphone = $form->get('emergencyphone');
+                            $emergencyphone->setValue($userProfile->getEmergency_phone());
+
+                            echo $this->formInput($emergencyphone);
+                            ?>
+                        </div>
+                        <label class="control-label help-block"></label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label col-sm-4" for="housephone">House Phone</label>
+
+                    <div class="col-sm-8">
+                        <div class="input-group">
+                            <span class="input-group-addon">+</span>
+                            <?php
+                            $housephone = $form->get('housephone');
+                            $housephone->setValue($userProfile->getHouse_phone());
+
+                            echo $this->formInput($housephone);
+                            ?>
+                        </div>
+                        <label class="control-label help-block"></label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label col-sm-4" for="birthday">Birthday</label>
+
+                    <div class="col-sm-8">
+                        <?php
+                        $birthday = $form->get('birthday');
+                        $birthday->setValue(date(Constants::GLOBAL_DATE_FORMAT, strtotime($userProfile->getBirthday())));
+
+                        echo $this->formInput($birthday);
+                        ?>
+                        <label class="control-label help-block"></label>
+                    </div>
+                </div>
+                <?php
+                    $userId = $form->get('userId');
+                    $userId->setValue($userProfile->getId());
+
+                    echo $this->formInput($userId);
+                ?>
+                <?php echo $this->form()->closeTag() ?>
+                <div class="clearfix"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <button class="btn btn-primary" id="change_details">Change</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="changePassowrdModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-primary">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 id="myModalLabel" class="modal-title">Change Password</h4>
+            </div>
+            <div class="modal-body">
+                <?php
+                    $form = $this->changePasswordForm;
+                    $form->prepare();
+                    $form->setAttribute('action', $this->url('backoffice/default', array('controller' => 'profile', 'action'=>'ajaxchangepassword')));
+                    $form->setAttribute('method', 'post');
+                    $form->setAttribute('class', 'form-horizontal');
+                    $form->setAttribute('id', 'changePasswordForm');
+
+                    echo $this->form()->openTag($form);
+                ?>
+                <div class="form-group">
+                    <label class="control-label col-sm-4" for="currentPassword">Current password</label>
+                    <div class="col-sm-6">
+                        <?php echo $this->formInput($form->get('currentPassword')); ?>
+                        <label class="control-label help-block"></label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-sm-4" for="password">New password</label>
+                    <div class="col-sm-6">
+                        <?php echo $this->formInput($form->get('password')); ?>
+                        <label class="control-label help-block"></label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-sm-4" for="password">Confirm new password</label>
+
+
+                    <div class="col-sm-6">
+                        <?php echo $this->formInput($form->get('passwordVerify')); ?>
+                        <label class="control-label help-block"></label>
+                    </div>
+                </div>
+                <?php
+                    $userId = $form->get('userId');
+                    $userId->setValue($userProfile->getId());
+
+                    echo $this->formInput($userId);
+                ?>
+                <?php echo $this->form()->closeTag() ?>
+                <div class="clearfix"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <button class="btn btn-primary" id="change_password">Change</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php } ?>

@@ -1,0 +1,81 @@
+{
+    "event": "suiteStart",
+    "suite": "",
+    "tests": 4
+}{
+    "event": "suiteStart",
+    "suite": "LIB_DDD_Service_Website",
+    "tests": 2
+}{
+    "event": "suiteStart",
+    "suite": "LibraryTest\\DDD\\Service\\Website\\BookingTest",
+    "tests": 2
+}{
+    "event": "testStart",
+    "suite": "LibraryTest\\DDD\\Service\\Website\\BookingTest",
+    "test": "LibraryTest\\DDD\\Service\\Website\\BookingTest::testFilterReservationData"
+}{
+    "event": "test",
+    "suite": "LibraryTest\\DDD\\Service\\Website\\BookingTest",
+    "test": "LibraryTest\\DDD\\Service\\Website\\BookingTest::testFilterReservationData",
+    "status": "pass",
+    "time": 0.048943996429443,
+    "trace": [],
+    "message": "",
+    "output": ""
+}{
+    "event": "testStart",
+    "suite": "LibraryTest\\DDD\\Service\\Website\\BookingTest",
+    "test": "LibraryTest\\DDD\\Service\\Website\\BookingTest::testBookingProcess"
+}{
+    "event": "test",
+    "suite": "LibraryTest\\DDD\\Service\\Website\\BookingTest",
+    "test": "LibraryTest\\DDD\\Service\\Website\\BookingTest::testBookingProcess",
+    "status": "pass",
+    "time": 0.90056300163269,
+    "trace": [],
+    "message": "",
+    "output": ""
+}{
+    "event": "suiteStart",
+    "suite": "WEB_Index_Controller",
+    "tests": 1
+}{
+    "event": "suiteStart",
+    "suite": "WebsiteTest\\Website\\Controller\\IndexControllerTest",
+    "tests": 1
+}{
+    "event": "testStart",
+    "suite": "WebsiteTest\\Website\\Controller\\IndexControllerTest",
+    "test": "WebsiteTest\\Website\\Controller\\IndexControllerTest::testIndexActionCanBeAccessed"
+}{
+    "event": "test",
+    "suite": "WebsiteTest\\Website\\Controller\\IndexControllerTest",
+    "test": "WebsiteTest\\Website\\Controller\\IndexControllerTest::testIndexActionCanBeAccessed",
+    "status": "pass",
+    "time": 0.091315984725952,
+    "trace": [],
+    "message": "",
+    "output": ""
+}{
+    "event": "suiteStart",
+    "suite": "WEB_Booking_Controller",
+    "tests": 1
+}{
+    "event": "suiteStart",
+    "suite": "WebsiteTest\\Website\\Controller\\BookingControllerTest",
+    "tests": 1
+}{
+    "event": "testStart",
+    "suite": "WebsiteTest\\Website\\Controller\\BookingControllerTest",
+    "test": "WebsiteTest\\Website\\Controller\\BookingControllerTest::testIndexActionCanBeAccessed"
+}{
+    "event": "test",
+    "suite": "WebsiteTest\\Website\\Controller\\BookingControllerTest",
+    "test": "WebsiteTest\\Website\\Controller\\BookingControllerTest::testIndexActionCanBeAccessed",
+    "status": "pass",
+    "time": 0.037865161895752,
+    "trace": [],
+    "message": "",
+    "output": ""
+}

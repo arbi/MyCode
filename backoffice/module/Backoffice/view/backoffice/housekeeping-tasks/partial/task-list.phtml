@@ -1,0 +1,161 @@
+<?php
+use \DDD\Service\Task;
+use \DDD\Service\Team\Team;
+use DDD\Service\User as UserService;
+use DDD\Service\Booking\BookingTicket;
+?>
+
+<?php if ($this->tasksByDays) { ?>
+    <?php foreach ($this->tasksByDays as $key => $tasks) { ?>
+        <br>
+        <h3>
+            <?= ($key == $this->currentDate ? '<span class="text-danger">Today</span> ' : date('l', strtotime($key))); ?>
+            <small><?=  date('M j, Y', strtotime($key)) ?></small>
+        </h3>
+        <?php foreach ($tasks as $task) { ?>
+            <?php $taskFaded = ($task['task_status'] == Task::STATUS_VERIFIED || $task['task_status'] == Task::STATUS_CANCEL); ?>
+            <div class="task-panel panel panel-default <?= $taskFaded ? 'panel-faded': '' ?>" data-task-id="<?= $task['id'] ?>" data-task-type="<?= $task['task_type'] ?>">
+                <div class="panel-heading">
+                    <div class="row hidden-print">
+                        <div class="col-sm-12 panel-title-container">
+                            <div class="row">
+                                <div class="col-xs-12 col-sm-5">
+                                    <span class="label label-default status-label text-size-11 vertical-center status-icon-small-padding "><?php echo Task::getTaskStatus()[$task['task_status']] ?></span>
+                                    <?php if ($task['task_type'] == Task::TYPE_KEYFOB || $task['task_type'] == Task::TYPE_APT_SERVICE) { ?>
+                                        <span class="label label-danger label-icon">
+                                            <span class="material-icons icon-key" title="Key and/or occupancy change task">vpn_key</span>
+                                        </span>
+                                    <?php } ?>
+
+                                    <?php if (isset($task['sameDayCheckin']) && $task['sameDayCheckin']) { ?>
+                                        <span data-toggle="tooltip" data-original-title="Same day check-in" class="sameday-checkin label label-danger label-icon">
+                                            <span class="glyphicon glyphicon-time" title="Same day Check-in"></span>
+                                        </span>
+                                    <?php } ?>
+
+                                    <?php if (isset($task['arrival_status']) && $task['arrival_status'] == BookingTicket::BOOKING_ARRIVAL_STATUS_CHECKED_OUT) { ?>
+                                        <span data-toggle="tooltip" data-original-title="Checked Out" class="checked-out label label-danger label-icon">
+                                            <span class="glyphicon glyphicon-log-out"></span>
+                                        </span>
+                                    <?php } ?>
+                                    <span class="material-icons text-danger icon-incident visible-xs-inline-block <?= ($task['incidents']) ? '': ' hide'?>" title="This task has an incident report">warning</span>
+                                    <h3 class="visible-xs-block">
+                                        <?= $task['apartment_name'] ?>
+                                        <small class="text-muted">(Unit <?= $task['unit_number'] ?>)</small>
+                                    </h3>
+                                    <span class="hidden-xs">
+                                        <?= $task['apartment_name'] ?>
+                                        <small class="text-muted">(Unit <?= $task['unit_number'] ?>)</small>
+                                    </span>
+                                    <span class="material-icons text-danger icon-incident hidden-xs <?= ($task['incidents']) ? '': ' hide'?>" title="This task has an incident report">warning</span>
+                                </div>
+
+                                <div class="col-sm-3 task-responsible-container">
+                                    <?php if ($task['task_type'] != Task::TYPE_APT_SERVICE) { ?>
+                                        <?php if (($this->isGlobal || $this->roleInTeam != Team::STAFF_MEMBER)) { ?>
+                                            <select data-value="<?= $task['responsible_id'] ?>" class="task-responsible form-control custom-selectize<?= '-' . $this->category ?>" data-placeholder="Responsible Unassigned" <?= $taskFaded ? 'disabled="disabled"' : '' ?>></select>
+                                        <?php } else if ($task['responsible_id']) { ?>
+
+                                            <div class="selectize-control form-control">
+                                                <div class="selectize-input disabled">
+                                                    <div>
+                                                        <span class="label label-primary"> R </span>
+                                                        <img src="<?= $this->allUsers[$task['responsible_id']]['avatar'] ?>" title="<?= $this->allUsers[$task['responsible_id']]['name'] ?>" class="ginosik-avatar-selectize">
+                                                        <?= $this->allUsers[$task['responsible_id']]['name']; ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php } ?>
+                                    <?php } else {
+                                        if ($this->isGlobal || $this->roleInTeam == Team::STAFF_MANAGER) { ?>
+                                            <select data-value="<?= $task['responsible_id'] ?>" class="task-responsible custom-selectize<?= '-' . $this->category ?> form-control" data-placeholder="Responsible Unassigned"></select>
+                                        <?php } else {
+                                            if ($this->roleInTeam == Team::STAFF_OFFICER && !$task['responsible_id']) { ?>
+                                                <button class="btn btn-primary btn-responsible-assign-to-me">
+                                                    Assign To Me
+                                                </button>
+                                            <?php } else if ($task['responsible_id']) { ?>
+                                                <div class="selectize-control form-control">
+                                                    <div class="selectize-input disabled">
+                                                        <div>
+                                                            <span class="label label-primary"> V </span>
+                                                            <img src="<?= $this->allUsers[$task['responsible_id']]['avatar'] ?>" title="<?= $this->allUsers[$task['responsible_id']]['name'] ?>" class="ginosik-avatar-selectize">
+                                                            <?= $this->allUsers[$task['responsible_id']]['name']; ?>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <?php }
+                                        } } ?>
+                                </div>
+
+                                <div class="col-sm-3">
+                                    <?php if ($task['task_type'] == Task::TYPE_APT_SERVICE) { ?>
+                                        <div class="selectize-control form-control">
+                                            <div class="selectize-input disabled">
+                                                <div>
+                                                    <span class="label label-primary"> V </span>
+                                                    <img src="<?= $this->allUsers[$task['verifier_id']]['avatar'] ?>" title="<?= $this->allUsers[$task['verifier_id']]['name'] ?>" class="ginosik-avatar-selectize">
+                                                    <?= $this->allUsers[$task['verifier_id']]['name']; ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php } else {
+                                        if ($this->isGlobal || $this->roleInTeam == Team::STAFF_MANAGER) {?>
+                                            <select data-value="<?= $task['verifier_id'] ?>" class="task-verifier form-control custom-selectize<?= '-' . $this->category ?>" data-placeholder="Verifier Unassigned" <?= $taskFaded ? 'disabled="disabled"' : '' ?>></select>
+                                        <?php } else if ($task['verifier_id']) { ?>
+                                            <div class="selectize-control form-control">
+                                                <div class="selectize-input disabled">
+                                                    <div>
+                                                        <span class="label label-primary"> V </span>
+                                                        <img src="<?= $this->allUsers[$task['verifier_id']]['avatar'] ?>" title="<?= $this->allUsers[$task['verifier_id']]['name'] ?>" class="ginosik-avatar-selectize">
+                                                        <?= $this->allUsers[$task['verifier_id']]['name']; ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php } else if ($this->roleInTeam == Team::STAFF_OFFICER) { ?>
+                                            <button class="btn btn-primary btn-assign-to-me">
+                                                Assign To Me
+                                            </button>
+                                        <?php }
+                                    } ?>
+                                </div>
+
+                                <div class="col-sm-1 col-xs-12 panel-toggle text-center">
+                                    <span class="glyphicon glyphicon-triangle-bottom accordion-toggle collapsed pull-right hidden-xs" data-toggle="collapse"></span>
+                                    <span class="glyphicon glyphicon-triangle-bottom accordion-toggle collapsed visible-xs-block" data-toggle="collapse"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="panel-collapse collapse">
+                    <div class="panel-body task-body" id="task-detail-<?= $task['id'] ?>">
+                    </div>
+                </div>
+            </div>
+        <?php } ?>
+    <?php } ?>
+
+    <div id="incident-report-other-modal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-danger">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="myModalLabel">
+                        Other Incident Report
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <textarea class="form-control" rows="4" id="other-incident-description" placeholder="Incident report description"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                    <a class="btn btn-danger" id="incident-report-other-button" href="#">Submit</a>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php }  else { ?>
+    <div class="alert alert-success">There are no tasks in <b><?= ucfirst($this->category) ?></b> section.</div>
+<?php } ?>

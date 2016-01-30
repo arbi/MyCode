@@ -1,0 +1,64 @@
+<?php
+	$this->layout()->viewTitle  = 'People Teams';
+	$this->headTitle()->setSeparator(' - ');
+	$this->headTitle($this->layout()->viewTitle);
+	$this->layout()->breadcrumb = $this->breadcrumb([
+		['Administration'],
+		['People Teams']
+	]);
+
+    $this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css')
+        ->appendStylesheet($this->basePath() . '/css/pages/team.css');
+
+    $this->InlineScript()
+        ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+        ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+        ->appendFile($this->basePath() . '/js/pages/team.js');
+?>
+<script>
+    DATATABLE_AJAX_SOURCE = "<?= $ajaxSourceUrl ?>";
+</script>
+
+<div id="status-switch">
+    <div class="btn-group fn-buttons pull-right">
+        <a href="#all" class="btn btn-sm btn-default" data-status="all">All</a>
+        <a href="#active" class="btn btn-sm btn-default active" data-status="active">Active</a>
+        <a href="#inactive" class="btn btn-sm btn-default" data-status="inactive">Inactive</a>
+    </div>
+    <input type="hidden" name="show_status" id="show-status" value="1" />
+</div>
+
+<table class="table table-striped table-bordered table-condensed table-hover datatables">
+    <thead>
+        <tr>
+            <th>ST</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Size</th>
+            <th>Dep.</th>
+            <th>Notif.</th>
+            <th>Front.</th>
+            <th>Sec.</th>
+            <th>Task.</th>
+            <th>Proc.</th>
+            <th>Hiring</th>
+            <th>Storage</th>
+            <th> &nbsp;</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+<?php if ($global) { ?>
+<div class="container page-actions">
+	<div class="row text-right">
+	    <a
+            href="<?= $this->url('backoffice/default', ['controller' => 'team', 'action' => 'edit'])?>"
+            class="btn btn-primary col-sm-2 col-xs-12 pull-right"
+        >
+            Add New Team
+        </a>
+	</div>
+</div>
+<?php } ?>

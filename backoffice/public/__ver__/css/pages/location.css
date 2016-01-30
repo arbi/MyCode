@@ -1,0 +1,25 @@
+div.active-country-list-container ul {
+    padding-left: 0;
+    display: block;
+    width: 12em;
+    list-style-type: none;
+}
+
+div.active-country-list-container ul li {
+    float: left;
+    width: 10em;
+}
+
+div.active-country-list-container br {
+    clear: left;
+}
+
+div.active-country-list-container {
+    margin-bottom: 1em;
+}
+
+.selectize-control.single .selectize-input:default,
+.selectize-control.single .selectize-input:after
+{
+    border-color: transparent !important;
+}

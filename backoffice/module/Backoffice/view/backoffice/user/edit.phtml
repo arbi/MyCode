@@ -1,0 +1,1053 @@
+<?php
+
+use Library\Constants\Constants;
+
+$form           = $this->userForm;
+$isUserDisabled = (int)$form->get('disabled')->getValue();
+$systemUser     = (int)$form->get('system')->getValue();
+$externalUser     = (int)$form->get('external')->getValue();
+
+if ($this->editableUserId) {
+	$fullName = $form->get('firstname')->getValue() . ' ' . $form->get('lastname')->getValue();
+}
+
+$subject = ($this->editableUserId > 0 ? $fullName : 'Add User');
+$title = $subject;
+
+if ($this->editableUserId) {
+    $title = $subject . '&nbsp;<span class="label label-success" style="font-size : 10px;">Active</span>';
+
+    if ($isUserDisabled) {
+        $title = $subject . '&nbsp;<span class="label label-default" style="font-size : 10px;">Inactive</span>';
+    }
+
+    if ($systemUser) {
+        $title .= '&nbsp;<span class="label label-warning" style="font-size : 10px;">System</span>';
+    }
+
+    if ($externalUser) {
+        $title .= '&nbsp;<span class="label label-warning" style="font-size : 10px;">External</span>';
+    }
+}
+
+
+$this->layout()->viewTitle = $title;
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($subject);
+
+?>
+<script>
+    var GLOBAL_EDITABLE_USER_ID                = <?= $this->editableUserId;?>;
+    var GLOBAL_GET_CITY                        = '<?= $this->url('backoffice/default', ['controller' => 'user', 'action' => 'ajaxgetcity'])?>';
+    var GLOBAL_USER_SAVE                       = '<?= $this->url('backoffice/default', ['controller' => 'user', 'action' => 'ajaxsave'])?>';
+    var GLOBAL_USER_DELETE                     = '<?= $this->url('backoffice/default', ['controller' => 'user', 'action' => 'ajaxdelete'])?>';
+    var GLOBAL_USER_ACTIVATE                   = '<?= $this->url('backoffice/default', ['controller' => 'user', 'action' => 'ajaxactivate'])?>';
+    var GLOBAL_USER_ACTIVATE_ALERT             = '<?= $this->url('backoffice/default', ['controller' => 'user', 'action' => 'ajax-activate-alert'])?>';
+    var GLOBAL_USER_ACCOUNT_EDIT               = '<?= $this->url('backoffice/default', ['controller' => 'user', 'action' => 'ajax-user-account-edit'])?>';
+    var GLOBAL_USER_SALARY_SCHEME_EDIT      = '<?= $this->url('backoffice/default', ['controller' => 'user', 'action' => 'ajax-salary-scheme-edit'])?>';
+    var GLOBAL_GET_DESCR                       = '<?= $this->url('backoffice/default', ['controller' => 'user', 'action' => 'ajaxgetdescripton'])?>';
+    var GLOBAL_SEND_MAIL                       = '<?= $this->url('backoffice/default', ['controller' => 'user', 'action' => 'ajax-send'])?>';
+    var GLOBAL_CLONE_USER                      = '<?= $this->url('backoffice/default', ['controller' => 'user', 'action' => 'ajax-clone-user'])?>';
+    var GLOBAL_EDIT                            = '<?= $this->editableUserId;?>';
+    var EVALUATION_INFORM                      = '<?= $this->url('backoffice/default', ['controller' => 'user', 'action' => 'ajax-inform-evaluation'])?>';
+    var SAVE_SCHEDULE                          = '<?= $this->url('schedule', ['controller' => 'user-schedule', 'action' => 'ajax-save-schedule'])?>';
+    var historyAaData                          = <?= $this->historyData ?>;
+    var DATATABLE_USER_ACCOUNTS_AJAX_SOURCE    = '<?= $this->url('backoffice/default', ['controller' => 'user', 'action' => 'ajax-get-user-account-list', 'id' => $this->editableUserId]) ?>';
+    var DATATABLE_USER_ACCOUNTS_ARCHIVE        = '<?= $this->url('backoffice/default', ['controller' => 'user', 'action' => 'ajax-set-user-account-archive']) ?>';
+    var DATATABLE_SALARY_SCHEME_AJAX_SOURCE    = '<?= $this->url('backoffice/default', ['controller' => 'user', 'action' => 'ajax-get-salary-scheme-list', 'id' => $this->editableUserId]) ?>';
+    var DATATABLE_SALARY_SCHEME_ARCHIVE        = '<?= $this->url('backoffice/default', ['controller' => 'user', 'action' => 'ajax-set-salary-scheme-archive']) ?>';
+    var SALARY_SCHEME_ARCHIVE_STATUS           = '<?= \DDD\Service\User\SalaryScheme::SALARY_SCHEME_STATUS_ARCHIVED ?>';
+    var GLOBAL_ADD_DEVICE_URI                  = '<?= $this->url('backoffice/default', ['controller' => 'user', 'action' => 'ajax-add-device']) ?>';
+    var GLOBAL_UNLINK_DEVICE_URI                  = '<?= $this->url('backoffice/default', ['controller' => 'user', 'action' => 'ajax-unlink-device']) ?>';
+</script>
+<?php
+    $this->layout()->breadcrumb = $this->breadcrumb([
+        ['Administration'],
+        ['People Directory', $this->url('backoffice/default', ['controller' => 'company-directory', 'action' => 'index'])],
+        [$subject]
+    ]);
+
+
+    $this->InlineScript()
+        ->appendFile($this->basePath() . '/js/validation/user.management.js')
+        ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+        ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+        ->appendFile($this->basePath() . '/js/plugins/jqwidgets/jqxcore.js')
+        ->appendFile($this->basePath() . '/js/plugins/jqwidgets/jqxbuttons.js')
+        ->appendFile($this->basePath() . '/js/plugins/jqwidgets/jqxscrollbar.js')
+        ->appendFile($this->basePath() . '/js/plugins/jqwidgets/jqxpanel.js')
+        ->appendFile($this->basePath() . '/js/plugins/jqwidgets/jqxtree.js')
+        ->appendFile($this->basePath() . '/js/plugins/jqwidgets/jqxcheckbox.js')
+        ->appendFile($this->basePath() . '/js/plugins/fnReloadAjax.js')
+        ->appendFile($this->basePath() . '/js/pages/user.js');
+
+
+    $this->headLink()
+        ->appendStylesheet($this->basePath() . '/css/datatable/datatables.bootstrap.css')
+        ->appendStylesheet($this->basePath() . '/css/datatable/datatables.responsive.css')
+        ->appendStylesheet($this->basePath() . '/css/plugins/jqwidgets/jqx.base.css')
+        ->appendStylesheet($this->basePath() . '/css/pages/user.edit.css');
+
+    $form->prepare();
+    $form->setAttribute('action', $this->url('backoffice/default', ['controller' => 'user', 'action' => 'edit']));
+    $form->setAttribute('method', 'post');
+    $form->setAttribute('class', 'form-horizontal');
+    $form->setAttribute('id', 'user-management');
+
+
+?>
+<?php
+echo $this->form()->openTag($form);
+?>
+<div class="row">
+    <div class="col-sm-12">
+        <!-- Tabs : START -->
+        <ul class="nav nav-tabs tabs-general">
+            <li class="active">
+                <a href="#personal" data-toggle="tab" id="personal-tab" data-tab-name="personal">
+                    Personal
+                </a>
+            </li>
+            <li>
+                <a href="#administration" data-toggle="tab" id="administration-tab" data-tab-name="personal">
+                    Administration
+                </a>
+            </li>
+
+            <?php if ($this->hasUserManagement || $this->hasPermissions) { ?>
+            <li>
+                <a href="#permission" data-toggle="tab" id="permission-tab" data-tab-name="permission">
+                    Permissions
+                </a>
+            </li>
+            <?php } ?>
+            <?php if ($this->userTeams->count()) { ?>
+            <li>
+                <a href="#schedule" data-toggle="tab" id="schedule-tab" data-tab-name="schedule">
+                    Schedule
+                </a>
+            </li>
+            <?php } ?>
+
+            <?php if($this->editableUserId) {?>
+                <?php if (($this->hasGlobalEvaluationManagerRole || $this->isManager) && !$systemUser) { ?>
+            <li>
+                <a href="#evaluations" data-toggle="tab" id="evaluations-tab" data-tab-name="evaluations">
+                    Evaluations
+                </a>
+            </li>
+            <li style="display: none" class="tab-highlights">
+                <a href="#add-evaluation" data-toggle="tab" id="add-evaluation-tab" data-tab-name="add-evaluation">
+                    New Evaluation
+                </a>
+            </li>
+            <li style="display: none" class="tab-highlights">
+                <a href="#plan-evaluation" data-toggle="tab" id="plan-evaluation-tab" data-tab-name="plan-evaluation">
+                    Plan Evaluation
+                </a>
+            </li>
+                <?php } ?>
+
+                <?php if (($this->hasUserManagement || $this->hasHR) && !$systemUser) { ?>
+            <li>
+                <a href="#documents" data-toggle="tab" id="documents-tab" data-tab-name="documents">
+                    Documents
+                </a>
+            </li>
+            <?php if ($this->hasSalaryManagerRole || $this->hasSalaryViewerRole) { ?>
+            <li>
+                <a href="#salary" data-toggle="tab" id="salary-tab" data-tab-name="salary">
+                    Salary
+                </a>
+            </li>
+            <?php } ?>
+            <?php if ($this->hasDigitalIdManagerRole) { ?>
+            <li>
+                <a href="#devices" data-toggle="tab" id="devices-tab" data-tab-name="devices">
+                    DigiMe
+                </a>
+            </li>
+            <?php } ?>
+            <li style="display: none" class="tab-highlights">
+                <a href="#add-document" data-toggle="tab" id="add-document-tab" data-tab-name="add-document">
+                    New Document
+                </a>
+            </li>
+            <?php if ($this->hasSalaryManagerRole) { ?>
+            <li style="display: none" class="tab-highlights">
+                <a href="#edit-account" data-toggle="tab" id="edit-account-tab" data-tab-name="edit-account">
+                    Edit Account
+                </a>
+            </li>
+            <li style="display: none" class="tab-highlights">
+                <a href="#edit-scheme" data-toggle="tab" id="edit-scheme-tab" data-tab-name="edit-scheme">
+                    Edit Schedule
+                </a>
+            </li>
+            <?php } ?>
+                <?php } ?>
+            <li class="pull-right">
+                <a href="#history" data-toggle="tab" id="history-tab" data-tab-name="history">
+                    <span class="glyphicon glyphicon-list-alt"></span> History
+                </a>
+            </li>
+            <?php } ?>
+        </ul>
+        <!-- Tabs : END -->
+
+        <div class="tab-content">
+            <div class="tab-pane active" id="personal">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <fieldset name="general">
+                            <legend>General</legend>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="firstname">First Name <?php echo $this->required(); ?></label>
+                                <div class="col-sm-8">
+                                    <?=$this->formInput($form->get('firstname'))?>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="lastname">Last Name <?php echo $this->required(); ?></label>
+                                <div class="col-sm-8">
+                                    <?=$this->formInput($form->get('lastname'))?>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="birthday">Birthday</label>
+                                <div class="col-sm-8">
+                                    <?=$this->formInput($form->get('birthday'))?>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="email">Email / Login <?php echo $this->required(); ?></label>
+                                <div class="col-sm-8">
+                                    <?=$this->formInput($form->get('email'))?>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="password">Password <?php echo $this->required(); ?></label>
+                                <div class="col-sm-8">
+                                    <?=$this->formInput($form->get('password'))?>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="timezone">
+                                    <?= $this->info('Timezone', 'Timezone in which is the user.'); ?>
+                                    <?= $this->required(); ?>
+                                </label>
+                                <div class="col-sm-8">
+                                    <?=$this->formElement($form->get('timezone'))?>
+                                </div>
+                            </div>
+                            <?php if ($this->editableUserId) { ?>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label" for="last_login">Last login</label>
+                                    <div class="col-sm-8">
+                                        <?=$this->formElement($form->get('last_login'))?>
+                                    </div>
+                                </div>
+                            <?php } ?>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="internal_number">Extension</label>
+                                <div class="col-sm-8">
+                                    <?= $this->formInput($form->get('internal_number')) ?>
+                                </div>
+                            </div>
+                            <?php if($this->editableUserId) { ?>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="last_login">Backoffice ID</label>
+                                <div class="col-sm-8 checkbox">
+                                    <?=$this->editableUserId?>
+                                </div>
+                            </div>
+                            <?php } ?>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="external">
+                                External
+                                </label>
+                                <div class="col-sm-8 checkbox">
+                                    <?=$this->formCheckbox($form->get('external'))?>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                    <div class="col-sm-6">
+                        <fieldset name="general">
+                            <legend>Contact</legend>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="businessphone">
+                                    <?= $this->info('Business Phone', 'Only this phone number will be shared with the entire organization.'); ?>
+                                </label>
+                                <div class="col-sm-8">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">+</span>
+                                        <?=$this->formInput($form->get('businessphone'))?>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="personalphone">Personal Phone</label>
+                                <div class="col-sm-8">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">+</span>
+                                        <?=$this->formInput($form->get('personalphone'))?>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="emergencyphone">Emergency Phone</label>
+                                <div class="col-sm-8">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">+</span>
+                                        <?=$this->formInput($form->get('emergencyphone'))?>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="housephone">House Phone</label>
+                                <div class="col-sm-8">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">+</span>
+                                        <?=$this->formInput($form->get('housephone'))?>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="alt_email">Alternative Email</label>
+                                <div class="col-sm-8">
+                                    <?=$this->formInput($form->get('alt_email'))?>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="asana_id">
+                                    <?= $this->info('Asana ID', 'If this user is an Asana user, adding their ID here will enable them to track their feedback to the Engineering team, click "Fetch" after filling in the email to add their Asana ID.'); ?>
+                                </label>
+                                <div class="col-sm-8">
+                                    <div class="input-group">
+                                        <?=$this->formInput($form->get('asana_id'))?>
+                                        <span class="input-group-btn">
+                                            <a class="btn btn-primary check-asana-id" data-url="<?php echo $this->url('backoffice/default', ['controller' => 'user', 'action' => 'ajax-get-asana-id']); ?>">Fetch</a>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="country">Country</label>
+                                <div class="col-sm-8">
+                                    <?=$this->formElement($form->get('country'))?>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="living_city">City</label>
+                                <div class="col-sm-8">
+                                    <?=$this->formInput($form->get('living_city'))?>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="address_permanent">Permanent Address</label>
+                                <div class="col-sm-8">
+                                    <?=$this->formElement($form->get('address_permanent'))?>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="addraddress_residenceess">Residence Address</label>
+                                <div class="col-sm-8">
+                                    <?=$this->formElement($form->get('address_residence'))?>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="administration">
+                <div class="row">
+                    <div class="col-sm-5">
+                        <fieldset name="general">
+                            <legend>General</legend>
+                            <div class="form-group">
+                                <label class="col-sm-5 control-label" for="reporting_office_id">
+                                    <?= $this->info('Reporting Office', 'The primary office which this person reports to. Some people may work in several offices, select the primary one'); ?>
+                                    <?php echo $this->required(); ?>
+                                </label>
+                                <div class="col-sm-7">
+                                    <?=$this->formElement($form->get('reporting_office_id'))?>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-5 control-label" for="city">
+                                    <?= $this->info('Working City', 'This city is required by the software to make several location, permission and time decision. Select the city where the employee is currently working in'); ?>
+                                    <?php echo $this->required(); ?>
+                                </label>
+                                <div class="col-sm-7">
+                                    <?=$this->formElement($form->get('city'))?>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-5 control-label" for="department">Department <?php echo $this->required(); ?></label>
+                                <div class="col-sm-7">
+                                    <?=$this->formElement($form->get('department'))?>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-5 control-label" for="position">Position <?php echo $this->required(); ?></label>
+                                <div class="col-sm-7">
+                                    <?=$this->formInput($form->get('position'))?>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-5 control-label" for="startdate">Start Date</label>
+                                <div class="col-sm-7">
+                                    <?=$this->formInput($form->get('startdate'))?>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-5 control-label" for="end_date">End Date</label>
+                                <div class="col-sm-7">
+                                    <?=$this->formInput($form->get('end_date'))?>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-5 control-label" for="manager">Manager <?php echo $this->required(); ?></label>
+                                <div class="col-sm-7">
+                                    <?=$this->formElement($form->get('manager'))?>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-5 control-label" for="vacation_days_per_year">
+                                    <?= $this->info('Vacation / Year', 'The number of vacation days per year as in contract.'); ?>
+                                </label>
+                                <div class="col-sm-7">
+                                    <?php
+                                    if (!$this->hasHR) {
+                                        $form->get('vacation_days_per_year')->setAttribute('readonly', true);
+                                    }
+                                    ?>
+                                    <?=$this->formInput($form->get('vacation_days_per_year'))?>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-5 control-label" for="vacationdays">
+                                    <?=$this->info('Sick Days', 'The number of Sick days.'); ?>
+                                </label>
+                                <div class="col-sm-7">
+                                    <?=$this->formInput($form->get('sick_days'))?>
+                                </div>
+                            </div>
+                            <?php if ($this->editableUserId) { ?>
+                            <div class="form-group">
+                                <label class="col-sm-5 control-label" for="vacationdays">
+                                    <?=$this->info('Vacation Vested', 'The number vacation days vested by working up to and include today.'); ?>
+                                </label>
+                                <div class="col-sm-7">
+                                    <?php
+                                    if (!$this->hasHR) {
+                                        $form->get('vacationdays')->setAttribute('readonly', true);
+                                    }
+                                    ?>
+                                    <?=$this->formInput($form->get('vacationdays'))?>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+
+                                <label for="<?php echo $form->get('employment')->getAttribute('id'); ?>" class="control-label col-sm-5">
+                                <?=$this->info($form->get('employment')->getLabel(), 'Determines the percentage of employment of this employee, so if you work currently 1/2 time, it should be set to 50%.'); ?>
+                                </label>
+                                <div class="col-sm-7">
+                                <?php
+                                    if (!$this->hasHR) {
+                                        $form->get('employment')->setAttribute('disabled', true);
+                                    }
+                                     echo $this->formSelect($form->get('employment'));
+                                 ?>
+                                </div>
+                            </div>
+                            <?php } ?>
+
+                            <div class="form-group">
+                                <label class="col-sm-5 control-label" for="period_of_evaluation">Period of Evaluation</label>
+                                <div class="col-sm-7">
+                                    <?=$this->formElement($form->get('period_of_evaluation'))?>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <div class="col-sm-7">
+                        <?php if ($this->userTeams->count()) { ?>
+                        <fieldset name="schedule">
+                            <legend>Teams</legend>
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <?php foreach ($this->userTeams as $team) { ?>
+                                    <div class="media subordinates">
+                                        <div class="col-sm-12">
+                                            <div class="media-left">
+                                                <img class="pull-left" src="<?= \Library\Utility\Helper::getTeamAvatar() ?>" width="20">
+                                            </div>
+                                            <div class="media-body">
+                                                &nbsp;
+                                                <?php
+                                                    $teamDirector = ($team->getTeamDirectorId() == $this->userId);
+
+                                                    if ($teamDirector || $this->hasTeamManagerRole) {
+                                                        $editTeamURL = $this->url(
+                                                            'backoffice/default',
+                                                            [
+                                                                'controller' => 'team',
+                                                                'action' => 'edit',
+                                                                'id' => $team->getId()
+                                                            ]
+                                                        );
+                                                    ?>
+                                                    <a href="<?= $editTeamURL ?>" target="_blank"><?= $team->getName() ?></a>
+                                                    <?php
+                                                    } else {
+                                                    ?><span><?= $team->getName() ?></span>
+                                                    <?php
+                                                    }
+                                                ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <?php } ?>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <?php } ?>
+                        <?php if (!empty($this->subordinates)) { ?>
+                            <fieldset name="schedule">
+                                <legend>Direct Reports</legend>
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <div class="subordinates">
+
+                                            <?php foreach ($this->subordinates as $subordinate) { ?>
+                                                    <div class="media subordinates">
+                                                        <div class="col-sm-4">
+                                                            <div class="media-body">
+                                                                <a href="<?= $this->url('backoffice/default', array('controller' => 'profile', 'id' => $subordinate->getId())) ?>" target="_blank">
+                                                                    <img class="media-object pull-left" src="<?php echo \Library\Utility\Helper::getUserAvatar($subordinate); ?>" width="17">
+                                                                    &nbsp;
+                                                                    <?php echo $subordinate->getFirstName() . ' ' . $subordinate->getLastName(); ?>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-8">
+                                                            <?php if ($this->itsMe) { ?>
+                                                                <a class="label label-primary"  href="<?php echo $this->url('backoffice/default', array('controller' => 'user', 'action' => 'edit', 'id' => $subordinate->getId())) ?>" target="_blank">
+                                                                    Manage
+                                                                </a>
+                                                            <?php } ?>
+                                                        </div>
+                                                    </div>
+                                            <?php } ?>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </fieldset>
+                        <?php } ?>
+                    </div>
+
+                </div>
+            </div>
+            <div class="tab-pane" id="permission">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <label class="control-label" for="search">Search</label>
+                                        <input type="text" id="search" class="form-control" style="width:100%">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <?= $this->info('Clone', 'Will make an exact copy of the selected user\'s permissions to this user'); ?> <input type="text" id="clone_as" class="form-control" style="width:100%">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div id='jqxTree' style="visibility: hidden">
+                                    <ul>
+                                        <?php foreach ($permissionHierarchy as $simplePermission) {?>
+                                            <li data-id="<?php echo $simplePermission['id']?>"
+                                                item-checked="<?php echo ($simplePermission['is_selected']) ? 'true': 'false';?>"
+                                                data-description='<?php echo htmlspecialchars($simplePermission['description'], ENT_QUOTES, 'UTF-8')?>'
+                                                >
+                                                <?php echo $simplePermission['name']?>
+                                                <?php if (!empty($simplePermission['children'])) { ?>
+                                                    <ul>
+                                                        <?php foreach ($simplePermission['children'] as $child) { ?>
+
+                                                            <li data-id="<?php echo $child['id']?>"
+                                                                item-checked="<?php echo ($child['is_selected']) ? 'true': 'false';?>"
+                                                                data-description='<?php echo htmlspecialchars($child['description'], ENT_QUOTES, 'UTF-8')?>'
+                                                                >
+                                                                <?php echo $child['name']?>
+                                                            </li>
+
+                                                        <?php } ?>
+                                                    </ul>
+                                                <?php } ?>
+                                            </li>
+                                        <?php } ?>
+                                    </ul>
+                                </div>
+                                <div class="loading-tree"><h1 class="text-muted text-center">Loading Tree...</h1></div>
+                                <div id="permission_discription"></div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="col-sm-6">
+
+                        <?php if ($form->has('dashboards')) { ?>
+                            <fieldset name="dashboards">
+                                <legend>Dashboards</legend>
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <?= $this->info('Universal', 'Select widgets which will be available on Universal Dashboard for this user.'); ?> <?= $this->formElement($form->get('dashboards')) ?>
+                                    </div>
+                                </div>
+                                <?php if ($form->has('conciergegroups')) { ?>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <?= $this->info('Concierge', 'Select Product Groups which will be available for this user.'); ?><?= $this->formElement($form->get('conciergegroups')) ?>
+                                        </div>
+                                    </div>
+                                <?php } ?>
+                            </fieldset>
+                        <?php } ?>
+                    </div>
+                </div>
+            </div>
+
+            <?php if ($this->hasDigitalIdManagerRole) { ?>
+            <div class="tab-pane" id="devices">
+                <div class="col-sm-6">
+                    <fieldset name="devices-list">
+                        <legend>Devices</legend>
+
+                        <?php if (($this->userDevices) && $this->userDevices->count()) { ?>
+                        <table class="table table-striped table-bordered table-condensed" id="devices-table">
+                            <thead>
+                            <tr>
+                                <th class="device-added-date"> Added date </th>
+                                <th class="device-hash"> Hash </th>
+                                <th class="device-actions"> </th>
+                            </tr>
+                            </thead>
+                            <tbody id="items-list">
+                            <?php foreach ($this->userDevices as $device) { ?>
+                                <tr>
+                                    <td>
+                                        <?=date(Constants::GLOBAL_DATE_TIME_WO_SEC_FORMAT, time($device->getDateAdded()))?>
+                                    </td>
+
+                                    <td>
+                                        <?=$device->getHash()?>
+                                    </td>
+
+                                    <td>
+                                        <a href="#" id="<?=$device->getId()?>" class="btn btn-xs btn-danger btn-block itemRemoveRow remove-device" data-loading-text="Unlinking...">
+                                            Unlink
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php } ?>
+                            </tbody>
+                        </table>
+                        <?php } else { ?>
+                            User does not have any devices
+                        <?php } ?>
+                    </fieldset>
+                </div>
+            </div>
+            <?php } ?>
+
+            <?php if ($this->editableUserId) { ?>
+            <div class="tab-pane" id="schedule">
+                <?= $this->partial('backoffice-user/user-schedule/edit', [
+                    'scheduleType'  => $this->data->get('user_main')->getScheduleType(),
+                    'scheduleStart' => $this->data->get('user_main')->getScheduleStart(),
+                    'scheduleData'  => $this->data->get('schedule_data'),
+                    'userId'        => $this->editableUserId
+                ]); ?>
+            </div>
+            <?php } ?>
+
+            <?php if ($this->editableUserId) {?>
+            <?php if ($this->hasGlobalEvaluationManagerRole || $this->isManager) { ?>
+            <div class="tab-pane" id="evaluations">
+            <?php
+                echo $this->partial('backoffice/user/evaluations', [
+                    'hasUserManagement' => $this->hasUserManagement,
+                    'evaluationsList'   => $this->evaluationsList,
+                    'isManager'         => $this->isManager,
+                    'userId'            => $this->userId,
+                    'hasGlobalEvaluationManagerRole' => $this->hasGlobalEvaluationManagerRole,
+                    'hasHR' => $this->hasHR,
+                    'editableUserId'    => $this->editableUserId,
+
+                ]);
+            ?>
+            </div>
+            <div class="tab-pane" id="add-evaluation">
+                <?php
+                    echo $this->partial('backoffice/user/add-evaluation', [
+                        'evaluationItems' => $this->userEvaluationItems,
+                        'evaluationForm' => $this->userEvaluationForm,
+                        'editableUserId' => $this->editableUserId,
+                        'userId' => $this->userId,
+                    ]);
+                ?>
+            </div>
+            <div class="tab-pane" id="plan-evaluation">
+                    <?php
+                        echo $this->partial('backoffice/user/plan-evaluation', [
+                            'planEvaluationForm' => $this->planEvaluationForm,
+                            'editableUserId' => $this->editableUserId,
+                            'userId' => $this->userId,
+                        ]);
+                    ?>
+                </div>
+            <?php } ?>
+            <?php if ($this->hasUserManagement || $this->hasHR) { ?>
+            <div class="tab-pane" id="documents">
+            <?php
+                echo $this->partial('backoffice/user/documents', [
+                    'documentsList' => $this->documentsList,
+                    'hasHR' => $this->hasHR,
+                    'hasUserManagement' => $this->hasUserManagement,
+                ]);
+            ?>
+            </div>
+            <div class="tab-pane" id="add-document">
+            <?php
+                echo $this->partial('backoffice/user/add-document', [
+                    'documentForm' => $this->userDocumentForm,
+                    'editableUserId' => $this->editableUserId,
+                    'userId' => $this->userId
+                ]);
+            ?>
+            </div>
+            <?php if ($this->hasSalaryManagerRole || $this->hasSalaryViewerRole) { ?>
+                <div class="tab-pane" id="salary">
+                    <?php if ($this->transactionAccountId) : ?>
+                        <fieldset name="salarySchemes">
+                            <legend>Scheme</legend>
+                            <div id="status-switch-scheme">
+                                <div class="btn-group fn-buttons pull-right">
+                                    <a href="#all" class="btn btn-sm btn-default active" data-status="all">All</a>
+                                    <a href="#active" class="btn btn-sm btn-default" data-status="active">Active</a>
+                                    <a href="#inactive" class="btn btn-sm btn-default" data-status="inactive">Inactive</a>
+                                    <a href="#archive" class="btn btn-sm btn-default" data-status="archived">Archive</a>
+                                </div>
+                                <input type="hidden" name="show_status_scheme" id="show_status_scheme" value="1" />
+                            </div>
+                            <div class="row hidden" id="datatable_salary_scheme_container">
+                                <div class="col-sm-12">
+                                    <table id="datatable_salary_scheme_info" class="table table-striped table-bordered table-condensed table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th> Status </th>
+                                                <th> Type </th>
+                                                <th> Name </th>
+                                                <th> Account </th>
+                                                <th> Effective Date </th>
+                                                <th> Frequency </th>
+                                                <th> Salary </th>
+                                                <th> Actions </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <fieldset name="userAccounts">
+                            <legend>Accounts</legend>
+                            <div id="status-switch-account">
+                                <div class="btn-group fn-buttons pull-right">
+                                    <a href="#" class="btn btn-sm btn-default active" data-status="all">All</a>
+                                    <a href="#" class="btn btn-sm btn-default" data-status="archived">Archived</a>
+                                </div>
+                                <input type="hidden" name="show_status_account" id="show_status_account" value="1" />
+                            </div>
+                            <div class="row hidden" id="datatable_user_account_container">
+                                <div class="col-sm-12">
+                                    <table id="datatable_user_account_info" class="table table-striped table-bordered table-condensed table-hover">
+                                        <thead>
+                                        <tr>
+                                            <th> Default </th>
+                                            <th> Name </th>
+                                            <th> Type </th>
+                                            <th> Full Legal Name </th>
+                                            <th> Addresses </th>
+                                            <th> Country </th>
+                                            <th> Account Number </th>
+                                            <th> Routing Number </th>
+                                            <th> Actions </th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </fieldset>
+                    <?php else : ?>
+                        <div class="col-sm-12 alert alert-danger partner-havent-transaction">
+                            This partner doesn't have transaction account.
+                        </div>
+                    <?php endif; ?>
+                </div>
+                <?php if ($this->hasSalaryManagerRole && $this->transactionAccountId) { ?>
+                    <div class="tab-pane" id="edit-account">
+
+                    </div>
+                    <div class="tab-pane" id="edit-scheme">
+
+                    </div>
+                <?php } ?>
+                <?php } ?>
+            <?php } ?>
+
+            <div class="tab-pane" id="history">
+                <?php echo $this->partial('backoffice/user/history'); ?>
+            </div>
+            <?php } ?>
+        </div>
+    </div>
+</div>
+
+<?php
+    echo $this->formInput($form->get('city_hidden_id'));
+    echo $this->formInput($form->get('user_hidden_id'));
+?>
+
+<div class="page-actions container">
+    <div class="row text-right" id="footer-buttons">
+       <?php echo $this->formButton($form->get('user_button')); ?>
+
+        <?php if ($this->editableUserId > 0) { ?>
+            <?php if (!$isUserDisabled) { ?>
+                <!-- Default Footer Buttons : START -->
+		        <?php if ($this->canDelete) { ?>
+	            <a href="#deleteModal" data-toggle="modal" class="btn btn-danger personal-tab-btn administration-tab-btn permission-tab-btn col-sm-2 col-xs-12 margin-left-10 pull-right" id="user_deactivate">
+                    Deactivate
+                </a>
+		        <?php } ?>
+	        <?php } else { ?>
+		        <a href="#activateModal" data-toggle="modal" id="activate_btn" class="btn personal-tab-btn administration-tab-btn permission-tab-btn btn-success col-sm-2 col-xs-12 margin-left-10 pull-right">
+                    Activate
+                </a>
+		    <?php } ?>
+
+            <?php if ($this->canDelete) { ?>
+                <a href="#sendModal" data-toggle="modal" class="btn btn-primary personal-tab-btn administration-tab-btn permission-tab-btn col-sm-2 col-xs-12 pull-left" id="user_welcome_send">
+                    Send Login Details
+                </a>
+                <a href="/profile/<?=$this->editableUserId?>" target="_blank" class="btn btn-info personal-tab-btn administration-tab-btn permission-tab-btn col-sm-2 col-xs-12 margin-left-10 pull-left" id="user_view_profile">
+                    View Profile
+                </a>
+            <?php } ?>
+            <!-- Default Footer Buttons : END -->
+
+            <!-- Add Evaluation : START -->
+            <a href="#add-evaluation" data-toggle="tab" class="btn btn-success evaluations-tab-btn col-sm-2 col-xs-12 margin-left-10 pull-right" style="display: none;" id="add_evaluation">
+                Add Evaluation
+            </a>
+            <a class="btn btn-success add-evaluation-tab-btn col-sm-2 col-xs-12 margin-left-10 pull-right" style="display: none;" id="save_evaluation">
+                Save Evaluation
+            </a>
+            <a class="btn btn-default add-evaluation-tab-btn col-sm-1 col-xs-12 margin-left-10 pull-right" style="display: none;" id="cancel_evaluation">
+                Cancel
+            </a>
+            <a href="#plan-evaluation" data-toggle="tab" class="btn btn-success evaluations-tab-btn col-sm-2 col-xs-12 margin-left-10 pull-right" style="display: none;" id="plan_evaluation">
+                Plan Evaluation
+            </a>
+            <a class="btn btn-success plan-evaluation-tab-btn col-sm-2 col-xs-12 margin-left-10 pull-right" style="display: none;" id="save_plan_evaluation">
+                Save
+            </a>
+            <a class="btn btn-default plan-evaluation-tab-btn col-sm-1 col-xs-12 margin-left-10 pull-right" style="display: none;" id="cancel_plan_evaluation">
+                Cancel
+            </a>
+            <!-- Add Evaluation : END -->
+
+            <!-- Add New Document : START -->
+            <a href="#add-document" data-toggle="tab" class="btn btn-success documents-tab-btn col-sm-2 col-xs-12 margin-left-10 pull-right" style="display: none;" id="add_document">
+                Add New Document
+            </a>
+            <a class="btn btn-success add-document-tab-btn col-sm-2 col-xs-12 margin-left-10 pull-right" style="display: none;" id="save_document" data-loading-text="Saving...">
+                Save Document
+            </a>
+            <a class="btn btn-default add-document-tab-btn col-sm-1 col-xs-12 margin-left-10 pull-right" style="display: none;" id="cancel_document">
+                Cancel
+            </a>
+            <a class="btn btn-primary schedule-tab-btn col-sm-2 col-xs-12 margin-left-10 pull-right" style="display: none;" id="save-schedule" data-loading-text="Saving...">
+                Save Schedule
+            </a>
+            <!-- Add New Document : END -->
+
+            <!-- Salary : START -->
+            <?php if ($this->editableUserId > 0 && $this->hasSalaryManagerRole && $this->transactionAccountId) { ?>
+            <a href="#add-scheme" data-toggle="tab" class="btn btn-success salary-tab-btn  col-sm-2 col-xs-12 margin-left-10 pull-right" id="add_scheme" data-user-id="<?= $this->editableUserId ?>" style="display: none;">
+                Add New Scheme
+            </a>
+            <a href="#add-account" data-toggle="tab" class="btn btn-success salary-tab-btn  col-sm-2 col-xs-12 margin-left-10 pull-right" id="add_account" data-user-id="<?= $this->editableUserId ?>" style="display: none;">
+                Add New Account
+            </a>
+            <?php } ?>
+            <!-- Salary : END -->
+
+            <!-- Devices : START -->
+            <?php if ($this->hasDigitalIdManagerRole) { ?>
+                <a href="#add-device" class="btn btn-success devices-tab-btn col-sm-2 col-xs-12 margin-left-10 pull-right" id="add-device" data-user-id="<?= $this->editableUserId ?>">
+                    Add New Device
+                </a>
+            <?php } ?>
+            <!-- Devices : END -->
+	    <?php } ?>
+    </div>
+</div>
+<?php echo $this->form()->closeTag() ?>
+
+<div id="sendModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-primary">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="sendModalLabel">Send Welcome Mail</h4>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you'd like to send a welcome mail?</p>
+                <p class=" text-danger">
+                    <span class="glyphicon glyphicon-exclamation-sign"></span>
+                    The system will generate a new random password and send it to the user.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <button class="btn btn-primary" id="user_send_button">Send</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="deleteModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-danger">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Deactivate User</h4>
+            </div>
+            <div class="modal-body">
+                <?php if (!empty($this->subordinates)) { ?>
+                <p class="margin-bottom-10">By disabling this user, manager of
+                    <?php foreach ($this->subordinates as $key => $subordinate) { ?>
+                            <?php echo ($key ? ', ': '') . $subordinate->getFirstName() . ' ' . $subordinate->getLastName(); ?>
+                    <?php } ?>
+                     will become <?=$this->managerName?>.
+                </p>
+                <?php } ?>
+                <ul>
+                    <li>User should be removed from Frontier Teams.</li>
+                    <li>User should be unassigned from upcoming housekeeping tasks.</li>
+                    <li>All dashboard's access, roles and money accounts will be taken from this user.</li>
+                    <li>This user will be removed from all teams. If he/she was the teams director, will be replaced by <b><?=$this->managerName?></b></li>
+                    <li>All the tasks for which this user is Responsible or Verifier will be assigned to <b><?=$this->managerName?></b>.</li>
+                    <li>This user will be removed from all tasks which are its Helper or Follower.</li>
+                    <li>The user's Personal Contacts will be deleted.</li>
+                </ul>
+
+                <p>Are you sure?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <button class="btn btn-danger" id="user_delete_button">Deactivate</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="activateModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-success">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel2">Activate User</h4>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <button class="btn btn-success" id="user_activate_button">Activate</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php if ($this->hasDigitalIdManagerRole) { ?>
+    <div id="addDeviceModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-success">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel2">Add New Device</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="add-device-form" class="form-horizontal">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <label class="col-sm-4 control-label" for="add-device-hash">
+                                    Hash
+                                </label>
+                                <div class="col-sm-8 controls">
+                                    <input name="add-device-hash" id="add-device-hash" class="form-control" value="">
+                                    <div class="help-block"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                    <button class="btn btn-success" id="add-device-button" data-loading-text="Adding...">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="unlinkDeviceModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-danger">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Unlink Device</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to Unlink this device?</p>
+                    <input id="unlink-device-id" type="hidden" value="">
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                    <button class="btn btn-danger" id="unlink-device-button" data-loading-text="Unlinking...">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php } ?>

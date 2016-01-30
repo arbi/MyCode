@@ -1,0 +1,83 @@
+<?php
+
+use \DDD\Service\Frontier;
+use \DDD\Service\Task;
+
+$dateFrom = isset($card['dateFrom']) ? new DateTime($card['dateFrom']) : 0 ;
+$dateTo   = isset($card['dateTo']) ? new DateTime($card['dateTo']) : 0 ;
+$now      = isset($card['now']) ? new DateTime($card['now']) : -1 ;
+
+$frontierTasks = [
+    Task::TYPE_CLEANING,
+    Task::TYPE_GUEST_SERVICE,
+    Task::TYPE_APT_SERVICE,
+    Task::TYPE_KEYFOB,
+    Task::TYPE_REPAIR
+];
+
+if ($now > $dateTo || !empty($card['departureDate'])) {
+    $doNotShowButtons = true;
+} else {
+    $doNotShowButtons = false;
+}
+
+?>
+    <h4>
+        Open Tasks
+        <b id="tasks-entity-name"><?= isset($card['name']) ? $card['name'] : '' ?></b>
+        <input type="hidden" id="tasks-entity-type" value="<?= $this->entityType ?>">
+        <input type="hidden" id="tasks-entity-id" value="<?= $this->entityId ?>">
+    </h4>
+    <ul id="task-list"<?= (empty($tasks) ? ' class="soft-hide"' : '') ?>>
+        <?php if (!empty($tasks)) { ?>
+            <?php
+            $i = 1;
+
+            foreach ($tasks as $task) {
+                if (!in_array($task['type'], $frontierTasks)) {
+                    continue;
+                }
+            ?>
+                <li class="frontier-card-task-list <?php if ($i < count($tasks)) { echo 'frontier-card-task-list-hr'; } ?>">
+                    <?= $task['priorityLabel']?>
+                    <a href="/task/edit/<?=$task['id']?>" target="_blank"><?= $task['title'] ?></a>
+
+                    <?php if ($task['type'] == Task::TYPE_KEYFOB) { ?>
+                        <a href="#" class="frontier-card-task-keyfob-checkbox" onclick="markTaskDone(this, event)" data-task-id="<?=$task['id']?>">
+                            <span class="glyphicon glyphicon-unchecked" data-toggle="tooltip" data-placement="left" title="" data-original-title="Mark Done"></span>
+                        </a>
+                    <?php }?>
+
+                </li>
+                <?php $i++; } ?>
+        <?php } ?>
+    </ul>
+    <div id="no-tasks"<?= (!empty($tasks) ? ' class="soft-hide"' : '') ?>>
+        <em class="text-success">
+            <span class="glyphicon glyphicon-ok-circle"></span>
+            There are no related tasks
+        </em>
+    </div>
+    <div class="row">
+        <div class="col-sm-12 card-actions">
+            <div class="btn-group pull-left">
+                <!-- for large displays - button with text -->
+                <button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown">
+                    <span>Create a Task</span>
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a href="javascript:void(0)" class="related-task-button">Related Task</a>
+                    </li>
+                    <li>
+                        <a href="javascript:void(0)" class="quick-task-button" data-status="<?=Frontier::FRONTIER_QUICK_TASK?>">Quick Task</a>
+                    </li>
+                </ul>
+            </div>
+            <?php if (!$doNotShowButtons) { ?>
+                <button class="btn btn-primary btn-sm hand-task-button<?= $this->entityType != Frontier::CARD_RESERVATION ? ' soft-hide' : '' ?>" data-status="<?=Frontier::FRONTIER_FOB_TASK?>"> Hand over a fob </button>
+                <button class="btn btn-primary btn-sm hand-task-button<?= $this->entityType != Frontier::CARD_RESERVATION ? ' soft-hide' : '' ?>" data-status="<?=Frontier::FRONTIER_KEY_TASK?>"> Hand over keys </button>
+            <?php } ?>
+        </div>
+    </div>

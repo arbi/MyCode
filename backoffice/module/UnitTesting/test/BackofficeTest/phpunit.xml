@@ -1,0 +1,449 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit  backupStaticAttributes="false"
+          colors="true"
+          convertErrorsToExceptions="true"
+          convertNoticesToExceptions="true"
+          convertWarningsToExceptions="true"
+          processIsolation="true"
+          stopOnFailure="false"
+          syntaxCheck="false"
+          bootstrap="Bootstrap.php">
+    <testsuites>
+        <!-- .......................................................................... -->
+        <!-- .......................... Start BackOffice tests ........................ -->
+        <!-- .......................................................................... -->
+            <!-- Apartel:start -->
+            <testsuite name="BO_Apartel_Base_Controller">
+                <file>./BackofficeTest/Apartel/Controller/BaseControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Apartel_Calendar_Controller">
+                <file>./BackofficeTest/Apartel/Controller/CalendarControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Apartel_Connection_Controller">
+                <file>./BackofficeTest/Apartel/Controller/ConnectionControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Apartel_Content_Controller">
+                <file>./BackofficeTest/Apartel/Controller/ContentControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Apartel_General_Controller">
+                <file>./BackofficeTest/Apartel/Controller/GeneralControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Apartel_History_Controller">
+                <file>./BackofficeTest/Apartel/Controller/HistoryControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Apartel_Inventory_Controller">
+                <file>./BackofficeTest/Apartel/Controller/InventoryControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Apartel_Type_Rate_Controller">
+                <file>./BackofficeTest/Apartel/Controller/TypeRateControllerTest.php</file>
+            </testsuite>
+            <!-- Apartel:end -->
+            <!-- Apartment:start -->
+            <testsuite name="BO_Apartment_Apartment_Controller">
+                <file>./BackofficeTest/Apartment/Controller/ApartmentControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Apartment_Apartment_Review_Category_Controller">
+                <file>./BackofficeTest/Apartment/Controller/ApartmentReviewCategoryControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Apartment_Base_Controller">
+                <file>./BackofficeTest/Apartment/Controller/BaseControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Apartment_Channel_Connection_Controller">
+                <file>./BackofficeTest/Apartment/Controller/ChannelConnectionControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Apartment_Cost_Controller">
+                <file>./BackofficeTest/Apartment/Controller/CostControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Apartment_Details_Controller">
+                <file>./BackofficeTest/Apartment/Controller/DetailsControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Apartment_Document_Controller">
+                <file>./BackofficeTest/Apartment/Controller/DocumentControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Apartment_General_Controller">
+                <file>./BackofficeTest/Apartment/Controller/GeneralControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Apartment_History_Controller">
+                <file>./BackofficeTest/Apartment/Controller/HistoryControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Apartment_Inventory_Calendar_Controller">
+                <file>./BackofficeTest/Apartment/Controller/InventoryCalendarControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Apartment_Inventory_Range_Controller">
+                <file>./BackofficeTest/Apartment/Controller/InventoryRangeControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Apartment_Location_Controller">
+                <file>./BackofficeTest/Apartment/Controller/LocationControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Apartment_Main_Controller">
+                <file>./BackofficeTest/Apartment/Controller/MainControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Apartment_Media_Controller">
+                <file>./BackofficeTest/Apartment/Controller/MediaControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Apartment_Occupancy_Statistics_Controller">
+                <file>./BackofficeTest/Apartment/Controller/OccupancyStatisticsControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Apartment_Rate_Controller">
+                <file>./BackofficeTest/Apartment/Controller/RateControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Apartment_Review_Controller">
+                <file>./BackofficeTest/Apartment/Controller/ReviewControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Apartment_Sales_Statistics_Controller">
+                <file>./BackofficeTest/Apartment/Controller/SalesStatisticsControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Apartment_Statistics_Controller">
+                <file>./BackofficeTest/Apartment/Controller/StatisticsControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Apartment_Welcome_Note_Controller">
+                <file>./BackofficeTest/Apartment/Controller/WelcomeNoteControllerTest.php</file>
+            </testsuite>
+            <!-- Apartment:end -->
+            <!-- BackOffice:start -->
+            <testsuite name="BO_Backoffice_Apartment_Group_Building_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/ApartmentGroupBuildingControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Apartment_Group_Concierge_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/ApartmentGroupConciergeControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Apartment_Group_Contacts_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/ApartmentGroupContactsControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Apartment_Group_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/ApartmentGroupControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Apartment_Group_Document_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/ApartmentGroupDocumentControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Apartment_Group_General_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/ApartmentGroupGeneralControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Apartment_Group_History_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/ApartmentGroupHistoryControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Blog_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/BlogControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Booking_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/BookingControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Cc_Provide_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/CcProvideControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Charge_Authorization_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/ChargeAuthorizationControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Cloud_Flare_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/CloudFlareControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Common_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/CommonControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Company_Directory_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/CompanyDirectoryControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Concierge_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/ConciergeControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Concierge_Dashboard_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/ConciergeDashboardControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Currency_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/CurrencyControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Distribution_View_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/DistributionViewControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Feedback_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/FeedbackControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Frontier_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/FrontierControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Group_Inventory_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/GroupInventoryControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Housekeeping_Tasks_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/HousekeepingTasksControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Index_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/IndexControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Language_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/LanguageControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Location_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/LocationControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_News_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/NewsControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Notification_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/NotificationControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Office_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/OfficeControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Omni_Search_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/OmniSearchControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Partners_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/PartnersControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Profile_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/ProfileControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_System_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/SystemControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Tag_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/TagControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Task_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/TaskControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Team_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/TeamControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Test_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/TestControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Test_Results_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/TestResultsControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Translation_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/TranslationControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_Upload_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/UploadControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Backoffice_User_Controller">
+                <file>./BackofficeTest/Backoffice/Controller/UserControllerTest.php</file>
+            </testsuite>
+            <!-- BackOffice:end -->
+            <!-- BackOfficeUser:start -->
+            <testsuite name="BO_BackofficeUser_Authentication_Controller">
+                <file>./BackofficeTest/BackofficeUser/Controller/AuthenticationControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_BackofficeUser_People_Directory_Controller">
+                <file>./BackofficeTest/BackofficeUser/Controller/PeopleDirectoryControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_BackofficeUser_User_Controller">
+                <file>./BackofficeTest/BackofficeUser/Controller/UserControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_BackofficeUser_User_Document_Controller">
+                <file>./BackofficeTest/BackofficeUser/Controller/UserDocumentControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_BackofficeUser_User_Evaluation_Controller">
+                <file>./BackofficeTest/BackofficeUser/Controller/UserEvaluationControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_BackofficeUser_User_Schedule_Controller">
+                <file>./BackofficeTest/BackofficeUser/Controller/UserScheduleControllerTest.php</file>
+            </testsuite>
+            <!-- BackOfficeUser:end -->
+            <!-- Console:start -->
+            <testsuite name="BO_Console_Apartment_Controller">
+                <file>./BackofficeTest/Console/Controller/ApartmentControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Console_Apartment_Group_Controller">
+                <file>./BackofficeTest/Console/Controller/ApartmentGroupControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Console_Api_Request_Controller">
+                <file>./BackofficeTest/Console/Controller/ApiRequestControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Console_Archive_Controller">
+                <file>./BackofficeTest/Console/Controller/ArchiveControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Console_Availability_Controller">
+                <file>./BackofficeTest/Console/Controller/AvailabilityControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Console_Booking_Controller">
+                <file>./BackofficeTest/Console/Controller/BookingControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Console_Channel_Manager_Controller">
+                <file>./BackofficeTest/Console/Controller/ChannelManagerControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Console_Concierge_Controller">
+                <file>./BackofficeTest/Console/Controller/ConciergeControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Console_Contact_Us_Controller">
+                <file>./BackofficeTest/Console/Controller/ContactUsControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Console_Credit_Card_Creation_Queue_Controller">
+                <file>./BackofficeTest/Console/Controller/CreditCardCreationQueueControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Console_Currency_Controller">
+                <file>./BackofficeTest/Console/Controller/CurrencyControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Console_Database_Controller">
+                <file>./BackofficeTest/Console/Controller/DatabaseControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Console_Email_Controller">
+                <file>./BackofficeTest/Console/Controller/EmailControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Console_Index_Controller">
+                <file>./BackofficeTest/Console/Controller/IndexControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Console_Inventory_Synchronization_Controller">
+                <file>./BackofficeTest/Console/Controller/InventorySynchronizationControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Console_Issues_Controller">
+                <file>./BackofficeTest/Console/Controller/IssuesControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Console_One_Time_Controller">
+                <file>./BackofficeTest/Console/Controller/OneTimeControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Console_Parking_Controller">
+                <file>./BackofficeTest/Console/Controller/ParkingControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Console_Reservation_Email_Controller">
+                <file>./BackofficeTest/Console/Controller/ReservationEmailControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Console_Task_Controller">
+                <file>./BackofficeTest/Console/Controller/TaskControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Console_Tools_Controller">
+                <file>./BackofficeTest/Console/Controller/ToolsControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Console_User_Controller">
+                <file>./BackofficeTest/Console/Controller/UserControllerTest.php</file>
+            </testsuite>
+            <!-- Console:end -->
+            <!-- Contacts:start -->
+            <testsuite name="BO_Contacts_Contacts_Controller">
+                <file>./BackofficeTest/Contacts/Controller/ContactsControllerTest.php</file>
+            </testsuite>
+            <!-- Contacts:end -->
+            <!-- CreditCard:start -->
+            <testsuite name="BO_Credit_Card_Test_Controller">
+                <file>./BackofficeTest/CreditCard/Controller/TestControllerTest.php</file>
+            </testsuite>
+            <!-- CreditCard:end -->
+            <!-- Document:start -->
+            <testsuite name="BO_Document_Document_Controller">
+                <file>./BackofficeTest/Document/Controller/DocumentControllerTest.php</file>
+            </testsuite>
+            <!-- Document:end -->
+            <!-- FileManager:start -->
+            <testsuite name="BO_File_Manager_Upload_Controller">
+                <file>./BackofficeTest/FileManager/Controller/UploadControllerTest.php</file>
+            </testsuite>
+            <!-- FileManager:end -->
+            <!-- Finance:start -->
+            <testsuite name="BO_Finance_Budget_Controller">
+                <file>./BackofficeTest/Finance/Controller/BudgetControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Finance_Chart_Controller">
+                <file>./BackofficeTest/Finance/Controller/ChartControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Finance_Espm_Controller">
+                <file>./BackofficeTest/Finance/Controller/EspmControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Finance_Expense_Item_Categories_Controller">
+                <file>./BackofficeTest/Finance/Controller/ExpenseItemCategoriesControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Finance_Legal_Entities_Controller">
+                <file>./BackofficeTest/Finance/Controller/LegalEntitiesControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Finance_Money_Account_Controller">
+                <file>./BackofficeTest/Finance/Controller/MoneyAccountControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Finance_Psp_Controller">
+                <file>./BackofficeTest/Finance/Controller/PspControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Finance_Purchase_Order_Controller">
+                <file>./BackofficeTest/Finance/Controller/PurchaseOrderControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Finance_Purchase_Order_Item_Controller">
+                <file>./BackofficeTest/Finance/Controller/PurchaseOrderItemControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Finance_Suppliers_Controller">
+                <file>./BackofficeTest/Finance/Controller/SuppliersControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Finance_Transfer_Controller">
+                <file>./BackofficeTest/Finance/Controller/TransferControllerTest.php</file>
+            </testsuite>
+            <!-- Finance:end -->
+            <!-- Lock:start -->
+            <testsuite name="BO_Lock_General_Controller">
+                <file>./BackofficeTest/Lock/Controller/GeneralControllerTest.php</file>
+            </testsuite>
+            <!-- Lock:end -->
+            <!-- Parking:start -->
+            <testsuite name="BO_Parking_Base_Controller">
+                <file>./BackofficeTest/Parking/Controller/BaseControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Parking_Calendar_Controller">
+                <file>./BackofficeTest/Parking/Controller/CalendarControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Parking_General_Controller">
+                <file>./BackofficeTest/Parking/Controller/GeneralControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Parking_Inventory_Controller">
+                <file>./BackofficeTest/Parking/Controller/InventoryControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Parking_Lots_Controller">
+                <file>./BackofficeTest/Parking/Controller/LotsControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Parking_Spots_Controller">
+                <file>./BackofficeTest/Parking/Controller/SpotsControllerTest.php</file>
+            </testsuite>
+            <!-- Parking:end -->
+            <!-- Recruitment:start -->
+            <testsuite name="BO_Recruitment_Applicants_Controller">
+                <file>./BackofficeTest/Recruitment/Controller/ApplicantsControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Recruitment_Jobs_Controller">
+                <file>./BackofficeTest/Recruitment/Controller/JobsControllerTest.php</file>
+            </testsuite>
+            <!-- Recruitment:end -->
+            <!-- Reviews:start -->
+            <testsuite name="BO_Reviews_General_Controller">
+                <file>./BackofficeTest/Reviews/Controller/GeneralControllerTest.php</file>
+            </testsuite>
+            <!-- Reviews:end -->
+            <!-- UniversalDashboard:start -->
+            <testsuite name="BO_Universal_Dashboard_Universal_Dashboard_Controller">
+                <file>./BackofficeTest/UniversalDashboard/Controller/UniversalDashboardControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Universal_Dashboard_Universal_Dashboard_Data_Controller">
+                <file>./BackofficeTest/UniversalDashboard/Controller/UniversalDashboardDataControllerTest.php</file>
+            </testsuite>
+            <!-- UniversalDashboard:end -->
+            <!-- Venue:start -->
+            <testsuite name="BO_Venue_General_Controller">
+                <file>./BackofficeTest/Venue/Controller/GeneralControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Venue_Charges_Controller">
+                <file>./BackofficeTest/Venue/Controller/ChargesControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Venue_Items_Controller">
+                <file>./BackofficeTest/Venue/Controller/ItemsControllerTest.php</file>
+            </testsuite>
+            <!-- Venue:end -->
+            <!-- Warehouse:start -->
+            <testsuite name="BO_Warehouse_Asset_Controller">
+                <file>./BackofficeTest/Warehouse/Controller/AssetControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Warehouse_Category_Controller">
+                <file>./BackofficeTest/Warehouse/Controller/CategoryControllerTest.php</file>
+            </testsuite>
+            <testsuite name="BO_Warehouse_Storage_Controller">
+                <file>./BackofficeTest/Warehouse/Controller/StorageControllerTest.php</file>
+            </testsuite>
+            <!-- Warehouse:end -->
+            <!-- WHOrder:start -->
+            <testsuite name="BO_WHOrder_Order_Controller">
+                <file>./BackofficeTest/WHOrder/Controller/OrderControllerTest.php</file>
+            </testsuite>
+            <!-- WHOrder:end -->
+        <!-- .......................................................................... -->
+        <!-- .......................... End BackOffice tests .......................... -->
+        <!-- .......................................................................... -->
+    </testsuites>
+    <logging>
+        <log type="json" target="../logfile.json"/>
+    </logging>
+</phpunit>

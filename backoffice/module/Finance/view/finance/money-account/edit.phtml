@@ -1,0 +1,339 @@
+<?php
+
+/**
+ * @var \DDD\Domain\Finance\Bank|bool $bank
+ */
+$current = $this->id ? $this->form->get('name')->getValue() : 'Add Money Account';
+$this->layout()->viewTitle = $current;
+$this->layout()->breadcrumb = $this->breadcrumb([
+    ['Finance'],
+    ['Money Account Management', $this->url('finance/default', ['controller' => 'money-account'])],
+    [$current]
+]);
+
+$this->headTitle()->setSeparator(' - ');
+$this->headTitle($this->layout()->viewTitle);
+$this->InlineScript()
+    ->appendFile($this->basePath() . '/js/plugins/jquery.dataTables.min.js')
+    ->appendFile($this->basePath() . '/js/DT_bootstrap.js')
+    ->appendFile($this->basePath() . '/js/validation/moneyaccount.js')
+    ->appendFile($this->basePath() . '/js/pages/moneyaccount.js');
+
+if ($this->id) {
+    $activationUrl = $this->url('finance/default', ['controller' => 'money-account', 'action' => 'activate']);
+    $bank = $this->bank;
+
+    if ($this->status) {
+        $activationButton = '<a href="' . $activationUrl . '" class="btn btn-danger bank-account-activate col-sm-2 col-xs-12 pull-right" data-id="' . $this->id . '" data-status="' . ($this->status ? 0 : 1) . '">Deactivate</a>';
+    } else {
+        $activationButton = '<a href="' . $activationUrl . '" class="btn btn-success bank-account-activate" data-id="' . $this->id . '" data-status="' . ($this->status ? 0 : 1) . '">Activate</a>';
+    }
+}
+
+?>
+<script>
+    <?php if ($this->error) { ?>
+    $(function () {
+        notification({
+            'status': 'error',
+            'msg': '<?php echo $this->error; ?>'
+        });
+    });
+    <?php } ?>
+    var moneyAccountDocListAaData = <?= $this->moneyAccountDocList ?>;
+    var GLOBAL_GET_LEGAL_ENTITY_COUNTRY = '<?= $this->url('finance/legal-entities', array('controller' => 'legal-entities', 'action' => 'ajax-get-country'))?>';
+</script>
+
+<ul class="nav nav-tabs tabs-general">
+    <li class="active">
+        <a href="#account_details" data-toggle="tab">Account Details</a>
+    </li>
+    <li style="<?= (!$this->id) ? 'display:none' : '' ?>">
+        <a href="#account_attachments" data-toggle="tab">Attachments</a>
+    </li>
+    <li class="tab-highlights" style="display:none">
+        <a href="#new_attachment" data-toggle="tab">New Attachment</a>
+    </li>
+</ul>
+<div class="tab-content">
+    <div class="tab-pane active" id="account_details" data-is-edit="<?php echo $this->id; ?>">
+        <?php echo $this->form()->openTag($this->form); ?>
+        <div class="row">
+            <div class="col-sm-6">
+                <fieldset name="type">
+                    <legend>Account</legend>
+
+                    <div class="form-group">
+                        <label for="type" class="col-sm-4 control-label">Account Type <?php echo $this->id ? '' : $this->required(); ?></label>
+                        <div class="col-sm-8">
+                            <?php
+                                if (!$this->id) {
+                                    echo $this->formSelect($form->get('type'));
+                                } else {
+                                    echo '<div class="form-control-static type" id="type" data-id="' . $form->get('type')->getValue() . '">
+                                        <span class="label label-default">' . \DDD\Service\MoneyAccount::getMoneyAccountTypeById($form->get('type')->getValue()) . '</span>
+                                    </div>';
+                                }
+                            ?>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="name" class="col-sm-4 control-label">Account Name <?php echo $this->required(); ?></label>
+                        <div class="col-sm-8">
+                            <?php echo $this->formInput($form->get('name')); ?>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="responsible_person" class="col-sm-4 control-label">
+                            <?php echo $this->info('Possession', 'The Card or Account is in the possession and/or responsibility of the selected person'); ?>
+                            <?php echo $this->required(); ?></label>
+                        <div class="col-sm-8">
+                            <?php echo $this->formSelect($form->get('responsible_person_id')); ?>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="legal_entity_id" class="col-sm-4 control-label">Leagal Entity <?php echo $this->required(); ?></label>
+
+                        <div class="col-sm-8">
+                            <?php echo $this->formSelect($form->get('legal_entity_id')); ?>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="legal-entity-country-container">
+                        <label class="col-sm-4 control-label">Legal Entity Country</label>
+                        <div class="col-lg-2 col-md-4 col-sm-6">
+                            <p class="help-block" id="legal-entity-country"></p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="currency_id" class="col-sm-4 control-label">Currency <?php echo $this->id ? '' : $this->required(); ?></label>
+                        <div class="col-sm-8">
+                            <?php
+                            if (!$this->id) {
+                                echo $this->formSelect($form->get('currency_id'));
+                            } else {
+                                $currencies = $form->getCurrencyList();
+
+                                if ($form->get('currency_id')->getValue()) {
+                                    echo '<div class="form-control-static" id="currency_id">
+                                        <span class="label label-default">' . $currencies[$form->get('currency_id')->getValue()] . '</span>
+                                    </div>';
+                                }
+                            }
+                            ?>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="is_searchable" class="col-sm-4 control-label">
+                            <?= $this->info('Is Searchable', 'Appears in listings'); ?> <?php echo $this->required(); ?>
+                        </label>
+                        <div class="col-sm-3">
+                            <?php echo $this->formSelect($form->get('is_searchable')); ?>
+                        </div>
+                    </div>
+
+                    <?php if ($this->pspList->count()) { ?>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">PSP</label>
+                        <div class="col-sm-8">
+                            <?php foreach ($this->pspList as $psp) { ?>
+                                <p><a href="<?=$this->url('finance/default', ['controller' => 'psp', 'action' => 'edit', 'id' => $psp['id']])?>" target="_blank"><?=$psp['short_name']?></a></p>
+                            <?php } ?>
+                        </div>
+                    </div>
+                    <?php } ?>
+
+                    <div class="form-group">
+                        <label for="bank_account_number" class="col-sm-4 control-label">Account IBAN</label>
+                        <div class="col-sm-8">
+                            <?php echo $this->formInput($form->get('bank_account_number')); ?>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="account_ending" class="col-sm-4 control-label"><?php echo $this->info('Account Ending', 'The las 4 digits of this account'); ?></label>
+                        <div class="col-lg-2 col-md-4 col-sm-6">
+                            <?php echo $this->formInput($form->get('account_ending')); ?>
+                        </div>
+                    </div>
+
+                </fieldset>
+            </div>
+            <div class="col-sm-6">
+                <fieldset name="options">
+                    <legend>Cardholder</legend>
+
+
+
+                    <div class="form-group">
+                        <label for="card_holder_id" class="col-sm-4 control-label">Name <?php echo $this->required(); ?></label>
+                        <div class="col-sm-8">
+                            <?php echo $this->formSelect($form->get('card_holder_id')); ?>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="cardholder-full-address-container">
+                        <label  class="col-sm-4 control-label">Address</label>
+                        <div class="col-sm-8">
+                            <p class="help-block" id="cardholder-full-address"></p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description" class="col-sm-4 control-label">Remarks</label>
+
+                        <div class="col-sm-8">
+                            <?php echo $this->formTextarea($form->get('description')); ?>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset name="bank_info" class="bank_info">
+                    <legend>Bank</legend>
+
+                    <div class="form-group">
+                        <label for="bank_id" class="col-sm-4 control-label">Issuing Bank <?php echo $this->required(); ?></label>
+
+                        <div class="col-sm-8">
+                            <?php echo $this->formSelect($form->get('bank_id')); ?>
+                        </div>
+                    </div>
+
+
+                    <?php if ($bank) { ?>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Name</label>
+                        <div class="col-sm-8">
+                            <div class="form-control-static"><?php echo $bank->getName(); ?></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Address</label>
+                        <div class="col-sm-8">
+                            <div class="form-control-static"><?php echo $bank->getAddress(); ?></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">BIC</label>
+                        <div class="col-sm-8">
+                            <div class="form-control-static"><?php echo $bank->getBic(); ?></div>
+                        </div>
+                    </div>
+                    <?php } ?>
+                </fieldset>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <fieldset name="user_management">
+                    <legend>User Management</legend>
+                    <div class="form-group">
+                        <label for="view_transactions" class="col-sm-2 control-label">
+                            <?= $this->info('View Transactions', 'Allows viewing list of all existing transactions on this account.'); ?>
+                        </label>
+
+                        <div class="col-sm-10">
+                            <?= $this->formSelect($form->get('view_transactions')); ?>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="add_transactions" class="col-sm-2 control-label">
+                            <?= $this->info('Add Transactions', 'Allows adding transactions to and from this account.'); ?>
+                        </label>
+
+                        <div class="col-sm-10">
+                            <?= $this->formSelect($form->get('add_transactions')); ?>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="manage_transactions" class="col-sm-2 control-label">
+                            <?= $this->info('Manage Transactions', 'Allows verifying and voiding transactions on this money account as well as accessing details page on those transactions.'); ?>
+                        </label>
+
+                        <div class="col-sm-10">
+                            <?= $this->formSelect($form->get('manage_transactions')); ?>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="manage_account" class="col-sm-2 control-label">
+                            <?= $this->info('Manage Account', 'Allows editing all the fields of this account on this very page.'); ?>
+                        </label>
+
+                        <div class="col-sm-10">
+                            <?= $this->formSelect($form->get('manage_account')); ?>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+        <div class="page-actions container">
+            <div class="row text-right">
+                <?php echo $this->formInput($form->get('save')); ?>
+                <?php echo isset($activationButton) ? $activationButton : ''; ?>
+            </div>
+        </div>
+        <?php echo $this->form()->closeTag(); ?>
+    </div>
+
+    <div class="tab-pane" id="account_attachments">
+        <div class="tbl-wrapper">
+            <?php if ($this->moneyAccountDocList) { ?>
+                <table id="datatable_attachment" class="table table-striped table-bordered table-condensed table-hover">
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Attacher</th>
+                        <th>Description</th>
+                        <th>&nbsp;</th>
+                        <th>&nbsp;</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            <?php } ?>
+        </div>
+        <a href="javascript:void(0)" class="btn btn-primary pull-right margin-left-5 attachBtn" id="attachBtn">New Attachment</a>
+    </div>
+
+    <div class="tab-pane" id="new_attachment">
+        <div class="row">
+            <div class="col-lg-12">
+                <?php echo $this->partial('finance/money-account/document', ['form' => $this->moneyAccountsDocForm]); ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="delete-dialog">
+    <div class="modal-dialog">
+        <div class="modal-content delete">
+            <div class="modal-header bg-danger text-danger">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Delete Document</h4>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <button class="btn btn-danger" id="delete_button">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="image-dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+            </div>
+        </div>
+    </div>
+</div>

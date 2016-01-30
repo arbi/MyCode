@@ -1,0 +1,26 @@
+<?php
+$this->headTitle()->setSeparator(' - ');
+
+$this->headTitle($this->layout()->apartmentName . ' - Apartment Location');
+$this->headLink()->appendStylesheet($this->basePath() . '/css/apartment/common.css');
+$this->InlineScript()
+	->appendFile( $this->basePath() . '/js/plugins/jquery.form.min.js')
+	->appendFile($this->basePath() . '/js/pages/apartment.location.js')
+	->appendFile($this->basePath() . '/js/validation/apartment.location.js');
+?>
+<script type="text/javascript">
+	var getProvinceOptionsURL = '<?= $this->url("apartment/location/get-province-options", ['apartment_id' => $this->apartmentId]) ?>';
+	var getCityOptionsURL = '<?= $this->url("apartment/location/get-city-options", ['apartment_id' => $this->apartmentId]) ?>';
+	var getBuildingSectionURL = '<?= $this->url("apartment/location/get-building-section", ['apartment_id' => $this->apartmentId]) ?>';
+    var SAVE_DATA = '<?= $this->url("apartment/location/save", ['apartment_id' => $this->apartmentId]) ?>';
+    var GLOBAL_COUNTRY_CURRENCY = $.parseJSON('<?=$this->listCountryWithCurrecny?>');
+</script>
+
+<div class="row">
+    <div class="col-sm-12">
+        <hr>
+        <?= $this->apartmentNavigation($this->apartmentId, $this->apartmentStatus, 'apartment/location')?>
+    </div>
+</div>
+
+<?= $this->formOutput?>
